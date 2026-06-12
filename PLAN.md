@@ -57,8 +57,8 @@ Implementation notes:
 Write a general-purpose Python script that accepts any state inflow **or** outflow CSV and joins it
 with `state_fips.csv` to add:
 
-- [ ] `y2_state_postal` — postal abbreviation of the receiving/destination state (`y2_statefips`)
-- [ ] `y2_state_name` — full name of the receiving/destination state
+- [x] `y2_state_postal` — postal abbreviation of the receiving/destination state (`y2_statefips`)
+- [x] `y2_state_name` — full name of the receiving/destination state
 
 The script should be callable as:
 ```
@@ -66,10 +66,10 @@ python enrich_state_data.py <input_csv> <output_csv>
 ```
 
 Batch-produce the four enriched files:
-- [ ] `stateinflow2122_enriched.csv`
-- [ ] `stateinflow2223_enriched.csv`
-- [ ] `stateoutflow2122_enriched.csv`
-- [ ] `stateoutflow2223_enriched.csv`
+- [x] `stateinflow2122_enriched.csv`
+- [x] `stateinflow2223_enriched.csv`
+- [x] `stateoutflow2122_enriched.csv`
+- [x] `stateoutflow2223_enriched.csv`
 
 ---
 
