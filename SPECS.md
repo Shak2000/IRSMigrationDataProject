@@ -1,4 +1,4 @@
-Purpose: Create an interactive data visualization that displays IRS data on U.S. domestic migration over time.
+Purpose: Create an interactive data visualization that displays IRS data on U.S. migration over time.
 
 Data source: IRS SOI tax data - Migration data and FCC FIPS Codes for States and Counties
 
