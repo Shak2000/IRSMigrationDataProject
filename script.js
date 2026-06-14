@@ -708,7 +708,8 @@ function _getStateMapValue(fips, year, metricKey, primaryFips) {
         return computeMetric(metricKey, {
             inflow: t?.inflow ?? null,
             outflow: t?.outflow ?? null,
-            totalInflow: t?.base_inflow ?? null,
+            // Force the denominator to always use the initial year's base population (outflow)
+            totalInflow: t?.base_outflow ?? null,
             totalOutflow: t?.base_outflow ?? null,
         });
     } else {
@@ -718,7 +719,8 @@ function _getStateMapValue(fips, year, metricKey, primaryFips) {
         return computeMetric(metricKey, {
             inflow,
             outflow,
-            totalInflow: pt?.base_inflow ?? null,
+            // Force the denominator to always use the initial year's base population (outflow)
+            totalInflow: pt?.base_outflow ?? null,
             totalOutflow: pt?.base_outflow ?? null,
         });
     }
@@ -730,7 +732,8 @@ function _getCountyMapValue(countyKey, year, metricKey, primaryCountyKey) {
         return computeMetric(metricKey, {
             inflow: t?.inflow ?? null,
             outflow: t?.outflow ?? null,
-            totalInflow: t?.base_inflow ?? null,
+            // Force the denominator to always use the initial year's base population (outflow)
+            totalInflow: t?.base_outflow ?? null,
             totalOutflow: t?.base_outflow ?? null,
         });
     } else {
@@ -740,7 +743,8 @@ function _getCountyMapValue(countyKey, year, metricKey, primaryCountyKey) {
         return computeMetric(metricKey, {
             inflow,
             outflow,
-            totalInflow: pt?.base_inflow ?? null,
+            // Force the denominator to always use the initial year's base population (outflow)
+            totalInflow: pt?.base_outflow ?? null,
             totalOutflow: pt?.base_outflow ?? null,
         });
     }
