@@ -290,12 +290,12 @@ any visuals.
 
 ### Milestone 4.2 — Choropleth Rendering
 
-- [ ] Bind the current year's metric values to each geographic region.
-- [ ] Compute a sequential color scale (`d3.scaleSequential`) using a curated diverging palette:
-  - [ ] **Net metrics:** diverging scale (negative = red-orange, zero = neutral gray, positive = green)
-  - [ ] **Inflow/outflow only metrics:** sequential scale (light → accent teal)
-- [ ] Render region `<path>` elements; fill by computed metric value.
-- [ ] Render a gradient color legend at the bottom of the map.
+- [x] Bind the current year's metric values to each geographic region.
+- [x] Compute a sequential color scale (`d3.scaleSequential`) using a curated diverging palette:
+  - [x] **Net metrics:** diverging scale (negative = red-orange, zero = neutral gray, positive = green)
+  - [x] **Inflow/outflow only metrics:** sequential scale (light → accent teal)
+- [x] Render region `<path>` elements; fill by computed metric value.
+- [x] Render a gradient color legend at the bottom of the map.
 
 ### Milestone 4.3 — Selection Logic
 
