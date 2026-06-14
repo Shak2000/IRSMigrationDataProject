@@ -1,9 +1,9 @@
 y2_state,y2_state_name,y2_statefips,y1_statefips,y1_state,y1_state_name,n1,n2,AGI
-US+FO,Total Migration-US and Foreign,96,01,AL,Alabama,47665,85968,3223014
+US+FO,AL Total Migration-US and Foreign,96,01,AL,Alabama,47665,85968,3223014
 US,Total Migration-US,97,01,AL,Alabama,47179,84874,3187972
 FO,Total Migration-Foreign,98,01,AL,Alabama,486,1094,35042
-US,Total Migration-US,97,01,AL,Alabama,63832,119588,3790741
-AL,Alabama,01,01,AL,Alabama,1670844,3472380,134752668
+US,AL Total Migration-Same State,97,01,AL,Alabama,63832,119588,3790741
+AL,AL Non-migrants,01,01,AL,Alabama,1670844,3472380,134752668
 GA,Georgia,13,01,AL,Alabama,8159,14709,482328
 FL,Florida,12,01,AL,Alabama,7124,12769,601845
 TN,Tennessee,47,01,AL,Alabama,4344,7603,284335
@@ -55,11 +55,11 @@ SD,South Dakota,46,01,AL,Alabama,74,136,4365
 WY,Wyoming,56,01,AL,Alabama,63,122,6025
 VT,Vermont,50,01,AL,Alabama,51,93,5690
 RI,Rhode Island,44,01,AL,Alabama,43,73,3266
-US+FO,Total Migration-US and Foreign,96,02,AK,Alaska,16834,32471,1281505
+US+FO,AK Total Migration-US and Foreign,96,02,AK,Alaska,16834,32471,1281505
 US,Total Migration-US,97,02,AK,Alaska,16482,31733,1256946
 FO,Total Migration-Foreign,98,02,AK,Alaska,352,738,24559
-US,Total Migration-US,97,02,AK,Alaska,6377,11742,438393
-AK,Alaska,02,02,AK,Alaska,266296,535471,25519259
+US,AK Total Migration-Same State,97,02,AK,Alaska,6377,11742,438393
+AK,AK Non-migrants,02,02,AK,Alaska,266296,535471,25519259
 WA,Washington,53,02,AK,Alaska,1720,3041,129430
 TX,Texas,48,02,AK,Alaska,1469,3086,120741
 CA,California,06,02,AK,Alaska,1150,1972,72934
@@ -111,11 +111,11 @@ VT,Vermont,50,02,AK,Alaska,39,63,4279
 DE,Delaware,10,02,AK,Alaska,38,85,2231
 WV,West Virginia,54,02,AK,Alaska,32,53,1671
 RI,Rhode Island,44,02,AK,Alaska,27,44,1768
-US+FO,Total Migration-US and Foreign,96,04,AZ,Arizona,109094,189691,9075107
+US+FO,AZ Total Migration-US and Foreign,96,04,AZ,Arizona,109094,189691,9075107
 US,Total Migration-US,97,04,AZ,Arizona,108171,187799,9012940
 FO,Total Migration-Foreign,98,04,AZ,Arizona,923,1892,62166
-US,Total Migration-US,97,04,AZ,Arizona,51833,92535,3194968
-AZ,Arizona,04,04,AZ,Arizona,2665355,5315062,245226628
+US,AZ Total Migration-Same State,97,04,AZ,Arizona,51833,92535,3194968
+AZ,AZ Non-migrants,04,04,AZ,Arizona,2665355,5315062,245226628
 CA,California,06,04,AZ,Arizona,16115,25677,1240884
 TX,Texas,48,04,AZ,Arizona,10929,20474,1084203
 CO,Colorado,08,04,AZ,Arizona,5950,9729,492160
@@ -167,11 +167,11 @@ DC,District of Columbia,11,04,AZ,Arizona,228,275,23933
 DE,Delaware,10,04,AZ,Arizona,175,298,13586
 VT,Vermont,50,04,AZ,Arizona,167,288,13721
 RI,Rhode Island,44,04,AZ,Arizona,161,258,13530
-US+FO,Total Migration-US and Foreign,96,05,AR,Arkansas,31700,58148,2021359
+US+FO,AR Total Migration-US and Foreign,96,05,AR,Arkansas,31700,58148,2021359
 US,Total Migration-US,97,05,AR,Arkansas,31462,57675,2009131
 FO,Total Migration-Foreign,98,05,AR,Arkansas,238,473,12228
-US,Total Migration-US,97,05,AR,Arkansas,45917,86695,2232341
-AR,Arkansas,05,05,AR,Arkansas,1006961,2122246,83324601
+US,AR Total Migration-Same State,97,05,AR,Arkansas,45917,86695,2232341
+AR,AR Non-migrants,05,05,AR,Arkansas,1006961,2122246,83324601
 TX,Texas,48,05,AR,Arkansas,6505,11904,422516
 MO,Missouri,29,05,AR,Arkansas,3176,5948,153857
 OK,Oklahoma,40,05,AR,Arkansas,2938,5786,136970
@@ -223,11 +223,11 @@ NH,New Hampshire,33,05,AR,Arkansas,45,78,2227
 DE,Delaware,10,05,AR,Arkansas,38,61,2119
 VT,Vermont,50,05,AR,Arkansas,30,55,1451
 RI,Rhode Island,44,05,AR,Arkansas,23,40,4098
-US+FO,Total Migration-US and Foreign,96,06,CA,California,402652,711148,52537453
+US+FO,CA Total Migration-US and Foreign,96,06,CA,California,402652,711148,52537453
 US,Total Migration-US,97,06,CA,California,399138,703688,52265473
 FO,Total Migration-Foreign,98,06,CA,California,3514,7460,271979
-US,Total Migration-US,97,06,CA,California,523178,880978,60779255
-CA,California,06,06,CA,California,15187730,30007256,1874895881
+US,CA Total Migration-Same State,97,06,CA,California,523178,880978,60779255
+CA,CA Non-migrants,06,06,CA,California,15187730,30007256,1874895881
 TX,Texas,48,06,CA,California,54136,106882,7901692
 AZ,Arizona,04,06,CA,California,32864,57857,3299502
 NV,Nevada,32,06,CA,California,30571,52332,4120848
@@ -279,11 +279,11 @@ ND,North Dakota,38,06,CA,California,757,1434,43948
 VT,Vermont,50,06,CA,California,580,978,72722
 DE,Delaware,10,06,CA,California,574,968,67397
 WV,West Virginia,54,06,CA,California,534,952,46964
-US+FO,Total Migration-US and Foreign,96,08,CO,Colorado,118703,203450,10920500
+US+FO,CO Total Migration-US and Foreign,96,08,CO,Colorado,118703,203450,10920500
 US,Total Migration-US,97,08,CO,Colorado,117815,201494,10852638
 FO,Total Migration-Foreign,98,08,CO,Colorado,888,1956,67862
-US,Total Migration-US,97,08,CO,Colorado,146724,231614,11776728
-CO,Colorado,08,08,CO,Colorado,2193326,4281326,257200326
+US,CO Total Migration-Same State,97,08,CO,Colorado,146724,231614,11776728
+CO,CO Non-migrants,08,08,CO,Colorado,2193326,4281326,257200326
 TX,Texas,48,08,CO,Colorado,13576,25101,1155672
 FL,Florida,12,08,CO,Colorado,10381,18289,1283276
 CA,California,06,08,CO,Colorado,9895,14929,1046599
@@ -335,11 +335,11 @@ VT,Vermont,50,08,CO,Colorado,361,585,32003
 WV,West Virginia,54,08,CO,Colorado,287,477,18900
 RI,Rhode Island,44,08,CO,Colorado,199,341,19108
 DE,Delaware,10,08,CO,Colorado,172,284,17045
-US+FO,Total Migration-US and Foreign,96,09,CT,Connecticut,56400,89213,7877796
+US+FO,CT Total Migration-US and Foreign,96,09,CT,Connecticut,56400,89213,7877796
 US,Total Migration-US,97,09,CT,Connecticut,55648,88096,7859003
 FO,Total Migration-Foreign,98,09,CT,Connecticut,752,1117,18794
-US,Total Migration-US,97,09,CT,Connecticut,36894,58269,2864092
-CT,Connecticut,09,09,CT,Connecticut,1446297,2773488,198713915
+US,CT Total Migration-Same State,97,09,CT,Connecticut,36894,58269,2864092
+CT,CT Non-migrants,09,09,CT,Connecticut,1446297,2773488,198713915
 NY,New York,36,09,CT,Connecticut,9991,14022,1704283
 FL,Florida,12,09,CT,Connecticut,9328,16262,2076419
 MA,Massachusetts,25,09,CT,Connecticut,5895,8106,643754
@@ -391,11 +391,11 @@ NE,Nebraska,31,09,CT,Connecticut,65,102,3600
 SD,South Dakota,46,09,CT,Connecticut,65,109,5984
 WY,Wyoming,56,09,CT,Connecticut,42,66,95913
 ND,North Dakota,38,09,CT,Connecticut,29,46,905
-US+FO,Total Migration-US and Foreign,96,10,DE,Delaware,17383,29327,1519026
+US+FO,DE Total Migration-US and Foreign,96,10,DE,Delaware,17383,29327,1519026
 US,Total Migration-US,97,10,DE,Delaware,17230,29043,1512740
 FO,Total Migration-Foreign,98,10,DE,Delaware,153,284,6286
-US,Total Migration-US,97,10,DE,Delaware,4597,8156,304508
-DE,Delaware,10,10,DE,Delaware,389013,752742,35089485
+US,DE Total Migration-Same State,97,10,DE,Delaware,4597,8156,304508
+DE,DE Non-migrants,10,10,DE,Delaware,389013,752742,35089485
 PA,Pennsylvania,42,10,DE,Delaware,3691,6096,371336
 MD,Maryland,24,10,DE,Delaware,3014,5032,207957
 FL,Florida,12,10,DE,Delaware,1807,3127,232892
@@ -447,10 +447,10 @@ MT,Montana,30,10,DE,Delaware,19,29,2179
 WY,Wyoming,56,10,DE,Delaware,17,25,1124
 ND,North Dakota,38,10,DE,Delaware,15,40,670
 NE,Nebraska,31,10,DE,Delaware,14,24,819
-US+FO,Total Migration-US and Foreign,96,11,DC,District of Columbia,32930,47345,4265837
+US+FO,DC Total Migration-US and Foreign,96,11,DC,District of Columbia,32930,47345,4265837
 US,Total Migration-US,97,11,DC,District of Columbia,32602,46615,4211641
 FO,Total Migration-Foreign,98,11,DC,District of Columbia,328,730,54196
-DC,District of Columbia,11,11,DC,District of Columbia,262311,427413,38827102
+DC,DC Non-migrants,11,11,DC,District of Columbia,262311,427413,38827102
 MD,Maryland,24,11,DC,District of Columbia,10005,16605,1055055
 VA,Virginia,51,11,DC,District of Columbia,6481,9136,888469
 NY,New York,36,11,DC,District of Columbia,2423,2747,296409
@@ -502,11 +502,11 @@ AK,Alaska,02,11,DC,District of Columbia,26,37,2185
 ID,Idaho,16,11,DC,District of Columbia,22,34,1848
 WY,Wyoming,56,11,DC,District of Columbia,13,19,4968
 ND,North Dakota,38,11,DC,District of Columbia,12,15,830
-US+FO,Total Migration-US and Foreign,96,12,FL,Florida,277527,466210,26646421
+US+FO,FL Total Migration-US and Foreign,96,12,FL,Florida,277527,466210,26646421
 US,Total Migration-US,97,12,FL,Florida,272756,457281,26403743
 FO,Total Migration-Foreign,98,12,FL,Florida,4771,8929,242679
-US,Total Migration-US,97,12,FL,Florida,374254,633905,27456941
-FL,Florida,12,12,FL,Florida,8415987,15837332,857534204
+US,FL Total Migration-Same State,97,12,FL,Florida,374254,633905,27456941
+FL,FL Non-migrants,12,12,FL,Florida,8415987,15837332,857534204
 GA,Georgia,13,12,FL,Florida,26876,48301,1857012
 TX,Texas,48,12,FL,Florida,22277,38873,1796256
 NC,North Carolina,37,12,FL,Florida,18962,33289,1555210
@@ -558,11 +558,11 @@ MT,Montana,30,12,FL,Florida,645,1042,55609
 SD,South Dakota,46,12,FL,Florida,542,960,34078
 ND,North Dakota,38,12,FL,Florida,498,864,23362
 WY,Wyoming,56,12,FL,Florida,405,702,33022
-US+FO,Total Migration-US and Foreign,96,13,GA,Georgia,131351,233229,10908057
+US+FO,GA Total Migration-US and Foreign,96,13,GA,Georgia,131351,233229,10908057
 US,Total Migration-US,97,13,GA,Georgia,129816,230008,10819372
 FO,Total Migration-Foreign,98,13,GA,Georgia,1535,3221,88685
-US,Total Migration-US,97,13,GA,Georgia,242294,446349,15953493
-GA,Georgia,13,13,GA,Georgia,3657235,7519287,340699715
+US,GA Total Migration-Same State,97,13,GA,Georgia,242294,446349,15953493
+GA,GA Non-migrants,13,13,GA,Georgia,3657235,7519287,340699715
 FL,Florida,12,13,GA,Georgia,24383,43402,2722787
 TX,Texas,48,13,GA,Georgia,10270,18960,767799
 SC,South Carolina,45,13,GA,Georgia,8996,16349,835286
@@ -614,11 +614,11 @@ SD,South Dakota,46,13,GA,Georgia,189,346,14860
 ND,North Dakota,38,13,GA,Georgia,159,306,5466
 VT,Vermont,50,13,GA,Georgia,134,227,10540
 WY,Wyoming,56,13,GA,Georgia,126,205,7637
-US+FO,Total Migration-US and Foreign,96,15,HI,Hawaii,29518,57831,2278926
+US+FO,HI Total Migration-US and Foreign,96,15,HI,Hawaii,29518,57831,2278926
 US,Total Migration-US,97,15,HI,Hawaii,28636,55721,2203694
 FO,Total Migration-Foreign,98,15,HI,Hawaii,882,2110,75232
-US,Total Migration-US,97,15,HI,Hawaii,2836,4638,185700
-HI,Hawaii,15,15,HI,Hawaii,564311,1074790,48757911
+US,HI Total Migration-Same State,97,15,HI,Hawaii,2836,4638,185700
+HI,HI Non-migrants,15,15,HI,Hawaii,564311,1074790,48757911
 CA,California,06,15,HI,Hawaii,4995,8642,460245
 TX,Texas,48,15,HI,Hawaii,2530,5476,186825
 WA,Washington,53,15,HI,Hawaii,2497,4657,188035
@@ -670,11 +670,11 @@ RI,Rhode Island,44,15,HI,Hawaii,51,99,3907
 WV,West Virginia,54,15,HI,Hawaii,47,83,2361
 DE,Delaware,10,15,HI,Hawaii,33,60,3353
 VT,Vermont,50,15,HI,Hawaii,32,57,4933
-US+FO,Total Migration-US and Foreign,96,16,ID,Idaho,30369,56538,2082612
+US+FO,ID Total Migration-US and Foreign,96,16,ID,Idaho,30369,56538,2082612
 US,Total Migration-US,97,16,ID,Idaho,30187,56160,2071570
 FO,Total Migration-Foreign,98,16,ID,Idaho,182,378,11042
-US,Total Migration-US,97,16,ID,Idaho,23877,46339,1416459
-ID,Idaho,16,16,ID,Idaho,668593,1446676,63581717
+US,ID Total Migration-Same State,97,16,ID,Idaho,23877,46339,1416459
+ID,ID Non-migrants,16,16,ID,Idaho,668593,1446676,63581717
 WA,Washington,53,16,ID,Idaho,5154,8789,339278
 UT,Utah,49,16,ID,Idaho,3153,6102,174392
 CA,California,06,16,ID,Idaho,2940,4998,251242
@@ -726,11 +726,11 @@ WV,West Virginia,54,16,ID,Idaho,50,108,2614
 DC,District of Columbia,11,16,ID,Idaho,39,52,2299
 RI,Rhode Island,44,16,ID,Idaho,34,64,3034
 DE,Delaware,10,16,ID,Idaho,23,39,1519
-US+FO,Total Migration-US and Foreign,96,17,IL,Illinois,157022,264239,19433926
+US+FO,IL Total Migration-US and Foreign,96,17,IL,Illinois,157022,264239,19433926
 US,Total Migration-US,97,17,IL,Illinois,156257,262735,19377139
 FO,Total Migration-Foreign,98,17,IL,Illinois,765,1504,56787
-US,Total Migration-US,97,17,IL,Illinois,148558,257383,11281969
-IL,Illinois,17,17,IL,Illinois,4881732,9704206,522344143
+US,IL Total Migration-Same State,97,17,IL,Illinois,148558,257383,11281969
+IL,IL Non-migrants,17,17,IL,Illinois,4881732,9704206,522344143
 FL,Florida,12,17,IL,Illinois,17728,31620,4101617
 TX,Texas,48,17,IL,Illinois,13495,25045,1613347
 IN,Indiana,18,17,IL,Illinois,13099,23941,961079
@@ -782,11 +782,11 @@ WY,Wyoming,56,17,IL,Illinois,191,330,173265
 RI,Rhode Island,44,17,IL,Illinois,191,263,21503
 DE,Delaware,10,17,IL,Illinois,188,320,22092
 VT,Vermont,50,17,IL,Illinois,129,183,14153
-US+FO,Total Migration-US and Foreign,96,18,IN,Indiana,69968,119054,5387757
+US+FO,IN Total Migration-US and Foreign,96,18,IN,Indiana,69968,119054,5387757
 US,Total Migration-US,97,18,IN,Indiana,69662,118488,5372785
 FO,Total Migration-Foreign,98,18,IN,Indiana,306,566,14972
-US,Total Migration-US,97,18,IN,Indiana,109163,191220,6328249
-IN,Indiana,18,18,IN,Indiana,2561994,5227150,211183057
+US,IN Total Migration-Same State,97,18,IN,Indiana,109163,191220,6328249
+IN,IN Non-migrants,18,18,IN,Indiana,2561994,5227150,211183057
 IL,Illinois,17,18,IN,Indiana,9007,14745,516060
 FL,Florida,12,18,IN,Indiana,8418,14803,1048489
 KY,Kentucky,21,18,IN,Indiana,5155,8737,293820
@@ -838,11 +838,11 @@ WY,Wyoming,56,18,IN,Indiana,93,155,4616
 DE,Delaware,10,18,IN,Indiana,77,145,5326
 VT,Vermont,50,18,IN,Indiana,71,120,4576
 RI,Rhode Island,44,18,IN,Indiana,65,103,5394
-US+FO,Total Migration-US and Foreign,96,19,IA,Iowa,37932,63234,2613308
+US+FO,IA Total Migration-US and Foreign,96,19,IA,Iowa,37932,63234,2613308
 US,Total Migration-US,97,19,IA,Iowa,37807,62996,2606936
 FO,Total Migration-Foreign,98,19,IA,Iowa,125,238,6372
-US,Total Migration-US,97,19,IA,Iowa,46500,78242,2655397
-IA,Iowa,19,19,IA,Iowa,1194821,2474030,104183757
+US,IA Total Migration-Same State,97,19,IA,Iowa,46500,78242,2655397
+IA,IA Non-migrants,19,19,IA,Iowa,1194821,2474030,104183757
 IL,Illinois,17,19,IA,Iowa,4623,7630,249036
 NE,Nebraska,31,19,IA,Iowa,3108,5154,160941
 TX,Texas,48,19,IA,Iowa,2864,4974,189346
@@ -894,11 +894,11 @@ NH,New Hampshire,33,19,IA,Iowa,59,90,3093
 DE,Delaware,10,19,IA,Iowa,48,69,2875
 VT,Vermont,50,19,IA,Iowa,37,63,2041
 RI,Rhode Island,44,19,IA,Iowa,37,67,3539
-US+FO,Total Migration-US and Foreign,96,20,KS,Kansas,43740,78491,3323544
+US+FO,KS Total Migration-US and Foreign,96,20,KS,Kansas,43740,78491,3323544
 US,Total Migration-US,97,20,KS,Kansas,43318,77456,3295488
 FO,Total Migration-Foreign,98,20,KS,Kansas,422,1035,28056
-US,Total Migration-US,97,20,KS,Kansas,35807,62501,1867596
-KS,Kansas,20,20,KS,Kansas,1077240,2243794,100398798
+US,KS Total Migration-Same State,97,20,KS,Kansas,35807,62501,1867596
+KS,KS Non-migrants,20,20,KS,Kansas,1077240,2243794,100398798
 MO,Missouri,29,20,KS,Kansas,11813,19284,889555
 TX,Texas,48,20,KS,Kansas,4804,9128,368142
 OK,Oklahoma,40,20,KS,Kansas,2581,4843,149443
@@ -950,11 +950,11 @@ NH,New Hampshire,33,20,KS,Kansas,68,118,5962
 DE,Delaware,10,20,KS,Kansas,65,123,5662
 RI,Rhode Island,44,20,KS,Kansas,41,73,3304
 VT,Vermont,50,20,KS,Kansas,26,47,1399
-US+FO,Total Migration-US and Foreign,96,21,KY,Kentucky,46440,82156,3193824
+US+FO,KY Total Migration-US and Foreign,96,21,KY,Kentucky,46440,82156,3193824
 US,Total Migration-US,97,21,KY,Kentucky,46151,81524,3177989
 FO,Total Migration-Foreign,98,21,KY,Kentucky,289,632,15835
-US,Total Migration-US,97,21,KY,Kentucky,65546,119626,3382939
-KY,Kentucky,21,21,KY,Kentucky,1564441,3232790,118462213
+US,KY Total Migration-Same State,97,21,KY,Kentucky,65546,119626,3382939
+KY,KY Non-migrants,21,21,KY,Kentucky,1564441,3232790,118462213
 OH,Ohio,39,21,KY,Kentucky,6206,10244,358608
 IN,Indiana,18,21,KY,Kentucky,5691,9732,328043
 TN,Tennessee,47,21,KY,Kentucky,5522,9782,329043
@@ -1006,11 +1006,11 @@ WY,Wyoming,56,21,KY,Kentucky,58,111,4419
 ND,North Dakota,38,21,KY,Kentucky,54,106,1862
 RI,Rhode Island,44,21,KY,Kentucky,48,85,3749
 VT,Vermont,50,21,KY,Kentucky,34,59,1802
-US+FO,Total Migration-US and Foreign,96,22,LA,Louisiana,50564,92166,3249365
+US+FO,LA Total Migration-US and Foreign,96,22,LA,Louisiana,50564,92166,3249365
 US,Total Migration-US,97,22,LA,Louisiana,50196,91408,3230085
 FO,Total Migration-Foreign,98,22,LA,Louisiana,368,758,19279
-US,Total Migration-US,97,22,LA,Louisiana,68329,128540,3401347
-LA,Louisiana,22,22,LA,Louisiana,1539691,3157008,115225718
+US,LA Total Migration-Same State,97,22,LA,Louisiana,68329,128540,3401347
+LA,LA Non-migrants,22,22,LA,Louisiana,1539691,3157008,115225718
 TX,Texas,48,22,LA,Louisiana,16310,30399,865060
 MS,Mississippi,28,22,LA,Louisiana,3979,7710,243798
 FL,Florida,12,22,LA,Louisiana,3772,6800,384039
@@ -1062,11 +1062,11 @@ SD,South Dakota,46,22,LA,Louisiana,71,125,3143
 RI,Rhode Island,44,22,LA,Louisiana,63,96,3326
 DE,Delaware,10,22,LA,Louisiana,48,86,2691
 VT,Vermont,50,22,LA,Louisiana,41,63,2976
-US+FO,Total Migration-US and Foreign,96,23,ME,Maine,16415,25885,1431619
+US+FO,ME Total Migration-US and Foreign,96,23,ME,Maine,16415,25885,1431619
 US,Total Migration-US,97,23,ME,Maine,16347,25748,1427692
 FO,Total Migration-Foreign,98,23,ME,Maine,68,137,3928
-US,Total Migration-US,97,23,ME,Maine,19062,30106,1083279
-ME,Maine,23,23,ME,Maine,563495,1052320,47174225
+US,ME Total Migration-Same State,97,23,ME,Maine,19062,30106,1083279
+ME,ME Non-migrants,23,23,ME,Maine,563495,1052320,47174225
 FL,Florida,12,23,ME,Maine,2609,4315,350664
 MA,Massachusetts,25,23,ME,Maine,1931,2663,169270
 NH,New Hampshire,33,23,ME,Maine,1926,2834,150549
@@ -1118,11 +1118,11 @@ NE,Nebraska,31,23,ME,Maine,35,59,2297
 MS,Mississippi,28,23,ME,Maine,33,63,2846
 SD,South Dakota,46,23,ME,Maine,31,54,1659
 ND,North Dakota,38,23,ME,Maine,17,26,593
-US+FO,Total Migration-US and Foreign,96,24,MD,Maryland,99324,165821,10109194
+US+FO,MD Total Migration-US and Foreign,96,24,MD,Maryland,99324,165821,10109194
 US,Total Migration-US,97,24,MD,Maryland,98252,163376,10004103
 FO,Total Migration-Foreign,98,24,MD,Maryland,1072,2445,105091
-US,Total Migration-US,97,24,MD,Maryland,89449,154266,6526977
-MD,Maryland,24,24,MD,Maryland,2335850,4568391,258057801
+US,MD Total Migration-Same State,97,24,MD,Maryland,89449,154266,6526977
+MD,MD Non-migrants,24,24,MD,Maryland,2335850,4568391,258057801
 VA,Virginia,51,24,MD,Maryland,15104,24637,1287218
 FL,Florida,12,24,MD,Maryland,10472,18330,1827817
 PA,Pennsylvania,42,24,MD,Maryland,8973,14734,720114
@@ -1174,11 +1174,11 @@ MT,Montana,30,24,MD,Maryland,144,239,14773
 SD,South Dakota,46,24,MD,Maryland,124,236,11597
 WY,Wyoming,56,24,MD,Maryland,82,148,12617
 ND,North Dakota,38,24,MD,Maryland,76,122,4384
-US+FO,Total Migration-US and Foreign,96,25,MA,Massachusetts,104472,159200,13202799
+US+FO,MA Total Migration-US and Foreign,96,25,MA,Massachusetts,104472,159200,13202799
 US,Total Migration-US,97,25,MA,Massachusetts,103797,158117,13175724
 FO,Total Migration-Foreign,98,25,MA,Massachusetts,675,1083,27075
-US,Total Migration-US,97,25,MA,Massachusetts,103887,157621,11821811
-MA,Massachusetts,25,25,MA,Massachusetts,2779450,5251470,391076656
+US,MA Total Migration-Same State,97,25,MA,Massachusetts,103887,157621,11821811
+MA,MA Non-migrants,25,25,MA,Massachusetts,2779450,5251470,391076656
 FL,Florida,12,25,MA,Massachusetts,14018,23596,2855657
 NH,New Hampshire,33,25,MA,Massachusetts,11606,18189,1422229
 NY,New York,36,25,MA,Massachusetts,10465,13111,1353689
@@ -1230,11 +1230,11 @@ AK,Alaska,02,25,MA,Massachusetts,103,151,6773
 SD,South Dakota,46,25,MA,Massachusetts,88,152,7175
 WY,Wyoming,56,25,MA,Massachusetts,70,101,17732
 ND,North Dakota,38,25,MA,Massachusetts,44,75,2513
-US+FO,Total Migration-US and Foreign,96,26,MI,Michigan,82632,135970,7520946
+US+FO,MI Total Migration-US and Foreign,96,26,MI,Michigan,82632,135970,7520946
 US,Total Migration-US,97,26,MI,Michigan,82272,135274,7499267
 FO,Total Migration-Foreign,98,26,MI,Michigan,360,696,21679
-US,Total Migration-US,97,26,MI,Michigan,160321,266523,9867114
-MI,Michigan,26,26,MI,Michigan,3870664,7609894,336253350
+US,MI Total Migration-Same State,97,26,MI,Michigan,160321,266523,9867114
+MI,MI Non-migrants,26,26,MI,Michigan,3870664,7609894,336253350
 FL,Florida,12,26,MI,Michigan,12107,20842,1777002
 TX,Texas,48,26,MI,Michigan,6447,11803,479998
 OH,Ohio,39,26,MI,Michigan,5894,9633,385997
@@ -1286,11 +1286,11 @@ WY,Wyoming,56,26,MI,Michigan,166,279,9511
 VT,Vermont,50,26,MI,Michigan,143,203,11179
 DE,Delaware,10,26,MI,Michigan,127,211,8836
 RI,Rhode Island,44,26,MI,Michigan,118,182,8024
-US+FO,Total Migration-US and Foreign,96,27,MN,Minnesota,59470,97967,6118640
+US+FO,MN Total Migration-US and Foreign,96,27,MN,Minnesota,59470,97967,6118640
 US,Total Migration-US,97,27,MN,Minnesota,59272,97596,6108228
 FO,Total Migration-Foreign,98,27,MN,Minnesota,198,371,10411
-US,Total Migration-US,97,27,MN,Minnesota,120342,201636,8143029
-MN,Minnesota,27,27,MN,Minnesota,2226340,4500952,233605963
+US,MN Total Migration-Same State,97,27,MN,Minnesota,120342,201636,8143029
+MN,MN Non-migrants,27,27,MN,Minnesota,2226340,4500952,233605963
 WI,Wisconsin,55,27,MN,Minnesota,8211,13191,673310
 FL,Florida,12,27,MN,Minnesota,5423,9802,1173921
 TX,Texas,48,27,MN,Minnesota,4412,8221,430000
@@ -1342,11 +1342,11 @@ VT,Vermont,50,27,MN,Minnesota,82,128,5459
 RI,Rhode Island,44,27,MN,Minnesota,68,105,12497
 DE,Delaware,10,27,MN,Minnesota,56,85,3541
 WV,West Virginia,54,27,MN,Minnesota,50,97,3285
-US+FO,Total Migration-US and Foreign,96,28,MS,Mississippi,32520,59146,1766488
+US+FO,MS Total Migration-US and Foreign,96,28,MS,Mississippi,32520,59146,1766488
 US,Total Migration-US,97,28,MS,Mississippi,32181,58501,1750637
 FO,Total Migration-Foreign,98,28,MS,Mississippi,339,645,15851
-US,Total Migration-US,97,28,MS,Mississippi,39792,77104,1838899
-MS,Mississippi,28,28,MS,Mississippi,986364,2058629,64181085
+US,MS Total Migration-Same State,97,28,MS,Mississippi,39792,77104,1838899
+MS,MS Non-migrants,28,28,MS,Mississippi,986364,2058629,64181085
 TN,Tennessee,47,28,MS,Mississippi,5414,9443,285691
 TX,Texas,48,28,MS,Mississippi,4899,9002,240923
 AL,Alabama,01,28,MS,Mississippi,3014,5669,170188
@@ -1398,11 +1398,11 @@ WY,Wyoming,56,28,MS,Mississippi,40,74,2623
 RI,Rhode Island,44,28,MS,Mississippi,38,82,2826
 NH,New Hampshire,33,28,MS,Mississippi,34,49,2528
 VT,Vermont,50,28,MS,Mississippi,17,23,668
-US+FO,Total Migration-US and Foreign,96,29,MO,Missouri,71735,123351,5967492
+US+FO,MO Total Migration-US and Foreign,96,29,MO,Missouri,71735,123351,5967492
 US,Total Migration-US,97,29,MO,Missouri,71257,122342,5939427
 FO,Total Migration-Foreign,98,29,MO,Missouri,478,1009,28065
-US,Total Migration-US,97,29,MO,Missouri,106259,188590,6168310
-MO,Missouri,29,29,MO,Missouri,2243049,4539244,195599825
+US,MO Total Migration-Same State,97,29,MO,Missouri,106259,188590,6168310
+MO,MO Non-migrants,29,29,MO,Missouri,2243049,4539244,195599825
 KS,Kansas,20,29,MO,Missouri,10657,17386,723132
 IL,Illinois,17,29,MO,Missouri,7648,12354,449603
 TX,Texas,48,29,MO,Missouri,6927,12519,564311
@@ -1454,11 +1454,11 @@ NH,New Hampshire,33,29,MO,Missouri,98,163,7833
 DE,Delaware,10,29,MO,Missouri,80,149,6381
 RI,Rhode Island,44,29,MO,Missouri,60,96,3927
 VT,Vermont,50,29,MO,Missouri,54,89,5076
-US+FO,Total Migration-US and Foreign,96,30,MT,Montana,17594,30024,1299637
+US+FO,MT Total Migration-US and Foreign,96,30,MT,Montana,17594,30024,1299637
 US,Total Migration-US,97,30,MT,Montana,17482,29783,1293907
 FO,Total Migration-Foreign,98,30,MT,Montana,112,241,5729
-US,Total Migration-US,97,30,MT,Montana,13296,22200,853050
-MT,Montana,30,30,MT,Montana,425438,831399,38700712
+US,MT Total Migration-Same State,97,30,MT,Montana,13296,22200,853050
+MT,MT Non-migrants,30,30,MT,Montana,425438,831399,38700712
 WA,Washington,53,30,MT,Montana,1760,2709,109189
 CA,California,06,30,MT,Montana,1175,1841,92189
 AZ,Arizona,04,30,MT,Montana,1172,2037,103040
@@ -1510,11 +1510,11 @@ WV,West Virginia,54,30,MT,Montana,49,92,3125
 DC,District of Columbia,11,30,MT,Montana,37,39,2619
 RI,Rhode Island,44,30,MT,Montana,19,23,775
 DE,Delaware,10,30,MT,Montana,19,36,1129
-US+FO,Total Migration-US and Foreign,96,31,NE,Nebraska,23609,41550,1750489
+US+FO,NE Total Migration-US and Foreign,96,31,NE,Nebraska,23609,41550,1750489
 US,Total Migration-US,97,31,NE,Nebraska,23385,41121,1736572
 FO,Total Migration-Foreign,98,31,NE,Nebraska,224,429,13917
-US,Total Migration-US,97,31,NE,Nebraska,27982,48540,1639033
-NE,Nebraska,31,31,NE,Nebraska,742681,1562138,69626563
+US,NE Total Migration-Same State,97,31,NE,Nebraska,27982,48540,1639033
+NE,NE Non-migrants,31,31,NE,Nebraska,742681,1562138,69626563
 IA,Iowa,19,31,NE,Nebraska,3123,5571,171037
 TX,Texas,48,31,NE,Nebraska,2195,4170,165266
 CO,Colorado,08,31,NE,Nebraska,1864,2893,128925
@@ -1566,11 +1566,11 @@ NH,New Hampshire,33,31,NE,Nebraska,37,72,3173
 DE,Delaware,10,31,NE,Nebraska,20,36,1254
 RI,Rhode Island,44,31,NE,Nebraska,19,30,1063
 VT,Vermont,50,31,NE,Nebraska,17,30,1389
-US+FO,Total Migration-US and Foreign,96,32,NV,Nevada,62283,109204,5480947
+US+FO,NV Total Migration-US and Foreign,96,32,NV,Nevada,62283,109204,5480947
 US,Total Migration-US,97,32,NV,Nevada,61766,108164,5420132
 FO,Total Migration-Foreign,98,32,NV,Nevada,517,1040,60815
-US,Total Migration-US,97,32,NV,Nevada,11281,19298,787580
-NV,Nevada,32,32,NV,Nevada,1235707,2358614,125480832
+US,NV Total Migration-Same State,97,32,NV,Nevada,11281,19298,787580
+NV,NV Non-migrants,32,32,NV,Nevada,1235707,2358614,125480832
 CA,California,06,32,NV,Nevada,14518,23983,1249124
 TX,Texas,48,32,NV,Nevada,5672,10808,481808
 AZ,Arizona,04,32,NV,Nevada,4333,7617,354512
@@ -1622,11 +1622,11 @@ RI,Rhode Island,44,32,NV,Nevada,91,144,7068
 WV,West Virginia,54,32,NV,Nevada,90,164,3400
 DC,District of Columbia,11,32,NV,Nevada,85,106,7248
 VT,Vermont,50,32,NV,Nevada,39,74,2640
-US+FO,Total Migration-US and Foreign,96,33,NH,New Hampshire,24369,38428,2464183
+US+FO,NH Total Migration-US and Foreign,96,33,NH,New Hampshire,24369,38428,2464183
 US,Total Migration-US,97,33,NH,New Hampshire,24257,38186,2456005
 FO,Total Migration-Foreign,98,33,NH,New Hampshire,112,242,8177
-US,Total Migration-US,97,33,NH,New Hampshire,16235,25387,1259292
-NH,New Hampshire,33,33,NH,New Hampshire,576395,1090461,66234318
+US,NH Total Migration-Same State,97,33,NH,New Hampshire,16235,25387,1259292
+NH,NH Non-migrants,33,33,NH,New Hampshire,576395,1090461,66234318
 MA,Massachusetts,25,33,NH,New Hampshire,6131,8647,561735
 FL,Florida,12,33,NH,New Hampshire,3039,5235,517289
 ME,Maine,23,33,NH,New Hampshire,2595,4019,189659
@@ -1678,11 +1678,11 @@ SD,South Dakota,46,33,NH,New Hampshire,36,66,1822
 DE,Delaware,10,33,NH,New Hampshire,36,67,4091
 MS,Mississippi,28,33,NH,New Hampshire,33,59,4053
 ND,North Dakota,38,33,NH,New Hampshire,17,26,796
-US+FO,Total Migration-US and Foreign,96,34,NJ,New Jersey,131148,218986,17632533
+US+FO,NJ Total Migration-US and Foreign,96,34,NJ,New Jersey,131148,218986,17632533
 US,Total Migration-US,97,34,NJ,New Jersey,130055,217256,17595508
 FO,Total Migration-Foreign,98,34,NJ,New Jersey,1093,1730,37025
-US,Total Migration-US,97,34,NJ,New Jersey,130179,219895,13227661
-NJ,New Jersey,34,34,NJ,New Jersey,3566342,7096638,432569948
+US,NJ Total Migration-Same State,97,34,NJ,New Jersey,130179,219895,13227661
+NJ,NJ Non-migrants,34,34,NJ,New Jersey,3566342,7096638,432569948
 NY,New York,36,34,NJ,New Jersey,24960,36609,3161138
 FL,Florida,12,34,NJ,New Jersey,23128,41610,5277917
 PA,Pennsylvania,42,34,NJ,New Jersey,18226,29552,1783751
@@ -1734,11 +1734,11 @@ ID,Idaho,16,34,NJ,New Jersey,116,204,11384
 SD,South Dakota,46,34,NJ,New Jersey,94,161,7580
 WY,Wyoming,56,34,NJ,New Jersey,87,168,15270
 ND,North Dakota,38,34,NJ,New Jersey,67,111,2843
-US+FO,Total Migration-US and Foreign,96,35,NM,New Mexico,31848,57097,2499594
+US+FO,NM Total Migration-US and Foreign,96,35,NM,New Mexico,31848,57097,2499594
 US,Total Migration-US,97,35,NM,New Mexico,31355,56048,2470195
 FO,Total Migration-Foreign,98,35,NM,New Mexico,493,1049,29399
-US,Total Migration-US,97,35,NM,New Mexico,20401,35887,1030297
-NM,New Mexico,35,35,NM,New Mexico,774752,1501085,54279461
+US,NM Total Migration-Same State,97,35,NM,New Mexico,20401,35887,1030297
+NM,NM Non-migrants,35,35,NM,New Mexico,774752,1501085,54279461
 TX,Texas,48,35,NM,New Mexico,7671,14456,710289
 AZ,Arizona,04,35,NM,New Mexico,3254,5727,204483
 CO,Colorado,08,35,NM,New Mexico,2631,4399,173925
@@ -1790,11 +1790,11 @@ WV,West Virginia,54,35,NM,New Mexico,63,109,3712
 VT,Vermont,50,35,NM,New Mexico,51,82,4877
 DE,Delaware,10,35,NM,New Mexico,49,69,2674
 RI,Rhode Island,44,35,NM,New Mexico,36,68,3362
-US+FO,Total Migration-US and Foreign,96,36,NY,New York,289146,480158,36339557
+US+FO,NY Total Migration-US and Foreign,96,36,NY,New York,289146,480158,36339557
 US,Total Migration-US,97,36,NY,New York,286205,476051,36252111
 FO,Total Migration-Foreign,98,36,NY,New York,2941,4107,87447
-US,Total Migration-US,97,36,NY,New York,264415,425999,26739936
-NY,New York,36,36,NY,New York,7869409,14681625,908659511
+US,NY Total Migration-Same State,97,36,NY,New York,264415,425999,26739936
+NY,NY Non-migrants,36,36,NY,New York,7869409,14681625,908659511
 FL,Florida,12,36,NY,New York,51967,88344,9504484
 NJ,New Jersey,34,36,NY,New York,46761,79883,5902928
 PA,Pennsylvania,42,36,NY,New York,21636,37906,1707418
@@ -1846,11 +1846,11 @@ AK,Alaska,02,36,NY,New York,310,492,19561
 SD,South Dakota,46,36,NY,New York,261,465,19764
 WY,Wyoming,56,36,NY,New York,201,348,77875
 ND,North Dakota,38,36,NY,New York,168,296,8404
-US+FO,Total Migration-US and Foreign,96,37,NC,North Carolina,131590,232918,10607421
+US+FO,NC Total Migration-US and Foreign,96,37,NC,North Carolina,131590,232918,10607421
 US,Total Migration-US,97,37,NC,North Carolina,130008,229354,10510454
 FO,Total Migration-Foreign,98,37,NC,North Carolina,1582,3564,96967
-US,Total Migration-US,97,37,NC,North Carolina,181033,322555,11665894
-NC,North Carolina,37,37,NC,North Carolina,3756054,7618396,339086693
+US,NC Total Migration-Same State,97,37,NC,North Carolina,181033,322555,11665894
+NC,NC Non-migrants,37,37,NC,North Carolina,3756054,7618396,339086693
 SC,South Carolina,45,37,NC,North Carolina,17933,32901,1476329
 FL,Florida,12,37,NC,North Carolina,15362,27207,1827768
 VA,Virginia,51,37,NC,North Carolina,12070,21942,869024
@@ -1902,11 +1902,11 @@ VT,Vermont,50,37,NC,North Carolina,281,459,20193
 SD,South Dakota,46,37,NC,North Carolina,201,381,13479
 WY,Wyoming,56,37,NC,North Carolina,176,309,20142
 ND,North Dakota,38,37,NC,North Carolina,147,241,6789
-US+FO,Total Migration-US and Foreign,96,38,ND,North Dakota,14752,26023,1004384
+US+FO,ND Total Migration-US and Foreign,96,38,ND,North Dakota,14752,26023,1004384
 US,Total Migration-US,97,38,ND,North Dakota,14600,25733,996795
 FO,Total Migration-Foreign,98,38,ND,North Dakota,152,290,7589
-US,Total Migration-US,97,38,ND,North Dakota,9313,15506,551633
-ND,North Dakota,38,38,ND,North Dakota,293014,595358,30420744
+US,ND Total Migration-Same State,97,38,ND,North Dakota,9313,15506,551633
+ND,ND Non-migrants,38,38,ND,North Dakota,293014,595358,30420744
 MN,Minnesota,27,38,ND,North Dakota,4079,6573,237693
 TX,Texas,48,38,ND,North Dakota,1013,2010,77443
 AZ,Arizona,04,38,ND,North Dakota,694,1179,56410
@@ -1958,11 +1958,11 @@ DE,Delaware,10,38,ND,North Dakota,23,52,1936
 VT,Vermont,50,38,ND,North Dakota,19,33,1539
 RI,Rhode Island,44,38,ND,North Dakota,15,26,871
 DC,District of Columbia,11,38,ND,North Dakota,13,16,906
-US+FO,Total Migration-US and Foreign,96,39,OH,Ohio,102248,168736,9466108
+US+FO,OH Total Migration-US and Foreign,96,39,OH,Ohio,102248,168736,9466108
 US,Total Migration-US,97,39,OH,Ohio,101600,167539,9433945
 FO,Total Migration-Foreign,98,39,OH,Ohio,648,1197,32163
-US,Total Migration-US,97,39,OH,Ohio,176171,292727,10600074
-OH,Ohio,39,39,OH,Ohio,4591641,8912308,386320075
+US,OH Total Migration-Same State,97,39,OH,Ohio,176171,292727,10600074
+OH,OH Non-migrants,39,39,OH,Ohio,4591641,8912308,386320075
 FL,Florida,12,39,OH,Ohio,14584,24851,2376890
 TX,Texas,48,39,OH,Ohio,6728,12008,535989
 KY,Kentucky,21,39,OH,Ohio,6545,10615,413784
@@ -2014,11 +2014,11 @@ ND,North Dakota,38,39,OH,Ohio,164,288,7999
 RI,Rhode Island,44,39,OH,Ohio,159,247,15737
 WY,Wyoming,56,39,OH,Ohio,146,242,9804
 VT,Vermont,50,39,OH,Ohio,130,202,10591
-US+FO,Total Migration-US and Foreign,96,40,OK,Oklahoma,39518,73482,2525750
+US+FO,OK Total Migration-US and Foreign,96,40,OK,Oklahoma,39518,73482,2525750
 US,Total Migration-US,97,40,OK,Oklahoma,38987,72340,2495611
 FO,Total Migration-Foreign,98,40,OK,Oklahoma,531,1142,30140
-US,Total Migration-US,97,40,OK,Oklahoma,65269,124810,3561715
-OK,Oklahoma,40,40,OK,Oklahoma,1316666,2789015,101591406
+US,OK Total Migration-Same State,97,40,OK,Oklahoma,65269,124810,3561715
+OK,OK Non-migrants,40,40,OK,Oklahoma,1316666,2789015,101591406
 TX,Texas,48,40,OK,Oklahoma,10188,18770,683085
 AR,Arkansas,05,40,OK,Oklahoma,2774,5260,129090
 FL,Florida,12,40,OK,Oklahoma,2239,4147,174469
@@ -2070,11 +2070,11 @@ NH,New Hampshire,33,40,OK,Oklahoma,71,137,5855
 DE,Delaware,10,40,OK,Oklahoma,51,97,3326
 RI,Rhode Island,44,40,OK,Oklahoma,39,63,2972
 VT,Vermont,50,40,OK,Oklahoma,33,58,3790
-US+FO,Total Migration-US and Foreign,96,41,OR,Oregon,68617,115122,6356619
+US+FO,OR Total Migration-US and Foreign,96,41,OR,Oregon,68617,115122,6356619
 US,Total Migration-US,97,41,OR,Oregon,68413,114741,6343392
 FO,Total Migration-Foreign,98,41,OR,Oregon,204,381,13227
-US,Total Migration-US,97,41,OR,Oregon,66286,106536,5210381
-OR,Oregon,41,41,OR,Oregon,1595806,3082912,152890570
+US,OR Total Migration-Same State,97,41,OR,Oregon,66286,106536,5210381
+OR,OR Non-migrants,41,41,OR,Oregon,1595806,3082912,152890570
 WA,Washington,53,41,OR,Oregon,15880,25470,1611384
 CA,California,06,41,OR,Oregon,10550,15806,981853
 TX,Texas,48,41,OR,Oregon,4736,9108,465645
@@ -2126,11 +2126,11 @@ DC,District of Columbia,11,41,OR,Oregon,159,196,14220
 WV,West Virginia,54,41,OR,Oregon,99,182,5053
 RI,Rhode Island,44,41,OR,Oregon,78,126,6344
 DE,Delaware,10,41,OR,Oregon,59,96,10103
-US+FO,Total Migration-US and Foreign,96,42,PA,Pennsylvania,138538,227164,13363710
+US+FO,PA Total Migration-US and Foreign,96,42,PA,Pennsylvania,138538,227164,13363710
 US,Total Migration-US,97,42,PA,Pennsylvania,137216,225036,13316317
 FO,Total Migration-Foreign,98,42,PA,Pennsylvania,1322,2128,47393
-US,Total Migration-US,97,42,PA,Pennsylvania,153508,248903,10951261
-PA,Pennsylvania,42,42,PA,Pennsylvania,5127368,9944659,489906808
+US,PA Total Migration-Same State,97,42,PA,Pennsylvania,153508,248903,10951261
+PA,PA Non-migrants,42,42,PA,Pennsylvania,5127368,9944659,489906808
 FL,Florida,12,42,PA,Pennsylvania,18666,32347,2932869
 NJ,New Jersey,34,42,PA,Pennsylvania,16196,26428,1481786
 NY,New York,36,42,PA,Pennsylvania,13101,19332,1097510
@@ -2182,11 +2182,11 @@ NE,Nebraska,31,42,PA,Pennsylvania,217,394,14422
 SD,South Dakota,46,42,PA,Pennsylvania,198,380,12226
 WY,Wyoming,56,42,PA,Pennsylvania,186,334,16385
 ND,North Dakota,38,42,PA,Pennsylvania,157,300,7898
-US+FO,Total Migration-US and Foreign,96,44,RI,Rhode Island,19274,30793,1807791
+US+FO,RI Total Migration-US and Foreign,96,44,RI,Rhode Island,19274,30793,1807791
 US,Total Migration-US,97,44,RI,Rhode Island,19040,30402,1800103
 FO,Total Migration-Foreign,98,44,RI,Rhode Island,234,391,7688
-US,Total Migration-US,97,44,RI,Rhode Island,9476,14870,703391
-RI,Rhode Island,44,44,RI,Rhode Island,445014,814988,41236194
+US,RI Total Migration-Same State,97,44,RI,Rhode Island,9476,14870,703391
+RI,RI Non-migrants,44,44,RI,Rhode Island,445014,814988,41236194
 MA,Massachusetts,25,44,RI,Rhode Island,5147,7523,431038
 FL,Florida,12,44,RI,Rhode Island,2789,4767,450766
 CT,Connecticut,09,44,RI,Rhode Island,1882,3079,137167
@@ -2238,11 +2238,11 @@ ND,North Dakota,38,44,RI,Rhode Island,18,22,544
 SD,South Dakota,46,44,RI,Rhode Island,17,29,1096
 ID,Idaho,16,44,RI,Rhode Island,16,28,1129
 WY,Wyoming,56,44,RI,Rhode Island,12,16,994
-US+FO,Total Migration-US and Foreign,96,45,SC,South Carolina,69164,119964,5048515
+US+FO,SC Total Migration-US and Foreign,96,45,SC,South Carolina,69164,119964,5048515
 US,Total Migration-US,97,45,SC,South Carolina,68369,118363,5001833
 FO,Total Migration-Foreign,98,45,SC,South Carolina,795,1601,46682
-US,Total Migration-US,97,45,SC,South Carolina,73876,134750,4304613
-SC,South Carolina,45,45,SC,South Carolina,1863779,3760356,156649907
+US,SC Total Migration-Same State,97,45,SC,South Carolina,73876,134750,4304613
+SC,SC Non-migrants,45,45,SC,South Carolina,1863779,3760356,156649907
 NC,North Carolina,37,45,SC,South Carolina,14681,25095,1041466
 GA,Georgia,13,45,SC,South Carolina,8283,14698,508454
 FL,Florida,12,45,SC,South Carolina,7495,13193,688911
@@ -2294,11 +2294,11 @@ VT,Vermont,50,45,SC,South Carolina,141,245,10310
 SD,South Dakota,46,45,SC,South Carolina,122,225,9695
 WY,Wyoming,56,45,SC,South Carolina,100,175,10629
 ND,North Dakota,38,45,SC,South Carolina,91,176,4290
-US+FO,Total Migration-US and Foreign,96,46,SD,South Dakota,13354,23499,894909
+US+FO,SD Total Migration-US and Foreign,96,46,SD,South Dakota,13354,23499,894909
 US,Total Migration-US,97,46,SD,South Dakota,13229,23253,888807
 FO,Total Migration-Foreign,98,46,SD,South Dakota,125,246,6102
-US,Total Migration-US,97,46,SD,South Dakota,14336,24729,904805
-SD,South Dakota,46,46,SD,South Dakota,342710,710284,33432238
+US,SD Total Migration-Same State,97,46,SD,South Dakota,14336,24729,904805
+SD,SD Non-migrants,46,46,SD,South Dakota,342710,710284,33432238
 MN,Minnesota,27,46,SD,South Dakota,1586,2714,95103
 IA,Iowa,19,46,SD,South Dakota,1018,1733,62509
 NE,Nebraska,31,46,SD,South Dakota,848,1488,43175
@@ -2350,11 +2350,11 @@ DC,District of Columbia,11,46,SD,South Dakota,18,26,1148
 DE,Delaware,10,46,SD,South Dakota,16,26,692
 VT,Vermont,50,46,SD,South Dakota,13,19,1228
 RI,Rhode Island,44,46,SD,South Dakota,10,14,803
-US+FO,Total Migration-US and Foreign,96,47,TN,Tennessee,88672,158166,6573064
+US+FO,TN Total Migration-US and Foreign,96,47,TN,Tennessee,88672,158166,6573064
 US,Total Migration-US,97,47,TN,Tennessee,88147,157028,6543136
 FO,Total Migration-Foreign,98,47,TN,Tennessee,525,1138,29928
-US,Total Migration-US,97,47,TN,Tennessee,105634,191703,6644997
-TN,Tennessee,47,47,TN,Tennessee,2513762,5103091,223897863
+US,TN Total Migration-Same State,97,47,TN,Tennessee,105634,191703,6644997
+TN,TN Non-migrants,47,47,TN,Tennessee,2513762,5103091,223897863
 FL,Florida,12,47,TN,Tennessee,9976,17849,1065345
 GA,Georgia,13,47,TN,Tennessee,8101,14617,556904
 TX,Texas,48,47,TN,Tennessee,6615,12091,484123
@@ -2406,11 +2406,11 @@ WY,Wyoming,56,47,TN,Tennessee,126,232,6578
 ND,North Dakota,38,47,TN,Tennessee,120,232,5329
 RI,Rhode Island,44,47,TN,Tennessee,118,193,11509
 VT,Vermont,50,47,TN,Tennessee,100,176,7904
-US+FO,Total Migration-US and Foreign,96,48,TX,Texas,243258,441206,21724053
+US+FO,TX Total Migration-US and Foreign,96,48,TX,Texas,243258,441206,21724053
 US,Total Migration-US,97,48,TX,Texas,239601,433563,21498654
 FO,Total Migration-Foreign,98,48,TX,Texas,3657,7643,225399
-US,Total Migration-US,97,48,TX,Texas,564318,1044780,42262684
-TX,Texas,48,48,TX,Texas,10362321,21952455,1008593552
+US,TX Total Migration-Same State,97,48,TX,Texas,564318,1044780,42262684
+TX,TX Non-migrants,48,48,TX,Texas,10362321,21952455,1008593552
 CA,California,06,48,TX,Texas,23316,39032,2476091
 FL,Florida,12,48,TX,Texas,21221,37777,2422908
 CO,Colorado,08,48,TX,Texas,14499,25224,1450560
@@ -2462,11 +2462,11 @@ WV,West Virginia,54,48,TX,Texas,607,1184,44903
 DE,Delaware,10,48,TX,Texas,491,892,41745
 RI,Rhode Island,44,48,TX,Texas,395,648,32553
 VT,Vermont,50,48,TX,Texas,322,599,30598
-US+FO,Total Migration-US and Foreign,96,49,UT,Utah,43409,84275,3664985
+US+FO,UT Total Migration-US and Foreign,96,49,UT,Utah,43409,84275,3664985
 US,Total Migration-US,97,49,UT,Utah,43108,83539,3641894
 FO,Total Migration-Foreign,98,49,UT,Utah,301,736,23091
-US,Total Migration-US,97,49,UT,Utah,45949,88836,3248877
-UT,Utah,49,49,UT,Utah,1139108,2610107,122365244
+US,UT Total Migration-Same State,97,49,UT,Utah,45949,88836,3248877
+UT,UT Non-migrants,49,49,UT,Utah,1139108,2610107,122365244
 CA,California,06,49,UT,Utah,4741,8032,451415
 TX,Texas,48,49,UT,Utah,3787,8001,322841
 ID,Idaho,16,49,UT,Utah,3146,6809,211689
@@ -2518,11 +2518,11 @@ WV,West Virginia,54,49,UT,Utah,100,220,5373
 DC,District of Columbia,11,49,UT,Utah,93,126,9463
 RI,Rhode Island,44,49,UT,Utah,57,89,4790
 DE,Delaware,10,49,UT,Utah,47,95,5870
-US+FO,Total Migration-US and Foreign,96,50,VT,Vermont,11362,17246,899643
+US+FO,VT Total Migration-US and Foreign,96,50,VT,Vermont,11362,17246,899643
 US,Total Migration-US,97,50,VT,Vermont,11339,17206,898066
 FO,Total Migration-Foreign,98,50,VT,Vermont,23,40,1577
-US,Total Migration-US,97,50,VT,Vermont,6609,10068,400148
-VT,Vermont,50,50,VT,Vermont,271762,500428,23539665
+US,VT Total Migration-Same State,97,50,VT,Vermont,6609,10068,400148
+VT,VT Non-migrants,50,50,VT,Vermont,271762,500428,23539665
 NY,New York,36,50,VT,Vermont,1539,2242,111530
 NH,New Hampshire,33,50,VT,Vermont,1341,2018,99185
 MA,Massachusetts,25,50,VT,Vermont,1258,1684,102768
@@ -2574,11 +2574,11 @@ OK,Oklahoma,40,50,VT,Vermont,20,37,1093
 MS,Mississippi,28,50,VT,Vermont,20,44,1203
 NE,Nebraska,31,50,VT,Vermont,16,31,1635
 ND,North Dakota,38,50,VT,Vermont,-1,-1,-1
-US+FO,Total Migration-US and Foreign,96,51,VA,Virginia,140319,248474,14110281
+US+FO,VA Total Migration-US and Foreign,96,51,VA,Virginia,140319,248474,14110281
 US,Total Migration-US,97,51,VA,Virginia,136919,240148,13730853
 FO,Total Migration-Foreign,98,51,VA,Virginia,3400,8326,379428
-US,Total Migration-US,97,51,VA,Virginia,195148,340886,14509627
-VA,Virginia,51,51,VA,Virginia,3121183,6304124,344964932
+US,VA Total Migration-Same State,97,51,VA,Virginia,195148,340886,14509627
+VA,VA Non-migrants,51,51,VA,Virginia,3121183,6304124,344964932
 NC,North Carolina,37,51,VA,Virginia,15556,27771,1342524
 FL,Florida,12,51,VA,Virginia,15486,28685,2240396
 MD,Maryland,24,51,VA,Virginia,13424,22139,1235495
@@ -2630,11 +2630,11 @@ VT,Vermont,50,51,VA,Virginia,270,444,25533
 SD,South Dakota,46,51,VA,Virginia,267,542,27763
 WY,Wyoming,56,51,VA,Virginia,170,309,23456
 ND,North Dakota,38,51,VA,Virginia,143,286,8619
-US+FO,Total Migration-US and Foreign,96,53,WA,Washington,123800,225564,14721080
+US+FO,WA Total Migration-US and Foreign,96,53,WA,Washington,123800,225564,14721080
 US,Total Migration-US,97,53,WA,Washington,122463,222533,14622445
 FO,Total Migration-Foreign,98,53,WA,Washington,1337,3031,98634
-US,Total Migration-US,97,53,WA,Washington,108813,182899,9503810
-WA,Washington,53,53,WA,Washington,2986069,5899196,380976839
+US,WA Total Migration-Same State,97,53,WA,Washington,108813,182899,9503810
+WA,WA Non-migrants,53,53,WA,Washington,2986069,5899196,380976839
 CA,California,06,53,WA,Washington,18275,29096,2972701
 OR,Oregon,41,53,WA,Washington,12358,19487,999758
 TX,Texas,48,53,WA,Washington,11775,24308,1436506
@@ -2686,11 +2686,11 @@ VT,Vermont,50,53,WA,Washington,190,285,16182
 WV,West Virginia,54,53,WA,Washington,162,308,11241
 RI,Rhode Island,44,53,WA,Washington,161,296,18421
 DE,Delaware,10,53,WA,Washington,118,230,11715
-US+FO,Total Migration-US and Foreign,96,54,WV,West Virginia,20152,34558,1298203
+US+FO,WV Total Migration-US and Foreign,96,54,WV,West Virginia,20152,34558,1298203
 US,Total Migration-US,97,54,WV,West Virginia,20068,34400,1293430
 FO,Total Migration-Foreign,98,54,WV,West Virginia,84,158,4773
-US,Total Migration-US,97,54,WV,West Virginia,17473,31025,808897
-WV,West Virginia,54,54,WV,West Virginia,635302,1276163,42373166
+US,WV Total Migration-Same State,97,54,WV,West Virginia,17473,31025,808897
+WV,WV Non-migrants,54,54,WV,West Virginia,635302,1276163,42373166
 OH,Ohio,39,54,WV,West Virginia,3184,5526,195901
 VA,Virginia,51,54,WV,West Virginia,2685,4629,156675
 PA,Pennsylvania,42,54,WV,West Virginia,1898,3065,111416
@@ -2742,11 +2742,11 @@ HI,Hawaii,15,54,WV,West Virginia,27,48,1473
 VT,Vermont,50,54,WV,West Virginia,25,34,1334
 RI,Rhode Island,44,54,WV,West Virginia,23,30,1574
 WY,Wyoming,56,54,WV,West Virginia,21,53,1131
-US+FO,Total Migration-US and Foreign,96,55,WI,Wisconsin,56923,92345,4840663
+US+FO,WI Total Migration-US and Foreign,96,55,WI,Wisconsin,56923,92345,4840663
 US,Total Migration-US,97,55,WI,Wisconsin,56642,91825,4826075
 FO,Total Migration-Foreign,98,55,WI,Wisconsin,281,520,14589
-US,Total Migration-US,97,55,WI,Wisconsin,94045,151665,6132910
-WI,Wisconsin,55,55,WI,Wisconsin,2365967,4670022,214162298
+US,WI Total Migration-Same State,97,55,WI,Wisconsin,94045,151665,6132910
+WI,WI Non-migrants,55,55,WI,Wisconsin,2365967,4670022,214162298
 IL,Illinois,17,55,WI,Wisconsin,7792,11909,531964
 MN,Minnesota,27,55,WI,Wisconsin,7559,11108,484236
 FL,Florida,12,55,WI,Wisconsin,5527,9729,872252
@@ -2798,11 +2798,11 @@ VT,Vermont,50,55,WI,Wisconsin,88,123,5743
 WV,West Virginia,54,55,WI,Wisconsin,85,156,5547
 RI,Rhode Island,44,55,WI,Wisconsin,63,118,5835
 DE,Delaware,10,55,WI,Wisconsin,63,97,8021
-US+FO,Total Migration-US and Foreign,96,56,WY,Wyoming,12423,22166,1071783
+US+FO,WY Total Migration-US and Foreign,96,56,WY,Wyoming,12423,22166,1071783
 US,Total Migration-US,97,56,WY,Wyoming,12352,22006,1067918
 FO,Total Migration-Foreign,98,56,WY,Wyoming,71,160,3865
-US,Total Migration-US,97,56,WY,Wyoming,4671,8224,280658
-WY,Wyoming,56,56,WY,Wyoming,221294,451535,26449225
+US,WY Total Migration-Same State,97,56,WY,Wyoming,4671,8224,280658
+WY,WY Non-migrants,56,56,WY,Wyoming,221294,451535,26449225
 CO,Colorado,08,56,WY,Wyoming,1822,2866,127082
 TX,Texas,48,56,WY,Wyoming,867,1744,71567
 UT,Utah,49,56,WY,Wyoming,844,1570,102536
