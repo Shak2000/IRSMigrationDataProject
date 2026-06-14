@@ -259,14 +259,8 @@ function getCountyTotals(year, key) {
 /**
  * Process one batch of rows from a state enriched CSV.
  * Populates stateFlows, stateTotals, and stateMeta.
- *
- * Schema (columns):
- * y2_state, y2_state_name, y2_statefips,
- * y1_statefips, y1_state, y1_state_name,
- * n1, n2, AGI
  */
 function processStateRows(rows, year, direction) {
-    // Ensure nested containers exist
     if (!stateFlows[year]) stateFlows[year] = {};
     if (!stateFlows[year][direction]) stateFlows[year][direction] = {};
     if (!stateTotals[year]) stateTotals[year] = {};
@@ -276,35 +270,88 @@ function processStateRows(rows, year, direction) {
     for (const row of rows) {
         const y1 = row.y1_statefips;
         const y2 = row.y2_statefips;
+        const rec = { n1: parseNum(row.n1), n2: parseNum(row.n2), AGI: parseNum(row.AGI) };
 
-        const rec = {
-            n1: parseNum(row.n1),
-            n2: parseNum(row.n2),
-            AGI: parseNum(row.AGI),
-        };
-
-        // ── Flow map entry ────────────────────────────────────────────────────
         if (!dirMap[y1]) dirMap[y1] = {};
         dirMap[y1][y2] = rec;
 
-        // ── State metadata (collect from real geography rows) ─────────────────
-        if (isRealStateFips(y2)) {
-            stateMeta[y2] = { postal: row.y2_state, name: row.y2_state_name };
-        }
-        if (isRealStateFips(y1)) {
-            stateMeta[y1] = { postal: row.y1_state, name: row.y1_state_name };
+        if (isRealStateFips(y2)) stateMeta[y2] = { postal: row.y2_state, name: row.y2_state_name };
+        if (isRealStateFips(y1)) stateMeta[y1] = { postal: row.y1_state, name: row.y1_state_name };
+
+        // Support fallback naming in case scripts output differently
+        const y1Name = row.y1_state_name || row.y1_statename || row.y1_name || '';
+        const y2Name = row.y2_state_name || row.y2_statename || row.y2_name || '';
+        const isNonMigrant = y1Name.includes('Non-migrants') || y2Name.includes('Non-migrants');
+        const isSameState1 = y1Name.includes('Total Migration-Same State');
+        const isSameState2 = y2Name.includes('Total Migration-Same State');
+
+        if (direction === 'inflow') {
+            let refFips = null;
+            let isTotal = false;
+
+            // Agnostic check: Find which side is the real state and which has the aggregate string
+            if (isRealStateFips(y2) && y1Name.includes('Total Migration-US and Foreign')) {
+                refFips = y2;
+                isTotal = true;
+            } else if (isRealStateFips(y1) && y2Name.includes('Total Migration-US and Foreign')) {
+                refFips = y1;
+                isTotal = true;
+            } else if (isRealStateFips(y2) && (isNonMigrant || isSameState1)) {
+                refFips = y2;
+            } else if (isRealStateFips(y1) && (isNonMigrant || isSameState2)) {
+                refFips = y1;
+            }
+
+            if (refFips) {
+                if (!stateTotals[year][refFips]) stateTotals[year][refFips] = {};
+
+                // base_inflow: Includes everything (Non-migrants, Same State, Total Migration) for share denominators
+                if (!stateTotals[year][refFips].base_inflow) stateTotals[year][refFips].base_inflow = { n1: 0, n2: 0, AGI: 0 };
+                stateTotals[year][refFips].base_inflow.n1 += rec.n1;
+                stateTotals[year][refFips].base_inflow.n2 += rec.n2;
+                stateTotals[year][refFips].base_inflow.AGI += rec.AGI;
+
+                // inflow: Purely migration from US/Foreign
+                if (isTotal) {
+                    if (!stateTotals[year][refFips].inflow) stateTotals[year][refFips].inflow = { n1: 0, n2: 0, AGI: 0 };
+                    stateTotals[year][refFips].inflow.n1 += rec.n1;
+                    stateTotals[year][refFips].inflow.n2 += rec.n2;
+                    stateTotals[year][refFips].inflow.AGI += rec.AGI;
+                }
+            }
         }
 
-        // ── Totals: IRS aggregate rows ────────────────────────────────────────
-        // Inflow  file: the row where y1 = FIPS_TOTAL gives the total inflow to y2.
-        // Outflow file: the row where y2 = FIPS_TOTAL gives the total outflow from y1.
-        if (direction === 'inflow' && y1 === FIPS_TOTAL && isRealStateFips(y2)) {
-            if (!stateTotals[year][y2]) stateTotals[year][y2] = {};
-            stateTotals[year][y2].inflow = rec;
-        }
-        if (direction === 'outflow' && y2 === FIPS_TOTAL && isRealStateFips(y1)) {
-            if (!stateTotals[year][y1]) stateTotals[year][y1] = {};
-            stateTotals[year][y1].outflow = rec;
+        if (direction === 'outflow') {
+            let refFips = null;
+            let isTotal = false;
+
+            if (isRealStateFips(y1) && y2Name.includes('Total Migration-US and Foreign')) {
+                refFips = y1;
+                isTotal = true;
+            } else if (isRealStateFips(y2) && y1Name.includes('Total Migration-US and Foreign')) {
+                refFips = y2;
+                isTotal = true;
+            } else if (isRealStateFips(y1) && (isNonMigrant || isSameState2)) {
+                refFips = y1;
+            } else if (isRealStateFips(y2) && (isNonMigrant || isSameState1)) {
+                refFips = y2;
+            }
+
+            if (refFips) {
+                if (!stateTotals[year][refFips]) stateTotals[year][refFips] = {};
+
+                if (!stateTotals[year][refFips].base_outflow) stateTotals[year][refFips].base_outflow = { n1: 0, n2: 0, AGI: 0 };
+                stateTotals[year][refFips].base_outflow.n1 += rec.n1;
+                stateTotals[year][refFips].base_outflow.n2 += rec.n2;
+                stateTotals[year][refFips].base_outflow.AGI += rec.AGI;
+
+                if (isTotal) {
+                    if (!stateTotals[year][refFips].outflow) stateTotals[year][refFips].outflow = { n1: 0, n2: 0, AGI: 0 };
+                    stateTotals[year][refFips].outflow.n1 += rec.n1;
+                    stateTotals[year][refFips].outflow.n2 += rec.n2;
+                    stateTotals[year][refFips].outflow.AGI += rec.AGI;
+                }
+            }
         }
     }
 }
@@ -312,11 +359,6 @@ function processStateRows(rows, year, direction) {
 /**
  * Process one batch of rows from a county enriched CSV.
  * Populates countyFlows, countyTotals, and countyMeta.
- *
- * Schema (columns):
- * y2_state, y2_state_name, y2_statefips, y2_countyfips, y2_county_name,
- * y1_statefips, y1_countyfips, y1_state, y1_state_name, y1_county_name,
- * n1, n2, AGI
  */
 function processCountyRows(rows, year, direction) {
     if (!countyFlows[year]) countyFlows[year] = {};
@@ -326,57 +368,88 @@ function processCountyRows(rows, year, direction) {
     const dirMap = countyFlows[year][direction];
 
     for (const row of rows) {
-        const y1sf = row.y1_statefips;
-        const y1cf = row.y1_countyfips;
-        const y2sf = row.y2_statefips;
-        const y2cf = row.y2_countyfips;
-        const y1Key = `${y1sf}_${y1cf}`;
-        const y2Key = `${y2sf}_${y2cf}`;
+        const y1sf = row.y1_statefips, y1cf = row.y1_countyfips;
+        const y2sf = row.y2_statefips, y2cf = row.y2_countyfips;
+        const y1Key = `${y1sf}_${y1cf}`, y2Key = `${y2sf}_${y2cf}`;
+        const rec = { n1: parseNum(row.n1), n2: parseNum(row.n2), AGI: parseNum(row.AGI) };
 
-        const rec = {
-            n1: parseNum(row.n1),
-            n2: parseNum(row.n2),
-            AGI: parseNum(row.AGI),
-        };
-
-        // ── Flow map entry ────────────────────────────────────────────────────
         if (!dirMap[y1Key]) dirMap[y1Key] = {};
         dirMap[y1Key][y2Key] = rec;
 
-        // ── County metadata (real geographies only) ───────────────────────────
-        if (isRealCounty(y2sf, y2cf)) {
-            countyMeta[y2Key] = {
-                statefips: y2sf,
-                countyfips: y2cf,
-                countyName: row.y2_county_name,
-                stateName: row.y2_state_name,
-                statePostal: row.y2_state,
-            };
-        }
-        if (isRealCounty(y1sf, y1cf)) {
-            countyMeta[y1Key] = {
-                statefips: y1sf,
-                countyfips: y1cf,
-                countyName: row.y1_county_name,
-                stateName: row.y1_state_name,
-                statePostal: row.y1_state,
-            };
+        if (isRealCounty(y2sf, y2cf)) countyMeta[y2Key] = { statefips: y2sf, countyfips: y2cf, countyName: row.y2_county_name, stateName: row.y2_state_name, statePostal: row.y2_state };
+        if (isRealCounty(y1sf, y1cf)) countyMeta[y1Key] = { statefips: y1sf, countyfips: y1cf, countyName: row.y1_county_name, stateName: row.y1_state_name, statePostal: row.y1_state };
+
+        const y1Name = row.y1_county_name || row.y1_countyname || '';
+        const y2Name = row.y2_county_name || row.y2_countyname || '';
+        const isNonMigrant = y1Name.includes('Non-migrants') || y2Name.includes('Non-migrants');
+
+        if (direction === 'inflow') {
+            let refKey = null;
+            let isTotal = false;
+
+            // Agnostic check using 'Total Migration' to bypass 30-char IRS truncation limits
+            if (isRealCounty(y2sf, y2cf) && y1Name.includes('Total Migration')) {
+                refKey = y2Key;
+                isTotal = true;
+            } else if (isRealCounty(y1sf, y1cf) && y2Name.includes('Total Migration')) {
+                refKey = y1Key;
+                isTotal = true;
+            } else if (isRealCounty(y1sf, y1cf) && isNonMigrant) {
+                refKey = y1Key;
+            } else if (isRealCounty(y2sf, y2cf) && isNonMigrant) {
+                refKey = y2Key;
+            }
+
+            if (refKey) {
+                if (!countyTotals[year][refKey]) countyTotals[year][refKey] = {};
+
+                // base_inflow: Includes everything for share denominators
+                if (!countyTotals[year][refKey].base_inflow) countyTotals[year][refKey].base_inflow = { n1: 0, n2: 0, AGI: 0 };
+                countyTotals[year][refKey].base_inflow.n1 += rec.n1;
+                countyTotals[year][refKey].base_inflow.n2 += rec.n2;
+                countyTotals[year][refKey].base_inflow.AGI += rec.AGI;
+
+                // inflow: Purely migration from US/Foreign
+                if (isTotal) {
+                    if (!countyTotals[year][refKey].inflow) countyTotals[year][refKey].inflow = { n1: 0, n2: 0, AGI: 0 };
+                    countyTotals[year][refKey].inflow.n1 += rec.n1;
+                    countyTotals[year][refKey].inflow.n2 += rec.n2;
+                    countyTotals[year][refKey].inflow.AGI += rec.AGI;
+                }
+            }
         }
 
-        // ── Totals: IRS aggregate rows ────────────────────────────────────────
-        // Inflow  file: y1_statefips="96" AND y1_countyfips="000" → total inflow to y2 county.
-        // Outflow file: y2_statefips="96" AND y2_countyfips="000" → total outflow from y1 county.
-        if (direction === 'inflow'
-            && y1sf === FIPS_TOTAL && y1cf === '000'
-            && isRealCounty(y2sf, y2cf)) {
-            if (!countyTotals[year][y2Key]) countyTotals[year][y2Key] = {};
-            countyTotals[year][y2Key].inflow = rec;
-        }
-        if (direction === 'outflow'
-            && y2sf === FIPS_TOTAL && y2cf === '000'
-            && isRealCounty(y1sf, y1cf)) {
-            if (!countyTotals[year][y1Key]) countyTotals[year][y1Key] = {};
-            countyTotals[year][y1Key].outflow = rec;
+        if (direction === 'outflow') {
+            let refKey = null;
+            let isTotal = false;
+
+            if (isRealCounty(y1sf, y1cf) && y2Name.includes('Total Migration')) {
+                refKey = y1Key;
+                isTotal = true;
+            } else if (isRealCounty(y2sf, y2cf) && y1Name.includes('Total Migration')) {
+                refKey = y2Key;
+                isTotal = true;
+            } else if (isRealCounty(y1sf, y1cf) && isNonMigrant) {
+                refKey = y1Key;
+            } else if (isRealCounty(y2sf, y2cf) && isNonMigrant) {
+                refKey = y2Key;
+            }
+
+            if (refKey) {
+                if (!countyTotals[year][refKey]) countyTotals[year][refKey] = {};
+
+                if (!countyTotals[year][refKey].base_outflow) countyTotals[year][refKey].base_outflow = { n1: 0, n2: 0, AGI: 0 };
+                countyTotals[year][refKey].base_outflow.n1 += rec.n1;
+                countyTotals[year][refKey].base_outflow.n2 += rec.n2;
+                countyTotals[year][refKey].base_outflow.AGI += rec.AGI;
+
+                if (isTotal) {
+                    if (!countyTotals[year][refKey].outflow) countyTotals[year][refKey].outflow = { n1: 0, n2: 0, AGI: 0 };
+                    countyTotals[year][refKey].outflow.n1 += rec.n1;
+                    countyTotals[year][refKey].outflow.n2 += rec.n2;
+                    countyTotals[year][refKey].outflow.AGI += rec.AGI;
+                }
+            }
         }
     }
 }
@@ -631,54 +704,44 @@ function getMapValue(regionKey, year, metricKey, level, primaryRegion) {
 
 function _getStateMapValue(fips, year, metricKey, primaryFips) {
     if (!primaryFips) {
-        // ── Mode A: default view ───────────────────────────────────────────────
         const t = stateTotals[year]?.[fips];
-        const nat = nationalTotals[year];
         return computeMetric(metricKey, {
             inflow: t?.inflow ?? null,
             outflow: t?.outflow ?? null,
-            totalInflow: nat?.inflow ?? null,
-            totalOutflow: nat?.outflow ?? null,
+            totalInflow: t?.base_inflow ?? null,
+            totalOutflow: t?.base_outflow ?? null,
         });
     } else {
-        // ── Mode B: primary-selected view ─────────────────────────────────────
-        // inflow  = people who moved FROM fips INTO primaryFips
         const inflow = getStateFlow(year, 'inflow', fips, primaryFips);
-        // outflow = people who moved FROM primaryFips INTO fips
         const outflow = getStateFlow(year, 'outflow', primaryFips, fips);
         const pt = stateTotals[year]?.[primaryFips];
         return computeMetric(metricKey, {
             inflow,
             outflow,
-            totalInflow: pt?.inflow ?? null,
-            totalOutflow: pt?.outflow ?? null,
+            totalInflow: pt?.base_inflow ?? null,
+            totalOutflow: pt?.base_outflow ?? null,
         });
     }
 }
 
-function _getCountyMapValue(key, year, metricKey, primaryKey) {
-    if (!primaryKey) {
-        // ── Mode A: default view ───────────────────────────────────────────────
-        // National county totals are not precomputed (45 MB county data may not
-        // be loaded yet). Use the county's own total as both value and denominator;
-        // share metrics will be relative to the county's own total migration.
-        const t = countyTotals[year]?.[key];
+function _getCountyMapValue(countyKey, year, metricKey, primaryCountyKey) {
+    if (!primaryCountyKey) {
+        const t = countyTotals[year]?.[countyKey];
         return computeMetric(metricKey, {
             inflow: t?.inflow ?? null,
             outflow: t?.outflow ?? null,
-            totalInflow: t?.inflow ?? null,
-            totalOutflow: t?.outflow ?? null,
+            totalInflow: t?.base_inflow ?? null,
+            totalOutflow: t?.base_outflow ?? null,
         });
     } else {
-        // ── Mode B: primary-selected view ─────────────────────────────────────
-        const inflow = getCountyFlow(year, 'inflow', key, primaryKey);
-        const outflow = getCountyFlow(year, 'outflow', primaryKey, key);
-        const pt = countyTotals[year]?.[primaryKey];
+        const inflow = getCountyFlow(year, 'inflow', countyKey, primaryCountyKey);
+        const outflow = getCountyFlow(year, 'outflow', primaryCountyKey, countyKey);
+        const pt = countyTotals[year]?.[primaryCountyKey];
         return computeMetric(metricKey, {
             inflow,
             outflow,
-            totalInflow: pt?.inflow ?? null,
-            totalOutflow: pt?.outflow ?? null,
+            totalInflow: pt?.base_inflow ?? null,
+            totalOutflow: pt?.base_outflow ?? null,
         });
     }
 }
