@@ -154,11 +154,16 @@ def enrich(
                 y1_state = row.get("y1_state", "")
                 y1_state_name = row.get("y1_state_name", "")
 
-            # Track any codes that could not be resolved at all (already padded)
-            if not y2_state:
-                missing.add(("y2", y2_sf))
-            if not y1_state:
-                missing.add(("y1", y1_sf))
+            # If the raw data contained "Non-migrants", "Total Migration-Same State", 
+            # or "Total Migration-US and Foreign", ensure it is NOT overwritten by the lookup.
+            if direction == "inflow":
+                raw_y1_name = row.get("y1_state_name", "")
+                if any(sub in raw_y1_name for sub in ["Non-migrants", "Total Migration-Same State", "Total Migration-US and Foreign"]):
+                    y1_state_name = raw_y1_name
+            elif direction == "outflow":
+                raw_y2_name = row.get("y2_state_name", "")
+                if any(sub in raw_y2_name for sub in ["Non-migrants", "Total Migration-Same State", "Total Migration-US and Foreign"]):
+                    y2_state_name = raw_y2_name
 
             writer.writerow({
                 "y2_state":      y2_state,

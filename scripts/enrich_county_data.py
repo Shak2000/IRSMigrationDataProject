@@ -231,41 +231,44 @@ def enrich(
                 y2_state, y2_state_name, y2_county_name = resolve(
                     y2_sf, y2_cf, county_lookup, state_lookup
                 )
-                # y1 (origin) has postal + county name in the raw file, but the
-                # IRS truncates long county names. Prefer the full name from the
-                # lookup; fall back to the raw value only if lookup has no entry.
                 y1_state = row.get("y1_state", "")
                 y1_raw_county = row.get("y1_countyname", "")
-                _, _, y1_county_name_full = resolve(
-                    y1_sf, y1_cf, county_lookup, state_lookup
-                )
-                y1_county_name = y1_county_name_full if y1_county_name_full else y1_raw_county
-                _, y1_state_name = state_lookup.get(
-                    y1_sf, (y1_state, "")
-                )
-                # Fallback state name: use postal if name lookup failed
-                if not y1_state_name:
-                    y1_state_name = row.get("y1_state_name", "")
+                
+                # --- TRUNCATION-SAFE FIX ---
+                # Shortened to "Total Migration" to catch truncated IRS county strings
+                if any(sub in y1_raw_county for sub in ["Non-migrants", "Total Migration"]):
+                    y1_county_name = y1_raw_county
+                    _, y1_state_name = state_lookup.get(y1_sf, (y1_state, ""))
+                    if not y1_state_name:
+                        y1_state_name = row.get("y1_state_name", "")
+                else:
+                    _, _, y1_county_name_full = resolve(y1_sf, y1_cf, county_lookup, state_lookup)
+                    y1_county_name = y1_county_name_full if y1_county_name_full else y1_raw_county
+                    _, y1_state_name = state_lookup.get(y1_sf, (y1_state, ""))
+                    if not y1_state_name:
+                        y1_state_name = row.get("y1_state_name", "")
 
             else:  # outflow
                 # y1 (origin) is missing — derive from lookup
                 y1_state, y1_state_name, y1_county_name = resolve(
                     y1_sf, y1_cf, county_lookup, state_lookup
                 )
-                # y2 (destination) has postal + county name in the raw file, but
-                # the IRS truncates long county names. Prefer the full name from
-                # the lookup; fall back to the raw value only if lookup has no entry.
                 y2_state = row.get("y2_state", "")
                 y2_raw_county = row.get("y2_countyname", "")
-                _, _, y2_county_name_full = resolve(
-                    y2_sf, y2_cf, county_lookup, state_lookup
-                )
-                y2_county_name = y2_county_name_full if y2_county_name_full else y2_raw_county
-                _, y2_state_name = state_lookup.get(
-                    y2_sf, (y2_state, "")
-                )
-                if not y2_state_name:
-                    y2_state_name = row.get("y2_state_name", "")
+                
+                # --- TRUNCATION-SAFE FIX ---
+                # Shortened to "Total Migration" to catch truncated IRS county strings
+                if any(sub in y2_raw_county for sub in ["Non-migrants", "Total Migration"]):
+                    y2_county_name = y2_raw_county
+                    _, y2_state_name = state_lookup.get(y2_sf, (y2_state, ""))
+                    if not y2_state_name:
+                        y2_state_name = row.get("y2_state_name", "")
+                else:
+                    _, _, y2_county_name_full = resolve(y2_sf, y2_cf, county_lookup, state_lookup)
+                    y2_county_name = y2_county_name_full if y2_county_name_full else y2_raw_county
+                    _, y2_state_name = state_lookup.get(y2_sf, (y2_state, ""))
+                    if not y2_state_name:
+                        y2_state_name = row.get("y2_state_name", "")
 
             # Track unresolved codes (already padded)
             if not y2_state:
