@@ -923,6 +923,7 @@ async function renderMap() {
 
     // Array to hold [feature, numeric_value] tuples so we don't recalculate
     const valueTuples = [];
+    const validValues = [];
     let minVal = Infinity;
     let maxVal = -Infinity;
 
@@ -930,6 +931,7 @@ async function renderMap() {
         const val = getMapValue(f.fipsKey, year, appState.metric, appState.level, appState.primaryRegion);
         valueTuples.push([f, val]);
         if (val !== null && Number.isFinite(val)) {
+            validValues.push(val);
             if (val < minVal) minVal = val;
             if (val > maxVal) maxVal = val;
         }
@@ -938,65 +940,114 @@ async function renderMap() {
     // ── Build D3 Color Scale ─────────────────────────────────────────────────────
     let colorScale;
     let legendGradientCss = '';
+    let tickValues = [];
 
-    if (minVal === Infinity) {
+    if (validValues.length === 0) {
         // Fallback if absolutely no data exists for current filters
         minVal = 0;
         maxVal = 0;
         colorScale = () => 'var(--accent-bg)';
         legendGradientCss = 'var(--accent-bg)';
+        tickValues = [];
     } else {
         if (metricMeta.direction === 'both') {
-            // Diverging scale for net metrics (Negative = red/orange, 0 = neutral, Positive = green/teal)
-            // Ensure the scale is visually balanced around zero by taking the max absolute bound.
-            const absMax = Math.max(Math.abs(minVal), Math.abs(maxVal));
-            // Avoid divide-by-zero if absMax is 0
-            const domainMax = absMax > 0 ? absMax : 1;
-
-            // Use 11 discrete parts of the RdYlGn scheme
+            // Diverging quantile scale
             const divColors = d3.schemeRdYlGn[11];
 
-            colorScale = d3.scaleQuantize()
-                .domain([-domainMax, domainMax])
+            colorScale = d3.scaleQuantile()
+                .domain(validValues)
                 .range(divColors);
-
-            // Update bounds for legend display to reflect the balanced domain
-            minVal = -domainMax;
-            maxVal = domainMax;
 
             // Generate a hard-stepped gradient for the legend
             legendGradientCss = 'linear-gradient(to right, ' + divColors.map((c, i) => `${c} ${(i / 11) * 100}%, ${c} ${((i + 1) / 11) * 100}%`).join(', ') + ')';
 
         } else {
-            // Sequential scale for inflow/outflow/avg
-            // Domain from 0 (or min if > 0) to max
-            const domainMin = minVal < 0 ? minVal : 0;
-            const domainMax = maxVal > domainMin ? maxVal : domainMin + 1;
-
-            // d3.schemePuBu only defines discrete arrays up to 9 items.
-            // We quantize the continuous interpolator to get exactly 11 distinct colors.
+            // Sequential quantile scale
             const seqColors = d3.quantize(d3.interpolatePuBu, 11);
 
-            colorScale = d3.scaleQuantize()
-                .domain([domainMin, domainMax])
+            colorScale = d3.scaleQuantile()
+                .domain(validValues)
                 .range(seqColors);
-
-            // Update bounds for legend display
-            minVal = domainMin;
-            maxVal = domainMax;
 
             // Generate a hard-stepped gradient for the legend
             legendGradientCss = 'linear-gradient(to right, ' + seqColors.map((c, i) => `${c} ${(i / 11) * 100}%, ${c} ${((i + 1) / 11) * 100}%`).join(', ') + ')';
         }
+
+        // Quantiles array contains 10 boundaries for 11 buckets.
+        // We add min and max to get all 12 bounding numbers.
+        tickValues = [minVal, ...colorScale.quantiles(), maxVal];
     }
 
     // ── Update Legend UI ─────────────────────────────────────────────────────────
     const legendEl = document.getElementById('map-legend');
-    if (minVal !== Infinity) {
-        document.getElementById('legend-min').textContent = formatMetricValue(minVal, appState.metric);
-        document.getElementById('legend-max').textContent = formatMetricValue(maxVal, appState.metric);
-        document.getElementById('legend-gradient').style.background = legendGradientCss;
+    if (validValues.length > 0) {
+        const gradientEl = document.getElementById('legend-gradient');
+        if (gradientEl) {
+            gradientEl.style.background = legendGradientCss;
+            // Expand the bar vertically and enforce its presence
+            gradientEl.style.height = '16px';
+            gradientEl.style.minHeight = '16px';
+            gradientEl.style.width = '100%';
+            gradientEl.style.borderRadius = '4px';
+            gradientEl.style.display = 'block';
+            gradientEl.style.flexShrink = '0';
+        }
+
+        // Hide standard min/max text elements as we will display all boundaries dynamically
+        const oldMin = document.getElementById('legend-min');
+        const oldMax = document.getElementById('legend-max');
+        if (oldMin) oldMin.style.display = 'none';
+        if (oldMax) oldMax.style.display = 'none';
+
+        // Create or refresh the tick container below the gradient
+        let tickContainer = document.getElementById('legend-ticks');
+        if (!tickContainer) {
+            tickContainer = document.createElement('div');
+            tickContainer.id = 'legend-ticks';
+            tickContainer.style.position = 'relative';
+
+            if (gradientEl) {
+                gradientEl.parentNode.insertBefore(tickContainer, gradientEl.nextSibling);
+            } else {
+                legendEl.appendChild(tickContainer);
+            }
+        }
+
+        // Adjust styling for horizontal numbers
+        tickContainer.style.height = '24px';
+        tickContainer.style.marginTop = '6px';
+        tickContainer.style.width = '100%';
+        tickContainer.style.flexShrink = '0';
+
+        tickContainer.innerHTML = '';
+        tickValues.forEach((val, i) => {
+            const tick = document.createElement('span');
+            tick.textContent = formatMetricValue(val, appState.metric);
+            tick.style.position = 'absolute';
+            tick.style.left = `${(i / 11) * 100}%`;
+
+            // Keep numbers horizontal. Shift the first and last ones inward 
+            // so they don't get cut off by the edges of the screen.
+            if (i === 0) {
+                tick.style.transform = 'translateX(0)';
+            } else if (i === tickValues.length - 1) {
+                tick.style.transform = 'translateX(-100%)';
+            } else {
+                tick.style.transform = 'translateX(-50%)';
+            }
+
+            tick.style.fontSize = '0.7rem';
+            tick.style.whiteSpace = 'nowrap';
+            tickContainer.appendChild(tick);
+        });
+
+        // Stretch the legend full width and ensure it steals vertical space from the map
         legendEl.style.display = 'flex';
+        legendEl.style.flexDirection = 'column';
+        legendEl.style.width = '100%';
+        legendEl.style.boxSizing = 'border-box';
+        legendEl.style.paddingBottom = '10px';
+        legendEl.style.flexShrink = '0';
     } else {
         legendEl.style.display = 'none';
     }
