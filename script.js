@@ -792,13 +792,15 @@ function getMetricLabel(metricKey) {
  * All UI controls read from and write to this object; render() reads it.
  */
 const appState = {
-    level: 'state',   // 'state' | 'county'
-    yearIndex: 2,          // 0 → YEARS[0] ('2021'), 1 → '2122', 2 → '2223'
-    metric: 'pop_inflow', // metric key (see computeMetric)
-    primaryRegion: null,       // FIPS key of the selected primary region, or null
-    secondaryRegion: null,       // FIPS key of the secondary region, or null
-    flowType: 'total',    // line-chart flow-type dropdown value
-    zoomLevel: 1, // '1' to '5'
+    level: 'state',
+    yearIndex: 2,
+    metric: 'pop_inflow',
+    primaryRegion: null,
+    secondaryRegion: null,
+    flowType: 'total',
+    zoomLevel: 1,
+    panX: 0, // NEW: Horizontal pan (-100 to 100)
+    panY: 0, // NEW: Vertical pan (-100 to 100)
 };
 
 /** Convenience: return the current year tag string. */
@@ -1159,11 +1161,17 @@ async function renderMap() {
     const centerX = width / 2;
     const centerY = height / 2;
 
+    // Calculate panning offsets. 
+    // We invert the sign so "Right" slider moves the camera right (map moves left).
+    // Multiply by zoomFactor to keep panning speed feeling consistent while zoomed in.
+    const panTranslateX = -(appState.panX / 100) * (width / 2) * zoomFactor;
+    const panTranslateY = -(appState.panY / 100) * (height / 2) * zoomFactor;
+
     mapProjection
         .scale(baseScale * zoomFactor)
         .translate([
-            centerX + (baseTranslate[0] - centerX) * zoomFactor,
-            centerY + (baseTranslate[1] - centerY) * zoomFactor
+            centerX + (baseTranslate[0] - centerX) * zoomFactor + panTranslateX,
+            centerY + (baseTranslate[1] - centerY) * zoomFactor + panTranslateY
         ]);
 
     mapPath = d3.geoPath(mapProjection);
@@ -1439,6 +1447,42 @@ function wireControls() {
             renderMap(); // Only need to re-render map, not chart
         });
     }
+
+    // ── Pan X slider ──────────────────────────────────────────────────────────
+    const panXSlider = document.getElementById('pan-x-slider');
+    const panXLabel = document.getElementById('pan-x-display');
+
+    if (panXSlider) {
+        panXSlider.addEventListener('input', () => {
+            appState.panX = +panXSlider.value;
+            panXLabel.textContent = `${appState.panX > 0 ? '+' : ''}${appState.panX}`;
+
+            const min = +panXSlider.min;
+            const max = +panXSlider.max;
+            const pct = ((appState.panX - min) / (max - min)) * 100;
+            panXSlider.style.setProperty('--pan-x-pct', `${pct}`);
+
+            renderMap(); // Only need to re-render map
+        });
+    }
+
+    // ── Pan Y slider ──────────────────────────────────────────────────────────
+    const panYSlider = document.getElementById('pan-y-slider');
+    const panYLabel = document.getElementById('pan-y-display');
+
+    if (panYSlider) {
+        panYSlider.addEventListener('input', () => {
+            appState.panY = +panYSlider.value;
+            panYLabel.textContent = `${appState.panY > 0 ? '+' : ''}${appState.panY}`;
+
+            const min = +panYSlider.min;
+            const max = +panYSlider.max;
+            const pct = ((appState.panY - min) / (max - min)) * 100;
+            panYSlider.style.setProperty('--pan-y-pct', `${pct}`);
+
+            renderMap(); // Only need to re-render map
+        });
+    }
 }
 
 /**
@@ -1486,6 +1530,27 @@ function initUI() {
         const zoomMax = +zoomSlider.max;
         const zoomPct = ((appState.zoomLevel - zoomMin) / (zoomMax - zoomMin)) * 100;
         zoomSlider.style.setProperty('--zoom-pct', `${zoomPct}%`);
+    }
+
+    // ── Pan sliders ───────────────────────────────────────────────────────────
+    const panXSlider = document.getElementById('pan-x-slider');
+    const panXLabel = document.getElementById('pan-x-display');
+    if (panXSlider && panXLabel) {
+        panXSlider.value = appState.panX;
+        panXLabel.textContent = `${appState.panX > 0 ? '+' : ''}${appState.panX}`;
+        const min = +panXSlider.min;
+        const max = +panXSlider.max;
+        panXSlider.style.setProperty('--pan-x-pct', `${((appState.panX - min) / (max - min)) * 100}`);
+    }
+
+    const panYSlider = document.getElementById('pan-y-slider');
+    const panYLabel = document.getElementById('pan-y-display');
+    if (panYSlider && panYLabel) {
+        panYSlider.value = appState.panY;
+        panYLabel.textContent = `${appState.panY > 0 ? '+' : ''}${appState.panY}`;
+        const min = +panYSlider.min;
+        const max = +panYSlider.max;
+        panYSlider.style.setProperty('--pan-y-pct', `${((appState.panY - min) / (max - min)) * 100}`);
     }
 
     // ── Selection sidebar ─────────────────────────────────────────────────────
