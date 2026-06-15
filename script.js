@@ -55,7 +55,7 @@ const SPECIAL_STATE_FIPS = new Set(['57', '58', '59', '96', '97', '98']);
  * When combined with a real state FIPS, these are aggregate, not real counties.
  * When combined with a special state FIPS (96/97/98/57) they are also aggregate.
  */
-const SPECIAL_COUNTY_FIPS = new Set(['000', '001', '003']);
+const SPECIAL_COUNTY_FIPS = new Set(['000']);
 
 /**
  * File manifest.
@@ -215,7 +215,7 @@ function isRealStateFips(fips) {
  * i.e. neither the state FIPS nor the county FIPS is an IRS aggregate code.
  */
 function isRealCounty(sf, cf) {
-    return isRealStateFips(sf) && !SPECIAL_COUNTY_FIPS.has(cf);
+    return isRealStateFips(sf) && !SPECIAL_COUNTY_FIPS.has(cf) && !cf.startsWith('AGG');
 }
 
 /**

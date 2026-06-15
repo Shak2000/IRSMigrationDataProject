@@ -128,38 +128,25 @@ def resolve(
     county_lookup: dict[tuple[str, str], tuple[str, str, str]],
     state_lookup: dict[str, tuple[str, str]],
 ) -> tuple[str, str, str]:
-    """
-    Return (state_postal, state_name, county_name) for a (state, county) pair.
-
-    Handles:
-    - Normal county rows: look up (sf, cf) in county_lookup (covers all
-      counties in both vintages, including CT planning regions 110–190).
-    - Special IRS state codes (96/97/98/57): use SPECIAL_STATE_FIPS labels.
-    - Special IRS county aggregate codes (000/001/003): use SPECIAL_COUNTY_FIPS
-      labels with state info resolved from state_lookup. Note: these are IRS
-      aggregate codes — they are checked only after the special-state-FIPS guard
-      so they do not interfere with real county lookups.
-    """
     sf = raw_state_fips.strip().zfill(2)
     cf = raw_county_fips.strip().zfill(3)
 
-    # Special state aggregate codes
+    # 1. Special state aggregate codes (96, 97, 98, 57)
     if sf in SPECIAL_STATE_FIPS:
         postal, state_name = SPECIAL_STATE_FIPS[sf]
         county_label = SPECIAL_COUNTY_FIPS.get(cf, f"Aggregate (county {int(cf)})")
         return postal, state_name, county_label
 
-    # Real state, special county aggregate
-    if cf in SPECIAL_COUNTY_FIPS:
+    # 2. Real state, special state-wide aggregate (000)
+    if cf == "000":
         postal, state_name = state_lookup.get(sf, ("", ""))
-        return postal, state_name, SPECIAL_COUNTY_FIPS[cf]
+        return postal, state_name, SPECIAL_COUNTY_FIPS["000"]
 
-    # Normal lookup
+    # 3. Normal lookup (001 and 003 now safely pass through)
     result = county_lookup.get((sf, cf))
     if result:
         return result
 
-    # Unknown — return empty strings; caller will warn
     return "", "", ""
 
 
