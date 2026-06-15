@@ -333,31 +333,44 @@ any visuals.
 
 ---
 
-## Phase 6 — Line Graph
+## Phase 6 — Line Graph: Individual Flows
 
-**Goal:** Render the supplementary time-series line chart on the right panel.
+**Goal:** Render the supplementary time-series line chart for flows to or from a single state or county below the map.
 
 ### Milestone 6.1 — Chart Scaffold
 
-- [ ] Create an SVG inside `#linechart` with margins for axes and labels.
+- [ ] Create an SVG below the map.
 - [ ] Define `x` scale as `d3.scaleLinear` over available years; `y` scale as `d3.scaleLinear` over
   value range.
 - [ ] Render axes with `d3.axisBottom` and `d3.axisLeft`.
 
 ### Milestone 6.2 — No-Selection State
 
-- [ ] When `primaryRegion === null`, overlay a centered placeholder message: *"Select a region on the
+- [ ] When `individualRegion === null`, overlay a centered placeholder message: *"Select a region on the
   map to see trends over time."*
 
-### Milestone 6.3 — Primary Only State (Aggregate Trend)
+### Milestone 6.3 — Selection State
 
-- [ ] Show the secondary flow-type dropdown (Total flow, Total U.S. flow, Total foreign flow, Total
-  same-state flow, Total different-state flow [county only], Total non-movers).
-- [ ] Plot a single line representing the selected flow type for the primary region across all years.
+- [ ] Show the flow-type dropdown allowing the user to select any flow statistic from the list in SPECS.md.
+- [ ] Plot a single line representing the selected flow type for the individual region across all years.
 - [ ] Animate the line using `stroke-dasharray` / `stroke-dashoffset` on initial render.
 - [ ] Add circular data-point markers at each year; on hover, show a tooltip with the exact value.
 
-### Milestone 6.4 — Primary + Secondary State (Pairwise Trend)
+## Phase 7 – Line Graph: Pair Flows
+
+### Milestone 7.1 — Chart Scaffold
+
+- [ ] Create an SVG below the individual flow line graph.
+- [ ] Define `x` scale as `d3.scaleLinear` over available years; `y` scale as `d3.scaleLinear` over
+  value range.
+- [ ] Render axes with `d3.axisBottom` and `d3.axisLeft`.
+
+### Milestone 7.2 — No-Selection State
+
+- [ ] When `pairPrimaryRegion === null || pairSecondaryRegion === null`, overlay a centered placeholder message: *"Select a region on the
+  map to see trends over time."*
+
+### Milestone 7.3 — Double Selection State
 
 - [ ] Hide the flow-type dropdown.
 - [ ] Plot the migration flow between the primary and secondary region across all years.
@@ -366,31 +379,31 @@ any visuals.
 
 ---
 
-## Phase 7 — Polish, Accessibility & Validation
+## Phase 8 — Polish, Accessibility & Validation
 
 **Goal:** Final pass for quality, performance, and usability.
 
-### Milestone 7.1 — Micro-Animations & UX Polish
+### Milestone 8.1 — Micro-Animations & UX Polish
 
 - [ ] Animated map load: regions fade in with a staggered `delay` on first render.
 - [ ] Line chart path draws itself in on appearance.
 - [ ] Slider year indicator updates a visible numeric label in real time.
 - [ ] Metric dropdown uses a custom-styled `<select>` grouped by metric category.
 
-### Milestone 7.2 — Accessibility
+### Milestone 8.2 — Accessibility
 
 - [ ] All interactive elements have `aria-label` attributes.
 - [ ] Color scales are supplemented with pattern fills (optional hatching) for colorblind accessibility.
 - [ ] Keyboard navigation: Tab order through controls → map (arrow keys to move selection) → line chart.
 
-### Milestone 7.3 — Performance
+### Milestone 8.3 — Performance
 
 - [ ] County-level data (~90k rows × 4 files) is the main bottleneck. Strategies:
   - [ ] Load county data lazily (only when the user switches to County mode).
   - [ ] Precompute and cache aggregated totals per county on load.
   - [ ] Throttle slider `input` events with `d3.timer` / `requestAnimationFrame`.
 
-### Milestone 7.4 — Final Validation Checklist
+### Milestone 8.4 — Final Validation Checklist
 
 - [ ] All 22 metrics render correctly for both state and county modes
 - [ ] Selection states (none / primary / primary+secondary) all work as specified
@@ -461,9 +474,9 @@ IRSMigrationDataProject/
 ## Execution Order
 
 ```
-Phase 1  →  Phase 2  →  Phase 3  →  Phase 4  → Phase 5  →  Phase 6  →  Phase 7
-(Data)      (Scaffold)  (D3 Core)   (Map)      (Data)      (Chart)     (Polish)
+Phase 1  →  Phase 2  →  Phase 3  →  Phase 4  →  Phase 5  →  Phase 6    →  Phase 7  →  Phase 8
+(Data)      (Scaffold)  (D3 Core)   (Map)       (Data)      (Individual)  (Pair)      (Polish)
 ```
 
-Phases 2 and 3 can be developed in parallel once Phase 1 is complete. Phases 5 and 6 depend on
+Phases 2 and 3 can be developed in parallel once Phase 1 is complete. Phases 5, 6, and 7 depend on
 Phase 3 being complete.
