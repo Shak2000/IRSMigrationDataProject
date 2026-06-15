@@ -367,12 +367,11 @@ any visuals.
 
 ### Milestone 7.2 — No-Selection State
 
-- [ ] When `pairPrimaryRegion === null || pairSecondaryRegion === null`, overlay a centered placeholder message: *"Select a region on the
-  map to see trends over time."*
+- [ ] When `pairPrimaryRegion === null || pairSecondaryRegion === null`, overlay a centered placeholder message: *"Select a region on the map to see trends over time."*
 
 ### Milestone 7.3 — Double Selection State
 
-- [ ] Hide the flow-type dropdown.
+- [ ] Show the flow-type dropdown allowing the user to select any flow statistic from the list in SPECS.md.
 - [ ] Plot the migration flow between the primary and secondary region across all years.
 - [ ] Label the line with the secondary region name at the endpoint.
 - [ ] Smoothly transition the line when either selection changes.
