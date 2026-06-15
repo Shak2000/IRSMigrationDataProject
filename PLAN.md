@@ -299,20 +299,20 @@ any visuals.
 
 ### Milestone 4.3 — Selection Logic
 
-- [ ] **Click to select primary region:** clicking a region with no primary selected makes it the
+- [x] **Click to select primary region:** clicking a region with no primary selected makes it the
   primary; clicking again deselects. Clicking a different region when one is already selected sets
   the new one as secondary (or replaces the primary if none is secondary).
-- [ ] **Visual feedback:** primary region highlighted with gold stroke + slight scale-up; secondary with
+- [x] **Visual feedback:** primary region highlighted with gold stroke + slight scale-up; secondary with
   teal stroke; all others dimmed proportionally to their flow with the primary.
-- [ ] **No selection mode:** map shows total inbound or outbound flow per region (based on metric type).
-- [ ] **Primary selected mode:** map shows the flow between the primary region and every other region.
+- [x] **No selection mode:** map shows total inbound or outbound flow per region (based on metric type).
+- [x] **Primary selected mode:** map shows the flow between the primary region and every other region.
 
 ### Milestone 4.4 — Tooltips & Hover State
 
-- [ ] On `mouseover`: display a tooltip showing region name + current metric value (formatted with
+- [x] On `mouseover`: display a tooltip showing region name + current metric value (formatted with
   `d3.format`). Use a floating `<div>` tooltip that follows the cursor.
-- [ ] On `mouseout`: hide tooltip.
-- [ ] Smooth `transition().duration(200)` on fill changes during hover.
+- [x] On `mouseout`: hide tooltip.
+- [x] Smooth `transition().duration(200)` on fill changes during hover.
 
 ---
 
