@@ -612,50 +612,54 @@ const METRIC_META = {
  * n2  = individuals
  * AGI = adjusted gross income (thousands of dollars)
  */
-function computeMetric(metricKey, { inflow, outflow, totalInflow, totalOutflow }) {
+function computeMetric(metricKey, { inflow, outflow, totalInflow, totalOutflow }, isRelative = false) {
     // Provide zero-filled fallbacks so arithmetic never throws on null.
     const i = inflow ?? { n1: 0, n2: 0, AGI: 0 };
     const o = outflow ?? { n1: 0, n2: 0, AGI: 0 };
     const ti = totalInflow ?? i;   // fallback: self (gives share = 1)
     const to = totalOutflow ?? o;
 
+    // Dynamic net calculation based on whether a primary region is selected
+    const netN2 = isRelative ? o.n2 - i.n2 : i.n2 - o.n2;
+    const netN1 = isRelative ? o.n1 - i.n1 : i.n1 - o.n1;
+    const netAGI = isRelative ? o.AGI - i.AGI : i.AGI - o.AGI;
+
     switch (metricKey) {
 
         // ── Population ──────────────────────────────────────────────────────────
         case 'pop_inflow': return i.n2;
         case 'pop_outflow': return o.n2;
-        case 'pop_net': return i.n2 - o.n2;
+        case 'pop_net': return netN2;
         case 'pop_inflow_share': return ti.n2 > 0 ? i.n2 / ti.n2 : null;
         case 'pop_outflow_share': return to.n2 > 0 ? o.n2 / to.n2 : null;
         case 'pop_net_share': {
             const denom = Math.max(ti.n2, to.n2);
-            return denom > 0 ? (i.n2 - o.n2) / denom : null;
+            return denom > 0 ? netN2 / denom : null;
         }
 
         // ── Households ──────────────────────────────────────────────────────────
         case 'hh_inflow': return i.n1;
         case 'hh_outflow': return o.n1;
-        case 'hh_net': return i.n1 - o.n1;
+        case 'hh_net': return netN1;
         case 'hh_inflow_share': return ti.n1 > 0 ? i.n1 / ti.n1 : null;
         case 'hh_outflow_share': return to.n1 > 0 ? o.n1 / to.n1 : null;
         case 'hh_net_share': {
             const denom = Math.max(ti.n1, to.n1);
-            return denom > 0 ? (i.n1 - o.n1) / denom : null;
+            return denom > 0 ? netN1 / denom : null;
         }
 
         // ── AGI ─────────────────────────────────────────────────────────────────
         case 'agi_inflow': return i.AGI;
         case 'agi_outflow': return o.AGI;
-        case 'agi_net': return i.AGI - o.AGI;
+        case 'agi_net': return netAGI;
         case 'agi_inflow_share': return ti.AGI > 0 ? i.AGI / ti.AGI : null;
         case 'agi_outflow_share': return to.AGI > 0 ? o.AGI / to.AGI : null;
         case 'agi_net_share': {
             const denom = Math.max(ti.AGI, to.AGI);
-            return denom > 0 ? (i.AGI - o.AGI) / denom : null;
+            return denom > 0 ? netAGI / denom : null;
         }
 
         // ── Average AGI (AGI in $K per migrant) ─────────────────────────────────
-        // n2 = individuals, n1 = households
         case 'avg_agi_in_individual': return i.n2 > 0 ? i.AGI / i.n2 : null;
         case 'avg_agi_in_household': return i.n1 > 0 ? i.AGI / i.n1 : null;
         case 'avg_agi_out_individual': return o.n2 > 0 ? o.AGI / o.n2 : null;
@@ -708,10 +712,9 @@ function _getStateMapValue(fips, year, metricKey, primaryFips) {
         return computeMetric(metricKey, {
             inflow: t?.inflow ?? null,
             outflow: t?.outflow ?? null,
-            // Force the denominator to always use the initial year's base population (outflow)
             totalInflow: t?.base_outflow ?? null,
             totalOutflow: t?.base_outflow ?? null,
-        });
+        }, false); // <--- National mode: inflow - outflow
     } else {
         const inflow = getStateFlow(year, 'inflow', fips, primaryFips);
         const outflow = getStateFlow(year, 'outflow', primaryFips, fips);
@@ -719,10 +722,9 @@ function _getStateMapValue(fips, year, metricKey, primaryFips) {
         return computeMetric(metricKey, {
             inflow,
             outflow,
-            // Force the denominator to always use the initial year's base population (outflow)
             totalInflow: pt?.base_outflow ?? null,
             totalOutflow: pt?.base_outflow ?? null,
-        });
+        }, true); // <--- Relative mode: outflow - inflow
     }
 }
 
@@ -732,10 +734,9 @@ function _getCountyMapValue(countyKey, year, metricKey, primaryCountyKey) {
         return computeMetric(metricKey, {
             inflow: t?.inflow ?? null,
             outflow: t?.outflow ?? null,
-            // Force the denominator to always use the initial year's base population (outflow)
             totalInflow: t?.base_outflow ?? null,
             totalOutflow: t?.base_outflow ?? null,
-        });
+        }, false); // <--- National mode: inflow - outflow
     } else {
         const inflow = getCountyFlow(year, 'inflow', countyKey, primaryCountyKey);
         const outflow = getCountyFlow(year, 'outflow', primaryCountyKey, countyKey);
@@ -743,10 +744,9 @@ function _getCountyMapValue(countyKey, year, metricKey, primaryCountyKey) {
         return computeMetric(metricKey, {
             inflow,
             outflow,
-            // Force the denominator to always use the initial year's base population (outflow)
             totalInflow: pt?.base_outflow ?? null,
             totalOutflow: pt?.base_outflow ?? null,
-        });
+        }, true); // <--- Relative mode: outflow - inflow
     }
 }
 
@@ -1272,7 +1272,7 @@ async function renderMap() {
                 }
 
                 const direction = METRIC_META[appState.metric].direction;
-                if (direction === 'outflow') {
+                if (direction === 'outflow' || direction === 'both') {
                     labelStr += ` from ${primaryName}`;
                 } else {
                     labelStr += ` to ${primaryName}`;
