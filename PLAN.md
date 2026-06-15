@@ -316,23 +316,40 @@ any visuals.
 
 ---
 
-## Phase 5 — Line Graph
+## Phase 5 – Data Expansion
+
+### Milestone 5.1 – Extend Data Back to 2011-12
+
+- [ ] Collect IRS data on migration dating as far back as 2011-12
+- [ ] Expand the Python data enrichment files in data/original/ and data/enriched to process this data, too
+- [ ] Expand the YEAR_LABELS and YEARS constants in script.js to include the additional years
+
+### Milestone 5.2 – Extend Data Back to 1990-91 for States and 1991-92 for Counties
+
+- [ ] Collect IRS data on migration dating as far back as 1990-91 for states and 1991-92 for counties
+- [ ] Expand the Python data enrichment files in data/original/ and data/enriched to process this data, too
+- [ ] Note that the format of this data may be slightly different from the data from 2011-12 onwards, so the Python programs may need to be modified to handle this
+- [ ] Expand the YEAR_LABELS and YEARS constants in script.js to include the additional years
+
+---
+
+## Phase 6 — Line Graph
 
 **Goal:** Render the supplementary time-series line chart on the right panel.
 
-### Milestone 5.1 — Chart Scaffold
+### Milestone 6.1 — Chart Scaffold
 
 - [ ] Create an SVG inside `#linechart` with margins for axes and labels.
 - [ ] Define `x` scale as `d3.scaleLinear` over available years; `y` scale as `d3.scaleLinear` over
   value range.
 - [ ] Render axes with `d3.axisBottom` and `d3.axisLeft`.
 
-### Milestone 5.2 — No-Selection State
+### Milestone 6.2 — No-Selection State
 
 - [ ] When `primaryRegion === null`, overlay a centered placeholder message: *"Select a region on the
   map to see trends over time."*
 
-### Milestone 5.3 — Primary Only State (Aggregate Trend)
+### Milestone 6.3 — Primary Only State (Aggregate Trend)
 
 - [ ] Show the secondary flow-type dropdown (Total flow, Total U.S. flow, Total foreign flow, Total
   same-state flow, Total different-state flow [county only], Total non-movers).
@@ -340,7 +357,7 @@ any visuals.
 - [ ] Animate the line using `stroke-dasharray` / `stroke-dashoffset` on initial render.
 - [ ] Add circular data-point markers at each year; on hover, show a tooltip with the exact value.
 
-### Milestone 5.4 — Primary + Secondary State (Pairwise Trend)
+### Milestone 6.4 — Primary + Secondary State (Pairwise Trend)
 
 - [ ] Hide the flow-type dropdown.
 - [ ] Plot the migration flow between the primary and secondary region across all years.
@@ -349,31 +366,31 @@ any visuals.
 
 ---
 
-## Phase 6 — Polish, Accessibility & Validation
+## Phase 7 — Polish, Accessibility & Validation
 
 **Goal:** Final pass for quality, performance, and usability.
 
-### Milestone 6.1 — Micro-Animations & UX Polish
+### Milestone 7.1 — Micro-Animations & UX Polish
 
 - [ ] Animated map load: regions fade in with a staggered `delay` on first render.
 - [ ] Line chart path draws itself in on appearance.
 - [ ] Slider year indicator updates a visible numeric label in real time.
 - [ ] Metric dropdown uses a custom-styled `<select>` grouped by metric category.
 
-### Milestone 6.2 — Accessibility
+### Milestone 7.2 — Accessibility
 
 - [ ] All interactive elements have `aria-label` attributes.
 - [ ] Color scales are supplemented with pattern fills (optional hatching) for colorblind accessibility.
 - [ ] Keyboard navigation: Tab order through controls → map (arrow keys to move selection) → line chart.
 
-### Milestone 6.3 — Performance
+### Milestone 7.3 — Performance
 
 - [ ] County-level data (~90k rows × 4 files) is the main bottleneck. Strategies:
   - [ ] Load county data lazily (only when the user switches to County mode).
   - [ ] Precompute and cache aggregated totals per county on load.
   - [ ] Throttle slider `input` events with `d3.timer` / `requestAnimationFrame`.
 
-### Milestone 6.4 — Final Validation Checklist
+### Milestone 7.4 — Final Validation Checklist
 
 - [ ] All 22 metrics render correctly for both state and county modes
 - [ ] Selection states (none / primary / primary+secondary) all work as specified
@@ -436,7 +453,7 @@ IRSMigrationDataProject/
 │           └── countyoutflow2223_enriched.csv
 ├── index.html                                  # Phase 2.1
 ├── styles.css                                  # Phase 2.2
-└── script.js                                   # Phases 3–5
+└── script.js                                   # Phases 3–7
 ```
 
 ---
@@ -444,9 +461,9 @@ IRSMigrationDataProject/
 ## Execution Order
 
 ```
-Phase 1  →  Phase 2  →  Phase 3  →  Phase 4  →  Phase 5  →  Phase 6
-(Data)      (Scaffold)  (D3 Core)   (Map)       (Chart)     (Polish)
+Phase 1  →  Phase 2  →  Phase 3  →  Phase 4  → Phase 5  →  Phase 6  →  Phase 7
+(Data)      (Scaffold)  (D3 Core)   (Map)      (Data)      (Chart)     (Polish)
 ```
 
-Phases 2 and 3 can be developed in parallel once Phase 1 is complete. Phases 4 and 5 depend on
+Phases 2 and 3 can be developed in parallel once Phase 1 is complete. Phases 5 and 6 depend on
 Phase 3 being complete.
