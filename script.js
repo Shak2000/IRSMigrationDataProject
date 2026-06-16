@@ -1217,6 +1217,9 @@ async function renderMap() {
             // Apply slight opacity dimming on hover
             d3.select(this).attr('fill-opacity', 0.8);
 
+            // Bring hovered region to the top so its border isn't overlapped by neighbors
+            d3.select(this).raise();
+
             // Initialise or select the global tooltip element
             let tooltip = d3.select('#map-tooltip');
             if (tooltip.empty()) {
@@ -1288,6 +1291,11 @@ async function renderMap() {
         .on('mouseleave', function (event, d) {
             d3.select(this).attr('fill-opacity', 1);
             d3.select('#map-tooltip').style('display', 'none');
+
+            // Re-raise selected regions so they stay on top of the previously hovered item
+            mapLayerBase.selectAll('path.region')
+                .filter(data => data[0].fipsKey === appState.primaryRegion || data[0].fipsKey === appState.secondaryRegion)
+                .raise();
         })
         .on('click', function (event, d) {
             const fips = d[0].fipsKey;
