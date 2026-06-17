@@ -33,6 +33,8 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 FILE_PAIRS: list[tuple[str, str, str, str]] = [
     # State inflow
+    ("data/original/state_inflow/stateinflow1920.csv",
+     "data/enriched/state_inflow/stateinflow1920_enriched.csv",   "state",  "1920"),
     ("data/original/state_inflow/stateinflow2021.csv",
      "data/enriched/state_inflow/stateinflow2021_enriched.csv",   "state",  "2021"),
     ("data/original/state_inflow/stateinflow2122.csv",
@@ -40,6 +42,8 @@ FILE_PAIRS: list[tuple[str, str, str, str]] = [
     ("data/original/state_inflow/stateinflow2223.csv",
      "data/enriched/state_inflow/stateinflow2223_enriched.csv",   "state",  "2223"),
     # State outflow
+    ("data/original/state_outflow/stateoutflow1920.csv",
+     "data/enriched/state_outflow/stateoutflow1920_enriched.csv", "state",  "1920"),
     ("data/original/state_outflow/stateoutflow2021.csv",
      "data/enriched/state_outflow/stateoutflow2021_enriched.csv", "state",  "2021"),
     ("data/original/state_outflow/stateoutflow2122.csv",
@@ -47,6 +51,8 @@ FILE_PAIRS: list[tuple[str, str, str, str]] = [
     ("data/original/state_outflow/stateoutflow2223.csv",
      "data/enriched/state_outflow/stateoutflow2223_enriched.csv", "state",  "2223"),
     # County inflow
+    ("data/original/county_inflow/countyinflow1920.csv",
+     "data/enriched/county_inflow/countyinflow1920_enriched.csv", "county", "1920"),
     ("data/original/county_inflow/countyinflow2021.csv",
      "data/enriched/county_inflow/countyinflow2021_enriched.csv", "county", "2021"),
     ("data/original/county_inflow/countyinflow2122.csv",
@@ -54,6 +60,8 @@ FILE_PAIRS: list[tuple[str, str, str, str]] = [
     ("data/original/county_inflow/countyinflow2223.csv",
      "data/enriched/county_inflow/countyinflow2223_enriched.csv", "county", "2223"),
     # County outflow
+    ("data/original/county_outflow/countyoutflow1920.csv",
+     "data/enriched/county_outflow/countyoutflow1920_enriched.csv", "county", "1920"),
     ("data/original/county_outflow/countyoutflow2021.csv",
      "data/enriched/county_outflow/countyoutflow2021_enriched.csv", "county", "2021"),
     ("data/original/county_outflow/countyoutflow2122.csv",

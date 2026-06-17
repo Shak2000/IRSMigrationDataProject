@@ -39,9 +39,11 @@ from pathlib import Path
 STATE_FIPS_CSV = Path("data/fips/state_fips.csv")
 
 BATCH_FILES: list[tuple[str, str]] = [
+    ("data/original/state_inflow/stateinflow1920.csv",    "data/enriched/state_inflow/stateinflow1920_enriched.csv"),
     ("data/original/state_inflow/stateinflow2021.csv",    "data/enriched/state_inflow/stateinflow2021_enriched.csv"),
     ("data/original/state_inflow/stateinflow2122.csv",    "data/enriched/state_inflow/stateinflow2122_enriched.csv"),
     ("data/original/state_inflow/stateinflow2223.csv",    "data/enriched/state_inflow/stateinflow2223_enriched.csv"),
+    ("data/original/state_outflow/stateoutflow1920.csv",  "data/enriched/state_outflow/stateoutflow1920_enriched.csv"),
     ("data/original/state_outflow/stateoutflow2021.csv",  "data/enriched/state_outflow/stateoutflow2021_enriched.csv"),
     ("data/original/state_outflow/stateoutflow2122.csv",  "data/enriched/state_outflow/stateoutflow2122_enriched.csv"),
     ("data/original/state_outflow/stateoutflow2223.csv",  "data/enriched/state_outflow/stateoutflow2223_enriched.csv"),

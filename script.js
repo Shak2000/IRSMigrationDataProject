@@ -29,10 +29,11 @@
  * Available year-range tags.
  * The slider positions 0/1/2 map to these keys in the flow maps.
  */
-const YEARS = ['2021', '2122', '2223'];
+const YEARS = ['1920', '2021', '2122', '2223'];
 
 /** Human-readable labels for each year tag. */
 const YEAR_LABELS = {
+    '1920': '2019–20',
     '2021': '2020–21',
     '2122': '2021–22',
     '2223': '2022–23',
@@ -67,6 +68,10 @@ const SPECIAL_COUNTY_FIPS = new Set(['000']);
 const DATA_FILES = [
     // ── State inflow ──────────────────────────────────────────────────────────
     {
+        level: 'state', year: '1920', direction: 'inflow',
+        path: 'data/enriched/state_inflow/stateinflow1920_enriched.csv'
+    },
+    {
         level: 'state', year: '2021', direction: 'inflow',
         path: 'data/enriched/state_inflow/stateinflow2021_enriched.csv'
     },
@@ -79,6 +84,10 @@ const DATA_FILES = [
         path: 'data/enriched/state_inflow/stateinflow2223_enriched.csv'
     },
     // ── State outflow ─────────────────────────────────────────────────────────
+    {
+        level: 'state', year: '1920', direction: 'outflow',
+        path: 'data/enriched/state_outflow/stateoutflow1920_enriched.csv'
+    },
     {
         level: 'state', year: '2021', direction: 'outflow',
         path: 'data/enriched/state_outflow/stateoutflow2021_enriched.csv'
@@ -93,6 +102,10 @@ const DATA_FILES = [
     },
     // ── County inflow ─────────────────────────────────────────────────────────
     {
+        level: 'county', year: '1920', direction: 'inflow',
+        path: 'data/enriched/county_inflow/countyinflow1920_enriched.csv'
+    },
+    {
         level: 'county', year: '2021', direction: 'inflow',
         path: 'data/enriched/county_inflow/countyinflow2021_enriched.csv'
     },
@@ -105,6 +118,10 @@ const DATA_FILES = [
         path: 'data/enriched/county_inflow/countyinflow2223_enriched.csv'
     },
     // ── County outflow ────────────────────────────────────────────────────────
+    {
+        level: 'county', year: '1920', direction: 'outflow',
+        path: 'data/enriched/county_outflow/countyoutflow1920_enriched.csv'
+    },
     {
         level: 'county', year: '2021', direction: 'outflow',
         path: 'data/enriched/county_outflow/countyoutflow2021_enriched.csv'
@@ -793,14 +810,14 @@ function getMetricLabel(metricKey) {
  */
 const appState = {
     level: 'state',
-    yearIndex: 2,
+    yearIndex: 3,
     metric: 'pop_inflow',
     primaryRegion: null,
     secondaryRegion: null,
     flowType: 'total',
     zoomLevel: 1,
-    panX: 0, // NEW: Horizontal pan (-100 to 100)
-    panY: 0, // NEW: Vertical pan (-100 to 100)
+    panX: 0, // Horizontal pan
+    panY: 0, // Vertical pan
 };
 
 /** Convenience: return the current year tag string. */
