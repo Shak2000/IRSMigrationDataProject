@@ -585,6 +585,18 @@ const METRIC_META = {
  * AGI = adjusted gross income (thousands of dollars)
  */
 function computeMetric(metricKey, { inflow, outflow, totalInflow, totalOutflow }, isRelative = false) {
+    // ── Milestone 5.2: Check for missing data in county level ──
+    if (appState.level === 'county') {
+        const meta = METRIC_META[metricKey];
+        if (meta) {
+            // If the required directional data is missing, immediately return null
+            if (meta.direction === 'inflow' && !inflow) return null;
+            if (meta.direction === 'outflow' && !outflow) return null;
+            // For net statistics, if EITHER inflow or outflow is missing, return null
+            if (meta.direction === 'both' && (!inflow || !outflow)) return null;
+        }
+    }
+
     // Provide zero-filled fallbacks so arithmetic never throws on null.
     const i = inflow ?? { n1: 0, n2: 0, AGI: 0 };
     const o = outflow ?? { n1: 0, n2: 0, AGI: 0 };
@@ -920,7 +932,7 @@ function render() {
 }
 
 /**
- * renderMap() — Milestone 4.1 & 4.2
+ * renderMap()
  *
  * Async. Loads geo data on first call (cached thereafter), sizes the SVG to
  * the current container, builds an AlbersUSA projection, and paints:
@@ -1046,6 +1058,8 @@ async function renderMap() {
     // ── Update Legend UI ─────────────────────────────────────────────────────────
     const legendEl = document.getElementById('map-legend');
     if (validValues.length > 0) {
+        legendEl.style.visibility = 'visible'; // Restore visibility
+
         const gradientEl = document.getElementById('legend-gradient');
         if (gradientEl) {
             gradientEl.style.background = legendGradientCss;
@@ -1114,7 +1128,16 @@ async function renderMap() {
         legendEl.style.paddingBottom = '10px';
         legendEl.style.flexShrink = '0';
     } else {
-        legendEl.style.display = 'none';
+        // Keep the physical space reserved so the map layout doesn't jump, 
+        // but hide its visual contents because there is no data.
+        legendEl.style.display = 'flex';
+        legendEl.style.flexDirection = 'column';
+        legendEl.style.width = '100%';
+        legendEl.style.boxSizing = 'border-box';
+        legendEl.style.paddingBottom = '10px';
+        legendEl.style.flexShrink = '0';
+
+        legendEl.style.visibility = 'hidden';
     }
 
     // ── Projection & Zoom: AlbersUSA fitted to container ──────────────────────────────
@@ -1160,14 +1183,21 @@ async function renderMap() {
                 .attr('fill', d => {
                     if (d[0].fipsKey === appState.primaryRegion) return '#9ca3af'; // Darker gray for selected region
                     const val = d[1];
-                    return (val === null || !Number.isFinite(val)) ? 'var(--bg)' : colorScale(val);
+                    if (val === null || !Number.isFinite(val)) {
+                        // Milestone 5.2: Light gray for missing county data, background color for missing state data
+                        return appState.level === 'county' ? '#e5e7eb' : 'var(--bg)';
+                    }
+                    return colorScale(val);
                 }),
             update => update
                 .attr('d', d => mapPath(d[0])) // Update path for zooming
                 .attr('fill', d => {
-                    if (d[0].fipsKey === appState.primaryRegion) return '#9ca3af'; // Darker gray for selected region
+                    if (d[0].fipsKey === appState.primaryRegion) return '#9ca3af';
                     const val = d[1];
-                    return (val === null || !Number.isFinite(val)) ? 'var(--bg)' : colorScale(val);
+                    if (val === null || !Number.isFinite(val)) {
+                        return appState.level === 'county' ? '#e5e7eb' : 'var(--bg)';
+                    }
+                    return colorScale(val);
                 })
         )
         .attr('cursor', 'pointer')
@@ -1233,7 +1263,15 @@ async function renderMap() {
             }
 
             const val = d[1];
-            const metricStr = formatMetricValue(val, appState.metric);
+
+            // Milestone 5.2 update: Explicitly label missing data in the tooltip
+            let metricStr;
+            if (val === null || !Number.isFinite(val)) {
+                metricStr = '<em style="color: #999;">No data available</em>';
+            } else {
+                metricStr = formatMetricValue(val, appState.metric);
+            }
+
             let labelStr = getMetricLabel(appState.metric);
 
             // If a primary region is selected, clarify the directional relationship
