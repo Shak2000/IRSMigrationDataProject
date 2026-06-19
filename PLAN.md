@@ -330,13 +330,6 @@ any visuals.
 - [x] If the level is set to county, a county is selected, and for a particular year and metric, there is another county for which there is no data with the selected county, then that other county should be colored a light gray and not be enabled in the first place.
 - [x] Please make sure that the top two bullet points apply to a "net" statistic when the inflow or outflow data (or both) are missing for a county.
 
-### Milestone 5.3 – Extend Data Back to 1990-91 for States and 1991-92 for Counties
-
-- [ ] Collect IRS data on migration dating as far back as 1990-91 for states and 1991-92 for counties
-- [ ] Expand the Python data enrichment files in data/original/ and data/enriched to process this data, too
-- [ ] Note that the format of this data may be slightly different from the data from 2011-12 onwards, so the Python programs may need to be modified to handle this
-- [ ] Expand the YEAR_LABELS and YEARS constants in script.js to include the additional years
-
 ---
 
 ## Phase 6 — Line Graph: Individual Flows
@@ -384,31 +377,42 @@ any visuals.
 
 ---
 
-## Phase 8 — Polish, Accessibility & Validation
+## Phase 8 – Further Data Extensions
+
+### Milestone 8.1 – Extend Data Back to 1990-91 for States and 1991-92 for Counties
+
+- [ ] Collect IRS data on migration dating as far back as 1990-91 for states and 1991-92 for counties
+- [ ] Expand the Python data enrichment files in data/original/ and data/enriched to process this data, too
+- [ ] Note that the format of this data may be slightly different from the data from 2011-12 onwards, so the Python programs may need to be modified to handle this
+- [ ] Expand the YEAR_LABELS and YEARS constants in script.js to include the additional years
+
+---
+
+## Phase 9 — Polish, Accessibility & Validation
 
 **Goal:** Final pass for quality, performance, and usability.
 
-### Milestone 8.1 — Micro-Animations & UX Polish
+### Milestone 9.1 — Micro-Animations & UX Polish
 
 - [ ] Animated map load: regions fade in with a staggered `delay` on first render.
 - [ ] Line chart path draws itself in on appearance.
 - [ ] Slider year indicator updates a visible numeric label in real time.
 - [ ] Metric dropdown uses a custom-styled `<select>` grouped by metric category.
 
-### Milestone 8.2 — Accessibility
+### Milestone 9.2 — Accessibility
 
 - [ ] All interactive elements have `aria-label` attributes.
 - [ ] Color scales are supplemented with pattern fills (optional hatching) for colorblind accessibility.
 - [ ] Keyboard navigation: Tab order through controls → map (arrow keys to move selection) → line chart.
 
-### Milestone 8.3 — Performance
+### Milestone 9.3 — Performance
 
 - [ ] County-level data (~90k rows × 4 files) is the main bottleneck. Strategies:
   - [ ] Load county data lazily (only when the user switches to County mode).
   - [ ] Precompute and cache aggregated totals per county on load.
   - [ ] Throttle slider `input` events with `d3.timer` / `requestAnimationFrame`.
 
-### Milestone 8.4 — Final Validation Checklist
+### Milestone 9.4 — Final Validation Checklist
 
 - [ ] All 22 metrics render correctly for both state and county modes
 - [ ] Selection states (none / primary / primary+secondary) all work as specified
@@ -479,8 +483,8 @@ IRSMigrationDataProject/
 ## Execution Order
 
 ```
-Phase 1  →  Phase 2  →  Phase 3  →  Phase 4  →  Phase 5  →  Phase 6    →  Phase 7  →  Phase 8
-(Data)      (Scaffold)  (D3 Core)   (Map)       (Data)      (Individual)  (Pair)      (Polish)
+Phase 1  →  Phase 2  →  Phase 3  →  Phase 4  →  Phase 5  →  Phase 6    →  Phase 7  →  Phase 8  →  Phase 9
+(Data)      (Scaffold)  (D3 Core)   (Map)       (Data)      (Individual)  (Pair)      (More Data) (Polish)
 ```
 
 Phases 2 and 3 can be developed in parallel once Phase 1 is complete. Phases 5, 6, and 7 depend on
