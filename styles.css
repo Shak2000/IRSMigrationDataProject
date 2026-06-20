@@ -891,3 +891,414 @@ select:focus {
   font-weight: 500;
   color: var(--text-muted);
 }
+
+
+/* ────────────────────────────────────────────────────────────
+   12. PHASE 6 — INDIVIDUAL REGION TREND CHART
+──────────────────────────────────────────────────────────── */
+
+/*
+ * The body grid originally locks the main row to 1fr (filling the viewport
+ * exactly). The chart section lives OUTSIDE #main-layout, so we allow the
+ * body to scroll naturally beyond the viewport when the chart is present.
+ */
+body {
+  min-height: 100dvh;
+  height: auto;           /* allow content taller than viewport */
+  overflow-y: auto;       /* enable scrolling */
+  grid-template-rows: var(--header-h) var(--controls-h) minmax(520px, 70vh) auto;
+  grid-template-areas:
+    "header"
+    "controls"
+    "main"
+    "charts";
+}
+
+/* ── Section shell ───────────────────────────────────────── */
+#chart-individual {
+  grid-area: charts;
+  background: var(--bg);
+  border-top: 2px solid var(--border);
+  padding: var(--sp-xl) var(--sp-lg) var(--sp-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-lg);
+}
+
+/* ── Section header ──────────────────────────────────────── */
+.chart-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-sm);
+}
+
+.chart-section-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chart-section-heading {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+/* Goldenrod accent bar before the heading */
+.chart-section-heading::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 0.95em;
+  background: var(--accent);
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: var(--sp-sm);
+  margin-bottom: 2px;
+}
+
+.chart-section-subtitle {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-left: calc(4px + var(--sp-sm)); /* align under heading text after accent bar */
+}
+
+/* ── Controls row ────────────────────────────────────────── */
+.chart-controls-row {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--sp-lg);
+  padding: var(--sp-md) var(--sp-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.chart-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xs);
+  min-width: 0;
+}
+
+/* Region selector — moderately wide */
+#ind-region-select {
+  min-width: 220px;
+  max-width: 320px;
+}
+
+/* Metric selector — same as map's */
+#ind-metric-select {
+  min-width: 260px;
+  max-width: 380px;
+}
+
+/* Clear button */
+.chart-clear-btn {
+  padding: 6px 16px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+  white-space: nowrap;
+  align-self: flex-end;  /* bottom-align with the selects */
+}
+
+.chart-clear-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.chart-clear-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Chart area ──────────────────────────────────────────── */
+#chart-individual-area {
+  position: relative;
+  min-height: 340px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Placeholder — centered message card */
+.chart-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--sp-xl);
+  pointer-events: none;
+}
+
+.chart-placeholder p {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 30ch;
+}
+
+/* SVG container fills the remaining card space */
+#chart-individual-svg-container {
+  flex: 1;
+  min-height: 340px;
+  width: 100%;
+}
+
+/* D3 injects an SVG — make it fill the container */
+#chart-individual-svg-container svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── D3 axis text ────────────────────────────────────────── */
+.ind-chart-axis text {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.6875rem;
+  fill: var(--text-muted);
+}
+
+.ind-chart-axis path,
+.ind-chart-axis line {
+  stroke: var(--border);
+}
+
+/* Y-axis label */
+.ind-chart-y-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  fill: var(--text-muted);
+}
+
+/* Grid lines */
+.ind-chart-grid line {
+  stroke: var(--border);
+  stroke-dasharray: 3 3;
+  stroke-opacity: 0.7;
+}
+
+.ind-chart-grid path {
+  stroke: none;
+}
+
+/* ── Floating tooltip (shared with future Phase 7 chart) ─── */
+#chart-tooltip {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  box-shadow: var(--shadow-md);
+  font-size: 0.8125rem;
+  color: var(--text);
+  z-index: 200;
+  max-width: 220px;
+  line-height: 1.4;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  #chart-individual {
+    padding: var(--sp-lg) var(--sp-md);
+  }
+
+  .chart-controls-row {
+    padding: var(--sp-md);
+    gap: var(--sp-md);
+  }
+
+  .region-combobox,
+  #ind-metric-select {
+    min-width: 180px;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .chart-controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .region-combobox,
+  #ind-metric-select {
+    width: 100%;
+    max-width: none;
+  }
+
+  .chart-clear-btn {
+    align-self: flex-start;
+  }
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   13. PLACEHOLDER HIDDEN FIX
+   CSS display: flex on .chart-placeholder can override the
+   browser's default [hidden] = display: none.
+──────────────────────────────────────────────────────────── */
+.chart-placeholder[hidden] {
+  display: none !important;
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   14. REGION COMBOBOX
+──────────────────────────────────────────────────────────── */
+
+/* Wrapper provides the positioning context for the dropdown */
+.region-combobox {
+  position: relative;
+  min-width: 220px;
+  max-width: 360px;
+}
+
+/* Text input styled to look like the app's <select> elements */
+.region-combobox-input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  padding: 6px 30px 6px 10px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  /* Arrow icon — same SVG used by the native <select> override above */
+  background: var(--surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")
+    no-repeat right 10px center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: text;
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+  box-sizing: border-box;
+}
+
+.region-combobox-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.region-combobox-input:hover {
+  border-color: var(--accent);
+}
+
+.region-combobox-input:focus,
+.region-combobox-input[aria-expanded="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+/* Dropdown listbox panel */
+.region-combobox-listbox {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 500;
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  max-height: 280px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.region-combobox-listbox[hidden] {
+  display: none;
+}
+
+/* Scrollbar for the listbox */
+.region-combobox-listbox::-webkit-scrollbar {
+  width: 6px;
+}
+.region-combobox-listbox::-webkit-scrollbar-track {
+  background: transparent;
+}
+.region-combobox-listbox::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* Section group labels ("Selected", "States", "Counties") */
+.region-group-label {
+  padding: 5px 10px 3px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.region-group-label:first-child {
+  border-top: none;
+}
+
+/* Individual option rows */
+.region-option {
+  padding: 7px 12px;
+  font-size: 0.875rem;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--t-fast);
+}
+
+.region-option:hover {
+  background: var(--accent-light);
+}
+
+/* Active = currently selected region */
+.region-option--active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Highlighted = keyboard cursor position */
+.region-option--highlighted {
+  background: var(--accent-light);
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* No-results / hint rows */
+.region-option--no-results {
+  color: var(--text-muted);
+  font-style: italic;
+  cursor: default;
+  font-size: 0.8125rem;
+}
+
+.region-option--no-results:hover {
+  background: none;
+}

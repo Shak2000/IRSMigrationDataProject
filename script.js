@@ -1367,8 +1367,522 @@ async function renderMap() {
 }
 
 function renderChart() {
-    // Disabled functionality based on request to defer to a later tab milestone.
+    // Disabled — replaced by the standalone #chart-individual section (Phase 6).
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   SECTION 8.5 — PHASE 6: INDIVIDUAL REGION TREND CHART  (Milestone 6.1)
+═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Isolated state for the individual-region trend chart.
+ * Kept separate from appState so the chart has its own region / metric
+ * selection and does not interfere with the map's primary/secondary selection.
+ */
+const indChartState = {
+    regionKey: null,    // e.g. "06" (state FIPS) or "06_037" (county key)
+    regionLevel: null,  // 'state' | 'county'
+    metric: 'pop_inflow',
+};
+
+/** D3 handles retained between renders so we can update-in-place. */
+let indChartSvg = null;        // the root <svg> selection
+let indChartInner = null;      // the <g> shifted by margins
+let indChartXScale = null;
+let indChartYScale = null;
+// Wider left margin gives breathing room between y-axis label and tick numbers
+let indChartMargin = { top: 24, right: 32, bottom: 64, left: 100 };
+
+/** Flat entry list used by the combobox — rebuilt on data load. */
+let indComboboxEntries = [];   // [{ key, label, level }]
+let indComboboxOpen = false;
+let indComboboxHighlightIdx = -1;
+
+/* ── Combobox data ───────────────────────────────────────────────────────────
+ * Builds the flat entry list for the region combobox.
+ * States are always first; counties follow if data is loaded.
+ * Call this once on init and again after county data loads.
+ */
+function buildIndComboboxEntries() {
+    // States — only include entries that have a real name (not just a raw FIPS code).
+    // Entries where meta.name is blank or equals the raw FIPS slip through when the
+    // IRS file had no matching name row (e.g. FIPS "00" national total).
+    const stateEntries = Object.entries(stateMeta)
+        .filter(([fips, meta]) => {
+            const name = meta.name || meta.postal || '';
+            return name.length > 0 && name !== fips;
+        })
+        .map(([fips, meta]) => ({ key: fips, label: meta.name || meta.postal, level: 'state' }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+    // Counties — only include entries that have a real countyName string.
+    // Entries with blank/missing names appear as raw keys like "02_261" (dissolved
+    // Census areas) and should be excluded from the dropdown.
+    const countyEntries = countyDataLoaded
+        ? Object.entries(countyMeta)
+            .filter(([, meta]) => meta.countyName && meta.countyName.trim().length > 0)
+            .map(([key, meta]) => ({
+                key,
+                label: `${meta.countyName}, ${meta.statePostal || meta.stateName || ''}`.trim().replace(/,$/, ''),
+                level: 'county',
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label))
+        : [];
+
+    indComboboxEntries = [...stateEntries, ...countyEntries];
+}
+
+/* ── Combobox DOM helpers ───────────────────────────────────────────────── */
+
+function _appendRegionOption(listbox, entry, showLevelBadge) {
+    const opt = document.createElement('div');
+    const isActive = entry.key === indChartState.regionKey;
+    opt.className = 'region-option' + (isActive ? ' region-option--active' : '');
+    opt.textContent = showLevelBadge ? `${entry.label}\u2002(${entry.level})` : entry.label;
+    opt.dataset.key   = entry.key;
+    opt.dataset.level = entry.level;
+    opt.dataset.label = entry.label;
+    opt.setAttribute('role', 'option');
+    opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    listbox.appendChild(opt);
+}
+
+function _renderIndComboboxListbox(filterText) {
+    const listbox = document.getElementById('ind-region-listbox');
+    if (!listbox) return;
+
+    const lower = (filterText || '').toLowerCase().trim();
+    indComboboxHighlightIdx = -1;
+
+    const filtered = lower
+        ? indComboboxEntries.filter(e => e.label.toLowerCase().includes(lower))
+        : indComboboxEntries;
+
+    listbox.innerHTML = '';
+
+    if (filtered.length === 0) {
+        const msg = document.createElement('div');
+        msg.className = 'region-option region-option--no-results';
+        msg.textContent = 'No results found';
+        listbox.appendChild(msg);
+        return;
+    }
+
+    if (lower) {
+        // Flat filtered list — no level badge, just the region name
+        filtered.forEach(e => _appendRegionOption(listbox, e, false));
+    } else {
+        // Structured list: selected first, then States, then Counties
+        const selectedEntry = indChartState.regionKey
+            ? indComboboxEntries.find(e => e.key === indChartState.regionKey)
+            : null;
+
+        const states   = filtered.filter(e => e.level === 'state'  && e.key !== selectedEntry?.key);
+        const counties = filtered.filter(e => e.level === 'county' && e.key !== selectedEntry?.key);
+
+        if (selectedEntry) {
+            const grp = document.createElement('div');
+            grp.className = 'region-group-label';
+            grp.textContent = 'Selected';
+            listbox.appendChild(grp);
+            _appendRegionOption(listbox, selectedEntry, false);
+        }
+
+        if (states.length) {
+            const grp = document.createElement('div');
+            grp.className = 'region-group-label';
+            grp.textContent = 'States';
+            listbox.appendChild(grp);
+            states.forEach(e => _appendRegionOption(listbox, e, false));
+        }
+
+        if (counties.length) {
+            const grp = document.createElement('div');
+            grp.className = 'region-group-label';
+            grp.textContent = 'Counties';
+            listbox.appendChild(grp);
+            counties.forEach(e => _appendRegionOption(listbox, e, false));
+        }
+
+        // Loading indicator shown while background county fetch is still in flight
+        if (!countyDataLoaded) {
+            const hint = document.createElement('div');
+            hint.className = 'region-option region-option--no-results';
+            hint.textContent = 'Loading county data…';
+            listbox.appendChild(hint);
+        }
+    }
+}
+
+function _openIndCombobox() {
+    const listbox = document.getElementById('ind-region-listbox');
+    const input   = document.getElementById('ind-region-input');
+    if (!listbox || !input || indComboboxOpen) return;
+    listbox.removeAttribute('hidden');
+    input.setAttribute('aria-expanded', 'true');
+    indComboboxOpen = true;
+    _renderIndComboboxListbox(input.value);
+    // Scroll selected item into view
+    const active = listbox.querySelector('.region-option--active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+}
+
+function _closeIndCombobox() {
+    const listbox = document.getElementById('ind-region-listbox');
+    const input   = document.getElementById('ind-region-input');
+    if (!listbox || !input) return;
+    listbox.setAttribute('hidden', '');
+    input.setAttribute('aria-expanded', 'false');
+    indComboboxOpen = false;
+    indComboboxHighlightIdx = -1;
+    // Restore input to the selected name (or blank)
+    const entry = indChartState.regionKey
+        ? indComboboxEntries.find(e => e.key === indChartState.regionKey)
+        : null;
+    input.value = entry ? entry.label : '';
+}
+
+function _selectIndComboboxEntry(key, level, label) {
+    indChartState.regionKey   = key   || null;
+    indChartState.regionLevel = level || null;
+    const input = document.getElementById('ind-region-input');
+    if (input) input.value = key ? label : '';
+    _closeIndCombobox();
+    renderIndividualChart();
+}
+
+function _updateComboboxHighlight(options) {
+    options.forEach((opt, i) => {
+        if (i === indComboboxHighlightIdx) {
+            opt.classList.add('region-option--highlighted');
+            opt.scrollIntoView({ block: 'nearest' });
+        } else {
+            opt.classList.remove('region-option--highlighted');
+        }
+    });
+}
+
+/**
+ * One-time setup of combobox event listeners.
+ * Call after the DOM is ready and initial data has loaded.
+ */
+function initIndividualCombobox() {
+    const input    = document.getElementById('ind-region-input');
+    const listbox  = document.getElementById('ind-region-listbox');
+    const combobox = document.getElementById('ind-region-combobox');
+    if (!input || !listbox || !combobox) return;
+
+    buildIndComboboxEntries();
+
+    // Restore display value if a region was pre-selected
+    if (indChartState.regionKey) {
+        const entry = indComboboxEntries.find(e => e.key === indChartState.regionKey);
+        if (entry) input.value = entry.label;
+    }
+
+    // Open on focus
+    input.addEventListener('focus', () => _openIndCombobox());
+
+    // Filter while typing
+    input.addEventListener('input', () => {
+        if (!indComboboxOpen) _openIndCombobox();
+        _renderIndComboboxListbox(input.value);
+    });
+
+    // Keyboard navigation
+    input.addEventListener('keydown', e => {
+        if (!indComboboxOpen && e.key !== 'Tab') _openIndCombobox();
+        const options = Array.from(listbox.querySelectorAll('.region-option:not(.region-option--no-results)'));
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            indComboboxHighlightIdx = Math.min(indComboboxHighlightIdx + 1, options.length - 1);
+            _updateComboboxHighlight(options);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            indComboboxHighlightIdx = Math.max(indComboboxHighlightIdx - 1, 0);
+            _updateComboboxHighlight(options);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const highlighted = options[indComboboxHighlightIdx];
+            if (highlighted) _selectIndComboboxEntry(highlighted.dataset.key, highlighted.dataset.level, highlighted.dataset.label);
+        } else if (e.key === 'Escape') {
+            _closeIndCombobox();
+        }
+    });
+
+    // Select on click
+    listbox.addEventListener('mousedown', e => {
+        const opt = e.target.closest('.region-option');
+        if (!opt || opt.classList.contains('region-option--no-results')) return;
+        e.preventDefault(); // prevent blur-before-select race
+        _selectIndComboboxEntry(opt.dataset.key, opt.dataset.level, opt.dataset.label);
+    });
+
+    // Close on blur (delayed so mousedown on listbox can fire first)
+    input.addEventListener('blur', () => setTimeout(_closeIndCombobox, 150));
+
+    // Click outside closes
+    document.addEventListener('click', e => {
+        if (!combobox.contains(e.target)) _closeIndCombobox();
+    });
+}
+
+/**
+ * Create (first call) or resize (subsequent calls) the D3 SVG inside
+ * #chart-individual-svg-container, and establish / update scales and axes.
+ *
+ * Returns { width, height } — the inner drawing area dimensions.
+ */
+function setupIndividualChart() {
+    const container = document.getElementById('chart-individual-svg-container');
+    if (!container) return { width: 0, height: 0 };
+
+    const m = indChartMargin;
+    const totalW = container.clientWidth || 800;
+    const totalH = container.clientHeight || 340;
+    const width = totalW - m.left - m.right;
+    const height = totalH - m.top - m.bottom;
+
+    if (!indChartSvg) {
+        // ── First call: create the SVG skeleton ───────────────────────────────
+        indChartSvg = d3.select(container)
+            .append('svg')
+            .attr('role', 'img')
+            .attr('aria-label', 'Individual region migration trend');
+
+        indChartInner = indChartSvg.append('g')
+            .attr('class', 'ind-chart-inner');
+
+        // Grid lines group (behind everything)
+        indChartInner.append('g').attr('class', 'ind-chart-grid ind-chart-grid-y');
+
+        // Axes groups
+        indChartInner.append('g').attr('class', 'ind-chart-axis ind-chart-axis-x');
+        indChartInner.append('g').attr('class', 'ind-chart-axis ind-chart-axis-y');
+
+        // Y-axis label (rotated, positioned absolutely via transform)
+        indChartSvg.append('text')
+            .attr('class', 'ind-chart-y-label')
+            .attr('text-anchor', 'middle');
+
+        // Line path (drawn on top of grid)
+        indChartInner.append('path').attr('class', 'ind-chart-line');
+
+        // Dot group (circles drawn last so they sit on top of the line)
+        indChartInner.append('g').attr('class', 'ind-chart-dots');
+
+        // Zero-line (for net/diverging metrics)
+        indChartInner.append('line').attr('class', 'ind-chart-zero-line');
+    }
+
+    // ── Every call: update viewBox and translate margin group ─────────────────
+    indChartSvg
+        .attr('width', totalW)
+        .attr('height', totalH)
+        .attr('viewBox', `0 0 ${totalW} ${totalH}`);
+
+    indChartInner.attr('transform', `translate(${m.left},${m.top})`);
+
+    // ── Scales ────────────────────────────────────────────────────────────────
+    indChartXScale = d3.scalePoint()
+        .domain(YEARS)
+        .range([0, width])
+        .padding(0.1);
+
+    // yScale domain will be set by renderIndividualChart() once we have data.
+    indChartYScale = d3.scaleLinear().range([height, 0]);
+
+    // ── X-axis ────────────────────────────────────────────────────────────────
+    indChartInner.select('.ind-chart-axis-x')
+        .attr('transform', `translate(0,${height})`)
+        .call(
+            d3.axisBottom(indChartXScale)
+                .tickFormat(t => YEAR_LABELS[t] ?? t)
+        )
+        .selectAll('text')
+        .attr('transform', 'rotate(-40)')
+        .attr('text-anchor', 'end')
+        .attr('dx', '-0.4em')
+        .attr('dy', '0.15em');
+
+    // ── Y-axis label position ─────────────────────────────────────────────────
+    // Fixed at x=12 (near left edge) so there is always clear horizontal space
+    // between the label and the y-axis tick numbers (which extend left from x=m.left).
+    indChartSvg.select('.ind-chart-y-label')
+        .attr('transform', `translate(28, ${m.top + height / 2}) rotate(-90)`);
+
+
+    return { width, height };
+}
+
+/**
+ * Main render function for the individual chart.
+ *
+ * Shows the placeholder when no region is chosen.
+ * When a region is chosen, builds the data series and paints/updates:
+ *   - D3 scales with correct domains
+ *   - Y-axis ticks + grid lines
+ *   - The line path
+ *   - Circle markers with hover tooltips
+ *   - A horizontal zero-line for net/diverging metrics
+ *   - The Y-axis label text
+ */
+function renderIndividualChart() {
+    const placeholder = document.getElementById('chart-individual-placeholder');
+    const svgContainer = document.getElementById('chart-individual-svg-container');
+    if (!placeholder || !svgContainer) return;
+
+    // ── No region selected: show placeholder ──────────────────────────────────
+    if (!indChartState.regionKey) {
+        placeholder.removeAttribute('hidden');
+        svgContainer.setAttribute('hidden', '');
+        return;
+    }
+
+    // ── Region selected: hide placeholder, show chart ─────────────────────────
+    placeholder.setAttribute('hidden', '');
+    svgContainer.removeAttribute('hidden');
+
+    const { width, height } = setupIndividualChart();
+    if (width <= 0 || height <= 0) return;
+
+    const metricKey = indChartState.metric;
+    const regionKey = indChartState.regionKey;
+
+    // Build data series: one point per year.
+    // Use indChartState.regionLevel so states and counties can both be charted
+    // regardless of the map's current level radio.
+    const chartLevel = indChartState.regionLevel ?? appState.level;
+    const series = YEARS.map(year => ({
+        year,
+        label: YEAR_LABELS[year] ?? year,
+        value: getMapValue(regionKey, year, metricKey, chartLevel, null),
+    }));
+
+    const defined = d => d.value !== null && Number.isFinite(d.value);
+    const validVals = series.filter(defined).map(d => d.value);
+
+    // ── Y scale domain ────────────────────────────────────────────────────────
+    let [yMin, yMax] = validVals.length > 0
+        ? [d3.min(validVals), d3.max(validVals)]
+        : [0, 1];
+
+    const isDiverging = METRIC_META[metricKey]?.direction === 'both';
+    if (isDiverging) {
+        // Force zero to stay visible; extend whichever side is smaller
+        const absMax = Math.max(Math.abs(yMin), Math.abs(yMax), 1);
+        yMin = Math.min(yMin, -absMax * 0.05);
+        yMax = Math.max(yMax, absMax * 0.05);
+    } else {
+        yMin = Math.min(0, yMin);      // always include zero for one-sided metrics
+        yMax = yMax === 0 ? 1 : yMax;
+    }
+
+    // Add 5 % padding at the top so the highest dot isn't clipped
+    yMax *= 1.05;
+
+    indChartYScale.domain([yMin, yMax]).nice();
+
+    // ── Y-axis ────────────────────────────────────────────────────────────────
+    indChartInner.select('.ind-chart-axis-y')
+        .call(
+            d3.axisLeft(indChartYScale)
+                .ticks(6)
+                .tickFormat(v => formatMetricValue(v, metricKey))
+        );
+
+    // ── Horizontal grid lines ─────────────────────────────────────────────────
+    indChartInner.select('.ind-chart-grid-y')
+        .call(
+            d3.axisLeft(indChartYScale)
+                .ticks(6)
+                .tickSize(-width)
+                .tickFormat('')
+        )
+        .select('.domain').remove();
+
+    // ── Zero line (only for diverging metrics) ────────────────────────────────
+    indChartInner.select('.ind-chart-zero-line')
+        .attr('x1', 0).attr('x2', width)
+        .attr('y1', indChartYScale(0)).attr('y2', indChartYScale(0))
+        .attr('stroke', isDiverging ? 'rgba(0,0,0,0.25)' : 'none')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4 3');
+
+    // ── Y-axis label text ─────────────────────────────────────────────────────
+    indChartSvg.select('.ind-chart-y-label')
+        .text(getMetricLabel(metricKey));
+
+    // ── Line path ─────────────────────────────────────────────────────────────
+    const lineGen = d3.line()
+        .defined(defined)
+        .x(d => indChartXScale(d.year))
+        .y(d => indChartYScale(d.value))
+        .curve(d3.curveMonotoneX);
+
+    indChartInner.select('.ind-chart-line')
+        .datum(series)
+        .attr('fill', 'none')
+        .attr('stroke', 'var(--accent)')
+        .attr('stroke-width', 2.5)
+        .attr('stroke-linejoin', 'round')
+        .attr('stroke-linecap', 'round')
+        .attr('d', lineGen);
+
+    // ── Circle markers ────────────────────────────────────────────────────────
+    // Create / update a shared floating tooltip div (body-level, so it isn't
+    // clipped by the overflow:hidden card).
+    let tooltip = d3.select('body').select('#chart-tooltip');
+    if (tooltip.empty()) {
+        tooltip = d3.select('body').append('div').attr('id', 'chart-tooltip');
+    }
+
+    const dots = indChartInner.select('.ind-chart-dots')
+        .selectAll('circle')
+        .data(series, d => d.year);
+
+    dots.join(
+        enter => enter.append('circle')
+            .attr('r', 4)
+            .attr('cx', d => indChartXScale(d.year))
+            .attr('cy', d => defined(d) ? indChartYScale(d.value) : indChartYScale(yMin))
+            .attr('fill', d => defined(d) ? 'var(--surface)' : 'none')
+            .attr('stroke', d => defined(d) ? 'var(--accent)' : 'var(--text-muted)')
+            .attr('stroke-width', 2)
+            .style('cursor', d => defined(d) ? 'pointer' : 'default'),
+
+        update => update
+            .attr('cx', d => indChartXScale(d.year))
+            .attr('cy', d => defined(d) ? indChartYScale(d.value) : indChartYScale(yMin))
+            .attr('fill', d => defined(d) ? 'var(--surface)' : 'none')
+            .attr('stroke', d => defined(d) ? 'var(--accent)' : 'var(--text-muted)')
+    )
+        .on('mouseenter', function (event, d) {
+            d3.select(this).attr('r', 6);
+            const valStr = defined(d)
+                ? formatMetricValue(d.value, metricKey)
+                : 'No data';
+            tooltip
+                .style('display', 'block')
+                .html(`<strong>${d.label}</strong><br>${getMetricLabel(metricKey)}: ${valStr}`);
+        })
+        .on('mousemove', function (event) {
+            // Flip tooltip to the left if it would overflow the right side of the viewport
+            const tipNode = tooltip.node();
+            const tipW = tipNode ? tipNode.offsetWidth : 180;
+            const rightOverflow = event.pageX + 14 + tipW > window.innerWidth - 16;
+            tooltip
+                .style('left', rightOverflow
+                    ? (event.pageX - tipW - 14) + 'px'
+                    : (event.pageX + 14) + 'px')
+                .style('top', (event.pageY - 10) + 'px');
+        })
+        .on('mouseleave', function () {
+            d3.select(this).attr('r', 4);
+            tooltip.style('display', 'none');
+        });
+}
+
 
 /* ════════════════════════════════════════════════════════════════════════════
    SECTION 9 — CONTROL WIRING  (Milestone 3.3)
@@ -1377,23 +1891,16 @@ function renderChart() {
 function wireControls() {
     // ── Granularity radio buttons ─────────────────────────────────────────────
     document.querySelectorAll('input[name="granularity"]').forEach(radio => {
-        radio.addEventListener('change', async () => {
+        radio.addEventListener('change', () => {
             appState.level = radio.value;
             appState.primaryRegion = null;
             appState.secondaryRegion = null;
             updateSelectionUI();
-
-            if (appState.level === 'county' && !countyDataLoaded) {
-                setLoadingState(true, 'Loading county data…');
-                try {
-                    await loadCountyData();
-                } finally {
-                    setLoadingState(false);
-                }
-            }
+            // County data is loaded eagerly at startup — no lazy load needed here.
             render();
         });
     });
+
 
     // ── Year slider ───────────────────────────────────────────────────────────
     const slider = document.getElementById('year-slider');
@@ -1497,6 +2004,29 @@ function wireControls() {
             renderMap(); // Only need to re-render map
         });
     }
+
+    // ── Individual chart: metric selector ────────────────────────────────────
+    // (Region selection is handled entirely inside initIndividualCombobox)
+    const indMetricSel = document.getElementById('ind-metric-select');
+    if (indMetricSel) {
+        indMetricSel.addEventListener('change', () => {
+            indChartState.metric = indMetricSel.value;
+            renderIndividualChart();
+        });
+    }
+
+    // ── Individual chart: clear button ───────────────────────────────────────
+    const indClearBtn = document.getElementById('ind-clear-btn');
+    if (indClearBtn) {
+        indClearBtn.addEventListener('click', () => {
+            indChartState.regionKey   = null;
+            indChartState.regionLevel = null;
+            const input = document.getElementById('ind-region-input');
+            if (input) input.value = '';
+            _closeIndCombobox();
+            renderIndividualChart();
+        });
+    }
 }
 
 /**
@@ -1569,6 +2099,12 @@ function initUI() {
 
     // ── Selection sidebar ─────────────────────────────────────────────────────
     updateSelectionUI();
+
+    // ── Individual chart: sync metric select + populate region dropdown ────────
+    const indMetricEl = document.getElementById('ind-metric-select');
+    if (indMetricEl) indMetricEl.value = indChartState.metric;
+    initIndividualCombobox(); // builds entries, wires all combobox events
+    renderIndividualChart();
 }
 
 /**
@@ -1686,9 +2222,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     initUI();
     render();
 
+    // Begin loading county data eagerly in the background.
+    // This runs in parallel with the first map render so the UI stays responsive.
+    // When it completes, rebuild the combobox entries so counties become selectable.
+    loadCountyData().then(() => {
+        buildIndComboboxEntries();
+        // If the combobox is currently open, refresh the listbox immediately
+        if (indComboboxOpen) _renderIndComboboxListbox(
+            document.getElementById('ind-region-input')?.value ?? ''
+        );
+        console.log('[App] County combobox entries built:', indComboboxEntries.filter(e => e.level === 'county').length.toLocaleString());
+    }).catch(err => {
+        console.error('[App] County background load failed:', err);
+    });
+
     // Re-render map whenever the container is resized (e.g. window resize)
     const resizeObserver = new ResizeObserver(() => { if (mapSvg) renderMap(); });
     resizeObserver.observe(document.getElementById('map'));
+
+    // Re-scaffold and re-render the individual chart when its container resizes
+    const indChartContainer = document.getElementById('chart-individual-svg-container');
+    if (indChartContainer) {
+        const chartResizeObserver = new ResizeObserver(() => {
+            // Reset the SVG handle so setupIndividualChart() recreates it at the new size
+            if (indChartSvg) {
+                indChartSvg.remove();
+                indChartSvg = null;
+                indChartInner = null;
+            }
+            renderIndividualChart();
+        });
+        chartResizeObserver.observe(indChartContainer);
+    }
+
 
     // Expose data stores and API for debugging and for future milestones
     window._migration = {
