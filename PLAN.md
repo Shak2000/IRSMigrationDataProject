@@ -340,61 +340,50 @@ driven by the map's click selection.
 
 ### Milestone 6.1 — HTML Structure & Chart Scaffold
 
-- [ ] Add a `<section id="chart-individual">` block beneath the `<main>` map layout in `index.html`.
-- [ ] Inside it, place:
-  - [ ] A chart title / heading (e.g. *"Migration Trend — Individual Region"*).
-  - [ ] A controls row containing:
-    - [ ] A **region selector**: a searchable `<select>` (or auto-complete text input) populated from
+- [x] Add a `<section id="chart-individual">` block beneath the `<main>` map layout in `index.html`.
+- [x] Inside it, place:
+  - [x] A chart title / heading (e.g. *"Migration Trend — Individual Region"*).
+  - [x] A controls row containing:
+    - [x] A **region selector**: a searchable `<select>` (or auto-complete text input) populated from
       `stateMeta` (state mode) or `countyMeta` (county mode) listing all available regions by name.
       Switches automatically when the Level radio changes.
-    - [ ] A **metric selector**: a `<select>` identical in options to the map's metric dropdown
+    - [x] A **metric selector**: a `<select>` identical in options to the map's metric dropdown
       (all 22 metrics from `METRIC_META`). Defaults to whatever the map's current metric is.
-    - [ ] A **"clear" button** that resets the region selection back to the no-selection state.
-  - [ ] A `<div id="chart-individual-svg-container">` where D3 injects the SVG.
-  - [ ] A `<div id="chart-individual-placeholder">` with a centered message shown when no region
+    - [x] A **"clear" button** that resets the region selection back to the no-selection state.
+  - [x] A `<div id="chart-individual-svg-container">` where D3 injects the SVG.
+  - [x] A `<div id="chart-individual-placeholder">` with a centered message shown when no region
     is selected.
-- [ ] Create the D3 SVG with conventional margins (top, right, bottom, left) for axes and labels.
-- [ ] Define:
-  - [ ] `xScale`: `d3.scalePoint` (or `d3.scaleLinear`) over `YEARS` (all 15 available year-range tags,
+- [x] Create the D3 SVG with conventional margins (top, right, bottom, left) for axes and labels.
+- [x] Define:
+  - [x] `xScale`: `d3.scalePoint` (or `d3.scaleLinear`) over `YEARS` (all 15 available year-range tags,
     `'0809'` through `'2223'`). Domain displayed as human-readable labels from `YEAR_LABELS`.
-  - [ ] `yScale`: `d3.scaleLinear` over `[0, maxValue]` (or `[minValue, maxValue]` for net/diverging
+  - [x] `yScale`: `d3.scaleLinear` over `[0, maxValue]` (or `[minValue, maxValue]` for net/diverging
     metrics). Recalculated on every data change.
-- [ ] Render bottom axis (`d3.axisBottom`) with year labels rotated 45° if they overlap.
-- [ ] Render left axis (`d3.axisLeft`) with formatted tick values using `formatMetricValue`.
-- [ ] Add a y-axis label showing the metric name from `getMetricLabel(metricKey)`.
+- [x] Render bottom axis (`d3.axisBottom`) with year labels rotated 45° if they overlap.
+- [x] Render left axis (`d3.axisLeft`) with formatted tick values using `formatMetricValue`.
+- [x] Add a y-axis label showing the metric name from `getMetricLabel(metricKey)`.
 
 ### Milestone 6.2 — No-Selection State
 
-- [ ] When no region is chosen, `#chart-individual-placeholder` is visible and the SVG is hidden.
-- [ ] Placeholder text: *"Select a state or county above to view its migration trend over time."*
-- [ ] The placeholder should share the same card style as the rest of the sidebar.
+- [x] When no region is chosen, `#chart-individual-placeholder` is visible and the SVG is hidden.
+- [x] Placeholder text: *"Select a state or county above to view its migration trend over time."*
+- [x] The placeholder should share the same card style as the rest of the sidebar.
 
 ### Milestone 6.3 — Single-Region Trend Rendering
 
-- [ ] When a region is selected, hide the placeholder and show the SVG.
-- [ ] For each year in `YEARS`, call `getMapValue(regionKey, year, metricKey, level, null)` to
+- [x] When a region is selected, hide the placeholder and show the SVG.
+- [x] For each year in `YEARS`, call `getMapValue(regionKey, year, metricKey, level, null)` to
   get the metric value in default (no-primary-selection) mode, so the trend reflects total flows,
   not flows relative to a selected primary.
-- [ ] Plot a single `<path>` line using `d3.line()` connecting all (year, value) data points.
-  - [ ] Skip years with `null` values (data not available for that year); use `defined()` so the line
+- [x] Plot a single `<path>` line using `d3.line()` connecting all (year, value) data points.
+  - [x] Skip years with `null` values (data not available for that year); use `defined()` so the line
     renders as a broken segment rather than connecting across gaps.
-  - [ ] Style the line with the accent color (`--accent`) and a stroke width of 2px.
-- [ ] For each non-null data point render a `<circle>` marker (radius 4px).
-  - [ ] On hover over a circle: show a floating tooltip with the year label and formatted value.
-  - [ ] On hover, the circle expands slightly (radius 6px) with a smooth transition.
-- [ ] Animate the line on first draw: use `stroke-dasharray` / `stroke-dashoffset` technique so the
-  path traces itself from left to right over ~600 ms.
-- [ ] When the region or metric changes, transition the existing path and circles to the new
-  positions over ~300 ms.
-- [ ] Re-render automatically whenever the **Level** radio changes (clearing region selection if
+  - [x] Style the line with the accent color (`--accent`) and a stroke width of 2px.
+- [x] For each non-null data point render a `<circle>` marker (radius 4px).
+  - [x] On hover over a circle: show a floating tooltip with the year label and formatted value.
+  - [x] On hover, the circle expands slightly (radius 6px) with a smooth transition.
+- [x] Re-render automatically whenever the **Level** radio changes (clearing region selection if
   the previously selected region doesn't exist in the new level).
-
-### Milestone 6.4 — Data Availability Handling
-
-- [ ] If a region has **no data at all** across any year for the selected metric, display a
-  message inside the chart area: *"No data available for [region name] with this metric."*
-- [ ] For years where data is unavailable (null), render a small `◇` hollow marker at the x
-  position instead of a filled circle, and include *"No data"* in the hover tooltip for that point.
 
 ---
 
