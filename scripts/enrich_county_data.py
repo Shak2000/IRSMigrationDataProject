@@ -238,6 +238,14 @@ def enrich(
             y2_cf = row["y2_countyfips"].strip().zfill(3)
             y1_sf = row["y1_statefips"].strip().zfill(2)
             y1_cf = row["y1_countyfips"].strip().zfill(3)
+            
+            # MATHEMATICAL IDENTIFIER FOR NON-MIGRANTS
+            is_non_migrant = (
+                y1_sf == y2_sf and 
+                y1_cf == y2_cf and 
+                y1_sf not in SPECIAL_STATE_FIPS and 
+                y1_cf not in SPECIAL_COUNTY_FIPS
+            )
 
             if direction == "inflow":
                 # y2 (destination) is missing — derive from lookup
@@ -247,9 +255,13 @@ def enrich(
                 y1_state = row.get("y1_state", "")
                 y1_raw_county = row.get("y1_countyname", "")
                 
-                # --- TRUNCATION-SAFE FIX ---
-                # Shortened to "Total Migration" to catch truncated IRS county strings
-                if any(sub in y1_raw_county for sub in ["Non-migrants", "Total Migration"]):
+                # FORCE non-migrant label, or fallback to preserving special totals/lookups
+                if is_non_migrant:
+                    y1_county_name = "Non-migrants"
+                    _, y1_state_name = state_lookup.get(y1_sf, (y1_state, ""))
+                    if not y1_state_name:
+                        y1_state_name = row.get("y1_state_name", "")
+                elif any(sub in y1_raw_county for sub in ["Total Migration"]):
                     y1_county_name = y1_raw_county
                     _, y1_state_name = state_lookup.get(y1_sf, (y1_state, ""))
                     if not y1_state_name:
@@ -269,9 +281,13 @@ def enrich(
                 y2_state = row.get("y2_state", "")
                 y2_raw_county = row.get("y2_countyname", "")
                 
-                # --- TRUNCATION-SAFE FIX ---
-                # Shortened to "Total Migration" to catch truncated IRS county strings
-                if any(sub in y2_raw_county for sub in ["Non-migrants", "Total Migration"]):
+                # FORCE non-migrant label, or fallback to preserving special totals/lookups
+                if is_non_migrant:
+                    y2_county_name = "Non-migrants"
+                    _, y2_state_name = state_lookup.get(y2_sf, (y2_state, ""))
+                    if not y2_state_name:
+                        y2_state_name = row.get("y2_state_name", "")
+                elif any(sub in y2_raw_county for sub in ["Total Migration"]):
                     y2_county_name = y2_raw_county
                     _, y2_state_name = state_lookup.get(y2_sf, (y2_state, ""))
                     if not y2_state_name:
