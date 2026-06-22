@@ -324,6 +324,102 @@
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════
+       PHASE 7 — PAIRWISE REGION TREND CHART
+  ════════════════════════════════════════════════════════════════════════ -->
+
+  <section id="chart-pair" aria-labelledby="chart-pair-heading">
+
+    <div class="chart-section-header">
+      <div class="chart-section-title-group">
+        <h2 id="chart-pair-heading" class="chart-section-heading">
+          Migration Trend — Between Two Regions
+        </h2>
+        <p class="chart-section-subtitle">
+          Select two states or counties to view the migration flows between them over time.
+        </p>
+      </div>
+    </div>
+
+    <div class="chart-controls-wrapper">
+      <div class="chart-controls-row" role="group" aria-label="Pairwise chart controls">
+
+        <div class="chart-control-group">
+          <label class="control-label" for="pair-region-a-input">Region A</label>
+          <div class="region-combobox" id="pair-region-a-combobox">
+            <input type="text" id="pair-region-a-input" class="region-combobox-input"
+              placeholder="Search states and counties…" autocomplete="off" spellcheck="false" role="combobox"
+              aria-expanded="false" aria-haspopup="listbox" aria-autocomplete="list"
+              aria-controls="pair-region-a-listbox" />
+            <div id="pair-region-a-listbox" class="region-combobox-listbox" role="listbox" aria-label="Region options"
+              hidden></div>
+          </div>
+        </div>
+
+        <div class="chart-control-group">
+          <label class="control-label" for="pair-region-b-input">Region B</label>
+          <div class="region-combobox" id="pair-region-b-combobox">
+            <input type="text" id="pair-region-b-input" class="region-combobox-input"
+              placeholder="Search states and counties…" autocomplete="off" spellcheck="false" role="combobox"
+              aria-expanded="false" aria-haspopup="listbox" aria-autocomplete="list"
+              aria-controls="pair-region-b-listbox" />
+            <div id="pair-region-b-listbox" class="region-combobox-listbox" role="listbox" aria-label="Region options"
+              hidden></div>
+          </div>
+        </div>
+
+        <div class="chart-control-group">
+          <label class="control-label" for="pair-metric-select">Metric</label>
+          <select id="pair-metric-select" aria-label="Select metric for pairwise chart">
+            <optgroup label="Population">
+              <option value="pop_inflow">Population inflow (B → A)</option>
+              <option value="pop_outflow" selected>Population outflow (A → B)</option>
+              <option value="pop_net">Net population flow (A → B)</option>
+              <option value="pop_inflow_share">Population inflow as share of population (B → A)</option>
+              <option value="pop_outflow_share">Population outflow as share of population (A → B)</option>
+              <option value="pop_net_share">Net population flow as share of population (A → B)</option>
+            </optgroup>
+            <optgroup label="Households">
+              <option value="hh_inflow">Households inflow (B → A)</option>
+              <option value="hh_outflow">Households outflow (A → B)</option>
+              <option value="hh_net">Net household flow (A → B)</option>
+              <option value="hh_inflow_share">Households inflow as share of households (B → A)</option>
+              <option value="hh_outflow_share">Households outflow as share of households (A → B)</option>
+              <option value="hh_net_share">Net household flow as share of households (A → B)</option>
+            </optgroup>
+            <optgroup label="AGI">
+              <option value="agi_inflow">AGI inflow (B → A)</option>
+              <option value="agi_outflow">AGI outflow (A → B)</option>
+              <option value="agi_net">Net AGI flow (A → B)</option>
+              <option value="agi_inflow_share">AGI inflow as share of AGI (B → A)</option>
+              <option value="agi_outflow_share">AGI outflow as share of AGI (A → B)</option>
+              <option value="agi_net_share">Net AGI flow as share of AGI (A → B)</option>
+            </optgroup>
+            <optgroup label="Average AGI">
+              <option value="avg_agi_in_individual">Avg AGI of individual moving in (B → A)</option>
+              <option value="avg_agi_in_household">Avg AGI of household moving in (B → A)</option>
+              <option value="avg_agi_out_individual">Avg AGI of individual moving out (A → B)</option>
+              <option value="avg_agi_out_household">Avg AGI of household moving out (A → B)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <button id="pair-clear-btn" type="button" class="chart-clear-btn" aria-label="Clear pairwise chart selection">
+          Clear
+        </button>
+
+      </div>
+      <div style="width: 48px; flex-shrink: 0;"></div>
+    </div>
+    <div id="chart-pair-area">
+      <div id="chart-pair-placeholder" class="chart-placeholder" role="status" aria-live="polite">
+        <p>Select two states or counties above to view the migration flows between them over time.</p>
+      </div>
+
+      <div id="chart-pair-svg-container" aria-label="Pairwise region migration trend chart" hidden></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
        SCREEN-READER-ONLY LIVE REGION for dynamic updates
   ════════════════════════════════════════════════════════════════════════ -->
   <div id="sr-announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>

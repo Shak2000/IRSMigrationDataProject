@@ -1880,6 +1880,356 @@ function renderIndividualChart() {
         });
 }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   SECTION 8.6 — PHASE 7: PAIRWISE REGION TREND CHART  (Milestones 7.1/7.2)
+═══════════════════════════════════════════════════════════════════════════ */
+
+const pairChartState = {
+    regionAKey: null,
+    regionALevel: null,
+    regionBKey: null,
+    regionBLevel: null,
+    metric: 'pop_outflow'
+};
+
+let pairChartSvg = null;
+let pairChartInner = null;
+let pairChartXScale = null;
+let pairChartYScale = null;
+let pairChartMargin = { top: 24, right: 32, bottom: 64, left: 100 };
+
+function setupPairChart() {
+    const container = document.getElementById('chart-pair-svg-container');
+    if (!container) return { width: 0, height: 0 };
+
+    const m = pairChartMargin;
+    const totalW = container.clientWidth || 800;
+    const totalH = container.clientHeight || 340;
+    const width = totalW - m.left - m.right;
+    const height = totalH - m.top - m.bottom;
+
+    if (!pairChartSvg) {
+        pairChartSvg = d3.select(container).append('svg')
+            .attr('role', 'img').attr('aria-label', 'Pairwise migration trend');
+
+        pairChartInner = pairChartSvg.append('g').attr('class', 'pair-chart-inner');
+
+        pairChartInner.append('g').attr('class', 'ind-chart-grid ind-chart-grid-y');
+        pairChartInner.append('g').attr('class', 'ind-chart-axis ind-chart-axis-x');
+        pairChartInner.append('g').attr('class', 'ind-chart-axis ind-chart-axis-y');
+
+        pairChartSvg.append('text')
+            .attr('class', 'ind-chart-y-label pair-chart-y-label')
+            .attr('text-anchor', 'middle');
+
+        // Pre-append elements so we don't have to lazily create them in render
+        pairChartInner.append('line').attr('class', 'ind-chart-zero-line');
+        pairChartInner.append('path').attr('class', 'pair-chart-line');
+        pairChartInner.append('g').attr('class', 'pair-chart-dots');
+    }
+
+    pairChartSvg.attr('width', totalW).attr('height', totalH).attr('viewBox', `0 0 ${totalW} ${totalH}`);
+    pairChartInner.attr('transform', `translate(${m.left},${m.top})`);
+
+    pairChartXScale = d3.scalePoint().domain(YEARS).range([0, width]).padding(0.1);
+    pairChartYScale = d3.scaleLinear().range([height, 0]);
+
+    pairChartInner.select('.ind-chart-axis-x')
+        .attr('transform', `translate(0,${height})`)
+        .call(d3.axisBottom(pairChartXScale).tickFormat(t => YEAR_LABELS[t] ?? t))
+        .selectAll('text').attr('transform', 'rotate(-40)').attr('text-anchor', 'end').attr('dx', '-0.4em').attr('dy', '0.15em');
+
+    pairChartSvg.select('.pair-chart-y-label').attr('transform', `translate(28, ${m.top + height / 2}) rotate(-90)`).text(getMetricLabel(pairChartState.metric));
+
+    return { width, height };
+}
+
+function renderPairChart() {
+    const placeholder = document.getElementById('chart-pair-placeholder');
+    const svgContainer = document.getElementById('chart-pair-svg-container');
+    if (!placeholder || !svgContainer) return;
+
+    if (!pairChartState.regionAKey || !pairChartState.regionBKey) {
+        placeholder.removeAttribute('hidden');
+        svgContainer.setAttribute('hidden', '');
+        const p = placeholder.querySelector('p');
+        if (p) {
+            p.innerHTML = (pairChartState.regionAKey || pairChartState.regionBKey)
+                ? "Now select a second region to complete the comparison."
+                : "Select two states or counties above to view the migration flows between them over time.";
+        }
+        return;
+    }
+
+    placeholder.setAttribute('hidden', '');
+    svgContainer.removeAttribute('hidden');
+
+    const { width, height } = setupPairChart();
+    if (width <= 0 || height <= 0) return;
+
+    const metricKey = pairChartState.metric;
+
+    // Build data series treating Region A as the "Perspective" (Primary Region) 
+    // and Region B as the target region
+    const series = YEARS.map(year => ({
+        year,
+        label: YEAR_LABELS[year] ?? year,
+        value: getMapValue(pairChartState.regionBKey, year, metricKey, pairChartState.regionBLevel, pairChartState.regionAKey)
+    }));
+
+    const defined = d => d.value !== null && Number.isFinite(d.value);
+    const validVals = series.filter(defined).map(d => d.value);
+
+    // Dynamic Y Scale to handle diverging/net values
+    let [yMin, yMax] = validVals.length > 0
+        ? [d3.min(validVals), d3.max(validVals)]
+        : [0, 1];
+
+    const isDiverging = METRIC_META[metricKey]?.direction === 'both';
+    if (isDiverging) {
+        const absMax = Math.max(Math.abs(yMin), Math.abs(yMax), 1);
+        yMin = Math.min(yMin, -absMax * 0.05);
+        yMax = Math.max(yMax, absMax * 0.05);
+    } else {
+        yMin = Math.min(0, yMin);
+        yMax = yMax === 0 ? 1 : yMax;
+    }
+    yMax *= 1.05;
+
+    pairChartYScale.domain([yMin, yMax]).nice();
+
+    pairChartInner.select('.ind-chart-axis-y')
+        .call(
+            d3.axisLeft(pairChartYScale)
+                .ticks(6)
+                .tickFormat(v => formatMetricValue(v, metricKey))
+        );
+
+    pairChartInner.select('.ind-chart-grid-y')
+        .call(
+            d3.axisLeft(pairChartYScale)
+                .ticks(6)
+                .tickSize(-width)
+                .tickFormat('')
+        )
+        .select('.domain').remove();
+
+    // Zero-line (for net/diverging metrics)
+    pairChartInner.select('.ind-chart-zero-line')
+        .attr('x1', 0).attr('x2', width)
+        .attr('y1', pairChartYScale(0)).attr('y2', pairChartYScale(0))
+        .attr('stroke', isDiverging ? 'rgba(0,0,0,0.25)' : 'none')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4 3');
+
+    const lineGen = d3.line()
+        .defined(defined)
+        .x(d => pairChartXScale(d.year))
+        .y(d => pairChartYScale(d.value))
+        .curve(d3.curveMonotoneX);
+
+    pairChartInner.select('.pair-chart-line')
+        .datum(series)
+        .attr('fill', 'none')
+        .attr('stroke', 'var(--accent)')
+        .attr('stroke-width', 2.5)
+        .attr('stroke-linejoin', 'round')
+        .attr('stroke-linecap', 'round')
+        .attr('d', lineGen);
+
+    let tooltip = d3.select('body').select('#chart-tooltip');
+    if (tooltip.empty()) {
+        tooltip = d3.select('body').append('div').attr('id', 'chart-tooltip');
+    }
+
+    const dots = pairChartInner.select('.pair-chart-dots').selectAll('circle').data(series, d => d.year);
+
+    dots.join(
+        enter => enter.append('circle')
+            .attr('r', 4)
+            .attr('cx', d => pairChartXScale(d.year))
+            .attr('cy', d => defined(d) ? pairChartYScale(d.value) : 0)
+            .attr('fill', 'var(--surface)')
+            .attr('stroke', 'var(--accent)')
+            .attr('stroke-width', 2)
+            .style('cursor', 'pointer')
+            .style('display', d => defined(d) ? null : 'none'),
+        update => update
+            .attr('cx', d => pairChartXScale(d.year))
+            .attr('cy', d => defined(d) ? pairChartYScale(d.value) : 0)
+            .style('display', d => defined(d) ? null : 'none')
+    )
+        .on('mouseenter', function (event, d) {
+            d3.select(this).attr('r', 6);
+            const valStr = formatMetricValue(d.value, metricKey);
+            const inputA = document.getElementById('pair-region-a-input');
+            const inputB = document.getElementById('pair-region-b-input');
+            const nameA = inputA ? inputA.value : 'Region A';
+            const nameB = inputB ? inputB.value : 'Region B';
+
+            tooltip
+                .style('display', 'block')
+                .html(`<strong>${d.label}</strong><br/>
+                       <span style="color: #666;">Region A:</span> ${nameA}<br/>
+                       <span style="color: #666;">Region B:</span> ${nameB}<br/>
+                       <span style="color: #666;">${getMetricLabel(metricKey)}:</span> ${valStr}`);
+        })
+        .on('mousemove', function (event) {
+            const tipNode = tooltip.node();
+            const tipW = tipNode ? tipNode.offsetWidth : 180;
+            const rightOverflow = event.pageX + 14 + tipW > window.innerWidth - 16;
+            tooltip
+                .style('left', rightOverflow
+                    ? (event.pageX - tipW - 14) + 'px'
+                    : (event.pageX + 14) + 'px')
+                .style('top', (event.pageY - 10) + 'px');
+        })
+        .on('mouseleave', function () {
+            d3.select(this).attr('r', 4);
+            tooltip.style('display', 'none');
+        });
+}
+
+/** Helper to generate region comboboxes cleanly */
+function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel) {
+    let isOpen = false;
+    let highlightIdx = -1;
+
+    const input = document.getElementById(`${prefix}-input`);
+    const listbox = document.getElementById(`${prefix}-listbox`);
+    const combobox = document.getElementById(`${prefix}-combobox`);
+    if (!input || !listbox || !combobox) return;
+
+    function appendOption(entry, showBadge) {
+        const opt = document.createElement('div');
+        const isActive = entry.key === getSelectedKey();
+        opt.className = 'region-option' + (isActive ? ' region-option--active' : '');
+        opt.textContent = showBadge ? `${entry.label}\u2002(${entry.level})` : entry.label;
+        opt.dataset.key = entry.key;
+        opt.dataset.level = entry.level;
+        opt.dataset.label = entry.label;
+        listbox.appendChild(opt);
+    }
+
+    function renderList(filterText) {
+        const lower = (filterText || '').toLowerCase().trim();
+        highlightIdx = -1;
+
+        // NEW: Check if the other combobox has forced a specific level (state/county)
+        const allowedLevel = getAllowedLevel ? getAllowedLevel() : null;
+        let availableEntries = indComboboxEntries;
+
+        // NEW: Filter the available options to match the other combobox's level
+        if (allowedLevel) {
+            availableEntries = availableEntries.filter(e => e.level === allowedLevel);
+        }
+
+        const filtered = lower ? availableEntries.filter(e => e.label.toLowerCase().includes(lower)) : availableEntries;
+
+        listbox.innerHTML = '';
+        if (filtered.length === 0) {
+            listbox.innerHTML = '<div class="region-option region-option--no-results">No results found</div>';
+            return;
+        }
+
+        if (lower) {
+            filtered.forEach(e => appendOption(e, false));
+        } else {
+            const selKey = getSelectedKey();
+            const selectedEntry = selKey ? availableEntries.find(e => e.key === selKey) : null;
+            const states = filtered.filter(e => e.level === 'state' && e.key !== selKey);
+            const counties = filtered.filter(e => e.level === 'county' && e.key !== selKey);
+
+            if (selectedEntry) {
+                listbox.insertAdjacentHTML('beforeend', '<div class="region-group-label">Selected</div>');
+                appendOption(selectedEntry, false);
+            }
+            if (states.length) {
+                listbox.insertAdjacentHTML('beforeend', '<div class="region-group-label">States</div>');
+                states.forEach(e => appendOption(e, false));
+            }
+            if (counties.length) {
+                listbox.insertAdjacentHTML('beforeend', '<div class="region-group-label">Counties</div>');
+                counties.forEach(e => appendOption(e, false));
+            }
+            // NEW: Only show the county loading message if counties are actually allowed
+            if (!countyDataLoaded && (!allowedLevel || allowedLevel === 'county')) {
+                listbox.insertAdjacentHTML('beforeend', '<div class="region-option region-option--no-results">Loading county data…</div>');
+            }
+        }
+    }
+
+    function openBox() {
+        if (isOpen) return;
+        listbox.removeAttribute('hidden');
+        input.setAttribute('aria-expanded', 'true');
+        isOpen = true;
+        renderList(input.value);
+    }
+
+    function closeBox() {
+        listbox.setAttribute('hidden', '');
+        input.setAttribute('aria-expanded', 'false');
+        isOpen = false;
+        highlightIdx = -1;
+        const selKey = getSelectedKey();
+        const entry = selKey ? indComboboxEntries.find(e => e.key === selKey) : null;
+        input.value = entry ? entry.label : '';
+    }
+
+    input.addEventListener('focus', openBox);
+    input.addEventListener('input', () => { if (!isOpen) openBox(); renderList(input.value); });
+    input.addEventListener('keydown', e => {
+        if (!isOpen && e.key !== 'Tab') openBox();
+        const options = Array.from(listbox.querySelectorAll('.region-option:not(.region-option--no-results)'));
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            highlightIdx = e.key === 'ArrowDown' ? Math.min(highlightIdx + 1, options.length - 1) : Math.max(highlightIdx - 1, 0);
+            options.forEach((opt, i) => {
+                if (i === highlightIdx) { opt.classList.add('region-option--highlighted'); opt.scrollIntoView({ block: 'nearest' }); }
+                else opt.classList.remove('region-option--highlighted');
+            });
+        } else if (e.key === 'Enter') {
+            e.preventDefault(); const h = options[highlightIdx];
+            if (h) { onSelect(h.dataset.key, h.dataset.level, h.dataset.label); closeBox(); }
+        } else if (e.key === 'Escape') closeBox();
+    });
+    listbox.addEventListener('mousedown', e => {
+        const opt = e.target.closest('.region-option');
+        if (!opt || opt.classList.contains('region-option--no-results')) return;
+        e.preventDefault();
+        onSelect(opt.dataset.key, opt.dataset.level, opt.dataset.label);
+        closeBox();
+    });
+    input.addEventListener('blur', () => setTimeout(closeBox, 150));
+    document.addEventListener('click', e => { if (!combobox.contains(e.target)) closeBox(); });
+}
+
+function initPairComboboxes() {
+    bindGenericCombobox(
+        'pair-region-a',
+        () => pairChartState.regionAKey,
+        (key, level, label) => {
+            pairChartState.regionAKey = key || null;
+            pairChartState.regionALevel = level || null;
+            document.getElementById('pair-region-a-input').value = key ? label : '';
+            renderPairChart();
+        },
+        () => pairChartState.regionBLevel // NEW: Tells A to only show B's level
+    );
+
+    bindGenericCombobox(
+        'pair-region-b',
+        () => pairChartState.regionBKey,
+        (key, level, label) => {
+            pairChartState.regionBKey = key || null;
+            pairChartState.regionBLevel = level || null;
+            document.getElementById('pair-region-b-input').value = key ? label : '';
+            renderPairChart();
+        },
+        () => pairChartState.regionALevel // NEW: Tells B to only show A's level
+    );
+}
 
 /* ════════════════════════════════════════════════════════════════════════════
    SECTION 9 — CONTROL WIRING  (Milestone 3.3)
@@ -2041,6 +2391,31 @@ function wireControls() {
             window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         });
     }
+
+    // ── Pairwise chart: metric selector ────────────────────────────────────
+    const pairMetricSel = document.getElementById('pair-metric-select');
+    if (pairMetricSel) {
+        pairMetricSel.addEventListener('change', () => {
+            pairChartState.metric = pairMetricSel.value;
+            renderPairChart();
+        });
+    }
+
+    // ── Pairwise chart: clear button ───────────────────────────────────────
+    const pairClearBtn = document.getElementById('pair-clear-btn');
+    if (pairClearBtn) {
+        pairClearBtn.addEventListener('click', () => {
+            pairChartState.regionAKey = null;
+            pairChartState.regionALevel = null;
+            pairChartState.regionBKey = null;
+            pairChartState.regionBLevel = null;
+            const inputA = document.getElementById('pair-region-a-input');
+            const inputB = document.getElementById('pair-region-b-input');
+            if (inputA) inputA.value = '';
+            if (inputB) inputB.value = '';
+            renderPairChart();
+        });
+    }
 }
 
 /**
@@ -2119,6 +2494,12 @@ function initUI() {
     if (indMetricEl) indMetricEl.value = indChartState.metric;
     initIndividualCombobox(); // builds entries, wires all combobox events
     renderIndividualChart();
+
+    // ── Pairwise chart: sync state & populate dropdowns ───────────────────────
+    const pairMetricEl = document.getElementById('pair-metric-select');
+    if (pairMetricEl) pairMetricEl.value = pairChartState.metric;
+    initPairComboboxes();
+    renderPairChart();
 }
 
 /**
@@ -2269,6 +2650,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         chartResizeObserver.observe(indChartContainer);
     }
 
+    // Re-scaffold and re-render the pair chart when its container resizes
+    const pairChartContainer = document.getElementById('chart-pair-svg-container');
+    if (pairChartContainer) {
+        const pairResizeObserver = new ResizeObserver(() => {
+            if (pairChartSvg) {
+                pairChartSvg.remove();
+                pairChartSvg = null;
+                pairChartInner = null;
+            }
+            renderPairChart();
+        });
+        pairResizeObserver.observe(pairChartContainer);
+    }
 
     // Expose data stores and API for debugging and for future milestones
     window._migration = {
