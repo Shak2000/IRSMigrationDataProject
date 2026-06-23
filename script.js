@@ -1949,6 +1949,7 @@ function renderPairChart() {
     const svgContainer = document.getElementById('chart-pair-svg-container');
     if (!placeholder || !svgContainer) return;
 
+    // ── 1. Check if both regions are selected ─────────────────────────────────
     if (!pairChartState.regionAKey || !pairChartState.regionBKey) {
         placeholder.removeAttribute('hidden');
         svgContainer.setAttribute('hidden', '');
@@ -1964,40 +1965,56 @@ function renderPairChart() {
     placeholder.setAttribute('hidden', '');
     svgContainer.removeAttribute('hidden');
 
+    // ── 2. Setup Dimensions and Skeleton ──────────────────────────────────────
     const { width, height } = setupPairChart();
     if (width <= 0 || height <= 0) return;
 
     const metricKey = pairChartState.metric;
 
-    // Build data series treating Region A as the "Perspective" (Primary Region) 
-    // and Region B as the target region
-    const series = YEARS.map(year => ({
-        year,
-        label: YEAR_LABELS[year] ?? year,
-        value: getMapValue(pairChartState.regionBKey, year, metricKey, pairChartState.regionBLevel, pairChartState.regionAKey)
-    }));
+    // ── 3. Build Data Series ──────────────────────────────────────────────────
+    // Treating Region A as the "Perspective" (Primary Region) and Region B as the target
+    const series = YEARS.map(year => {
+        let value = null;
+        if (pairChartState.regionALevel === 'state') {
+            value = _getStateMapValue(pairChartState.regionBKey, year, metricKey, pairChartState.regionAKey);
+        } else {
+            value = _getCountyMapValue(pairChartState.regionBKey, year, metricKey, pairChartState.regionAKey);
+        }
+
+        return {
+            year,
+            label: YEAR_LABELS[year] ?? year,
+            value
+        };
+    });
 
     const defined = d => d.value !== null && Number.isFinite(d.value);
     const validVals = series.filter(defined).map(d => d.value);
 
-    // Dynamic Y Scale to handle diverging/net values
+    // ── 4. Dynamic Y Scale ────────────────────────────────────────────────────
     let [yMin, yMax] = validVals.length > 0
         ? [d3.min(validVals), d3.max(validVals)]
         : [0, 1];
 
+    const range = yMax - yMin;
+    // If the line is perfectly flat (range = 0), apply a minimal 5% pad so the axis doesn't break
+    const pad = range === 0 ? (Math.abs(yMax) * 0.05 || 1) : range * 0.1;
+
     const isDiverging = METRIC_META[metricKey]?.direction === 'both';
+
     if (isDiverging) {
-        const absMax = Math.max(Math.abs(yMin), Math.abs(yMax), 1);
-        yMin = Math.min(yMin, -absMax * 0.05);
-        yMax = Math.max(yMax, absMax * 0.05);
+        // NEW: Strictly pad around the actual data envelope. No more forced -100 to +100 symmetry.
+        yMin = yMin - pad;
+        yMax = yMax + pad;
     } else {
-        yMin = Math.min(0, yMin);
-        yMax = yMax === 0 ? 1 : yMax;
+        // For absolute metrics, allow it to zoom in, but never drop the axis below 0
+        yMin = Math.max(0, yMin - pad);
+        yMax = yMax + pad;
     }
-    yMax *= 1.05;
 
     pairChartYScale.domain([yMin, yMax]).nice();
 
+    // ── 5. Axes & Grid ────────────────────────────────────────────────────────
     pairChartInner.select('.ind-chart-axis-y')
         .call(
             d3.axisLeft(pairChartYScale)
@@ -2015,13 +2032,18 @@ function renderPairChart() {
         .select('.domain').remove();
 
     // Zero-line (for net/diverging metrics)
+    const zeroY = pairChartYScale(0);
+    // NEW: We must hide the zero-line if the tight padding pushes 0 off the screen
+    const showZero = isDiverging && zeroY >= 0 && zeroY <= height;
+
     pairChartInner.select('.ind-chart-zero-line')
         .attr('x1', 0).attr('x2', width)
-        .attr('y1', pairChartYScale(0)).attr('y2', pairChartYScale(0))
-        .attr('stroke', isDiverging ? 'rgba(0,0,0,0.25)' : 'none')
+        .attr('y1', zeroY).attr('y2', zeroY)
+        .attr('stroke', showZero ? 'rgba(0,0,0,0.25)' : 'none')
         .attr('stroke-width', 1)
         .attr('stroke-dasharray', '4 3');
 
+    // ── 6. Line Path ──────────────────────────────────────────────────────────
     const lineGen = d3.line()
         .defined(defined)
         .x(d => pairChartXScale(d.year))
@@ -2037,6 +2059,7 @@ function renderPairChart() {
         .attr('stroke-linecap', 'round')
         .attr('d', lineGen);
 
+    // ── 7. Circle Markers & Tooltip ───────────────────────────────────────────
     let tooltip = d3.select('body').select('#chart-tooltip');
     if (tooltip.empty()) {
         tooltip = d3.select('body').append('div').attr('id', 'chart-tooltip');
@@ -2062,6 +2085,8 @@ function renderPairChart() {
         .on('mouseenter', function (event, d) {
             d3.select(this).attr('r', 6);
             const valStr = formatMetricValue(d.value, metricKey);
+
+            // Contextual labels from the UI dropdowns
             const inputA = document.getElementById('pair-region-a-input');
             const inputB = document.getElementById('pair-region-b-input');
             const nameA = inputA ? inputA.value : 'Region A';
