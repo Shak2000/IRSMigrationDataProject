@@ -1731,58 +1731,69 @@ function renderIndividualChart() {
     const svgContainer = document.getElementById('chart-individual-svg-container');
     if (!placeholder || !svgContainer) return;
 
-    // ── No region selected: show placeholder ──────────────────────────────────
+    // ── 1. Check if region is selected ────────────────────────────────────────
     if (!indChartState.regionKey) {
         placeholder.removeAttribute('hidden');
         svgContainer.setAttribute('hidden', '');
         return;
     }
 
-    // ── Region selected: hide placeholder, show chart ─────────────────────────
     placeholder.setAttribute('hidden', '');
     svgContainer.removeAttribute('hidden');
 
+    // ── 2. Setup Dimensions and Skeleton ──────────────────────────────────────
     const { width, height } = setupIndividualChart();
     if (width <= 0 || height <= 0) return;
 
     const metricKey = indChartState.metric;
-    const regionKey = indChartState.regionKey;
 
-    // Build data series: one point per year.
-    // Use indChartState.regionLevel so states and counties can both be charted
-    // regardless of the map's current level radio.
-    const chartLevel = indChartState.regionLevel ?? appState.level;
-    const series = YEARS.map(year => ({
-        year,
-        label: YEAR_LABELS[year] ?? year,
-        value: getMapValue(regionKey, year, metricKey, chartLevel, null),
-    }));
+    // ── 3. Build Data Series ──────────────────────────────────────────────────
+    const series = YEARS.map(year => {
+        let value = null;
+
+        // FIXED: Correctly reference regionLevel instead of level
+        const currentLevel = indChartState.regionLevel || indChartState.level;
+
+        if (currentLevel === 'state') {
+            value = _getStateMapValue(indChartState.regionKey, year, metricKey);
+        } else if (currentLevel === 'county') {
+            value = _getCountyMapValue(indChartState.regionKey, year, metricKey);
+        }
+
+        return {
+            year,
+            label: YEAR_LABELS[year] ?? year,
+            value
+        };
+    });
 
     const defined = d => d.value !== null && Number.isFinite(d.value);
     const validVals = series.filter(defined).map(d => d.value);
 
-    // ── Y scale domain ────────────────────────────────────────────────────────
+    // ── 4. Dynamic Y Scale ────────────────────────────────────────────────────
     let [yMin, yMax] = validVals.length > 0
         ? [d3.min(validVals), d3.max(validVals)]
         : [0, 1];
 
-    const isDiverging = METRIC_META[metricKey]?.direction === 'both';
-    if (isDiverging) {
-        // Force zero to stay visible; extend whichever side is smaller
-        const absMax = Math.max(Math.abs(yMin), Math.abs(yMax), 1);
-        yMin = Math.min(yMin, -absMax * 0.05);
-        yMax = Math.max(yMax, absMax * 0.05);
-    } else {
-        yMin = Math.min(0, yMin);      // always include zero for one-sided metrics
-        yMax = yMax === 0 ? 1 : yMax;
-    }
+    const range = yMax - yMin;
+    // Apply 10% padding based on the envelope. If perfectly flat, use 5% of the value.
+    const pad = range === 0 ? (Math.abs(yMax) * 0.05 || 1) : range * 0.1;
 
-    // Add 5 % padding at the top so the highest dot isn't clipped
-    yMax *= 1.05;
+    const isDiverging = METRIC_META[metricKey]?.direction === 'both';
+
+    if (isDiverging) {
+        // Strictly pad around the actual data envelope for net flows
+        yMin = yMin - pad;
+        yMax = yMax + pad;
+    } else {
+        // Allow absolute metrics to zoom in, but never drop below 0
+        yMin = Math.max(0, yMin - pad);
+        yMax = yMax + pad;
+    }
 
     indChartYScale.domain([yMin, yMax]).nice();
 
-    // ── Y-axis ────────────────────────────────────────────────────────────────
+    // ── 5. Axes & Grid ────────────────────────────────────────────────────────
     indChartInner.select('.ind-chart-axis-y')
         .call(
             d3.axisLeft(indChartYScale)
@@ -1790,7 +1801,6 @@ function renderIndividualChart() {
                 .tickFormat(v => formatMetricValue(v, metricKey))
         );
 
-    // ── Horizontal grid lines ─────────────────────────────────────────────────
     indChartInner.select('.ind-chart-grid-y')
         .call(
             d3.axisLeft(indChartYScale)
@@ -1800,19 +1810,19 @@ function renderIndividualChart() {
         )
         .select('.domain').remove();
 
-    // ── Zero line (only for diverging metrics) ────────────────────────────────
+    // Zero-line (for net/diverging metrics)
+    const zeroY = indChartYScale(0);
+    // Hide the zero-line if the tight padding pushes 0 off the screen
+    const showZero = isDiverging && zeroY >= 0 && zeroY <= height;
+
     indChartInner.select('.ind-chart-zero-line')
         .attr('x1', 0).attr('x2', width)
-        .attr('y1', indChartYScale(0)).attr('y2', indChartYScale(0))
-        .attr('stroke', isDiverging ? 'rgba(0,0,0,0.25)' : 'none')
+        .attr('y1', zeroY).attr('y2', zeroY)
+        .attr('stroke', showZero ? 'rgba(0,0,0,0.25)' : 'none')
         .attr('stroke-width', 1)
         .attr('stroke-dasharray', '4 3');
 
-    // ── Y-axis label text ─────────────────────────────────────────────────────
-    indChartSvg.select('.ind-chart-y-label')
-        .text(getMetricLabel(metricKey));
-
-    // ── Line path ─────────────────────────────────────────────────────────────
+    // ── 6. Line Path ──────────────────────────────────────────────────────────
     const lineGen = d3.line()
         .defined(defined)
         .x(d => indChartXScale(d.year))
@@ -1828,41 +1838,42 @@ function renderIndividualChart() {
         .attr('stroke-linecap', 'round')
         .attr('d', lineGen);
 
-    // ── Circle markers ────────────────────────────────────────────────────────
+    // ── 7. Circle Markers & Tooltip ───────────────────────────────────────────
     let tooltip = d3.select('body').select('#chart-tooltip');
     if (tooltip.empty()) {
         tooltip = d3.select('body').append('div').attr('id', 'chart-tooltip');
     }
 
-    const dots = indChartInner.select('.ind-chart-dots')
-        .selectAll('circle')
-        .data(series, d => d.year);
+    const dots = indChartInner.select('.ind-chart-dots').selectAll('circle').data(series, d => d.year);
 
     dots.join(
         enter => enter.append('circle')
             .attr('r', 4)
             .attr('cx', d => indChartXScale(d.year))
-            // The cy value doesn't matter for hidden dots, but we provide 0 to prevent SVG errors
             .attr('cy', d => defined(d) ? indChartYScale(d.value) : 0)
             .attr('fill', 'var(--surface)')
             .attr('stroke', 'var(--accent)')
             .attr('stroke-width', 2)
             .style('cursor', 'pointer')
-            // NEW: Hides the dot completely if data is missing
             .style('display', d => defined(d) ? null : 'none'),
-
         update => update
             .attr('cx', d => indChartXScale(d.year))
             .attr('cy', d => defined(d) ? indChartYScale(d.value) : 0)
-            // NEW: Hides the dot completely if data is missing
             .style('display', d => defined(d) ? null : 'none')
     )
         .on('mouseenter', function (event, d) {
             d3.select(this).attr('r', 6);
             const valStr = formatMetricValue(d.value, metricKey);
+
+            // Get the dynamically selected region name
+            const regionInput = document.getElementById('ind-region-input');
+            const regionName = regionInput ? regionInput.value : 'Selected Region';
+
             tooltip
                 .style('display', 'block')
-                .html(`<strong>${d.label}</strong><br>${getMetricLabel(metricKey)}: ${valStr}`);
+                .html(`<strong>${d.label}</strong><br/>
+                       <span style="color: #666;">Region:</span> ${regionName}<br/>
+                       <span style="color: #666;">${getMetricLabel(metricKey)}:</span> ${valStr}`);
         })
         .on('mousemove', function (event) {
             const tipNode = tooltip.node();
