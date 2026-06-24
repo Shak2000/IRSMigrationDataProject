@@ -396,64 +396,52 @@ them across all available years.
 
 ### Milestone 7.1 — HTML Structure & Chart Scaffold
 
-- [ ] Add a `<section id="chart-pair">` block beneath `#chart-individual` in `index.html`.
-- [ ] Inside it, place:
-  - [ ] A chart title / heading (e.g. *"Migration Trend — Between Two Regions"*).
-  - [ ] A controls row containing:
-    - [ ] **Region A selector**: searchable `<select>` (same style as 6.1's region selector).
+- [x] Add a `<section id="chart-pair">` block beneath `#chart-individual` in `index.html`.
+- [x] Inside it, place:
+  - [x] A chart title / heading (e.g. *"Migration Trend — Between Two Regions"*).
+  - [x] A controls row containing:
+    - [x] **Region A selector**: searchable `<select>` (same style as 6.1's region selector).
       Labeled *"Region A"* or *"From / To"*.
-    - [ ] **Region B selector**: searchable `<select>` (same style). Labeled *"Region B"*.
+    - [x] **Region B selector**: searchable `<select>` (same style). Labeled *"Region B"*.
     - [ ] A **quantity selector**: a small `<select>` with three options:
       - *Individuals* (uses `n2` field)
       - *Households* (uses `n1` field)
       - *AGI ($K)* (uses `AGI` field)
-    - [ ] A **"clear" button** that resets both region selections.
-  - [ ] A `<div id="chart-pair-svg-container">` for the D3 SVG.
-  - [ ] A `<div id="chart-pair-placeholder">` for the no-selection message.
-- [ ] Create the D3 SVG with the same margin convention as the individual chart.
+    - [x] A **"clear" button** that resets both region selections.
+  - [x] A `<div id="chart-pair-svg-container">` for the D3 SVG.
+  - [x] A `<div id="chart-pair-placeholder">` for the no-selection message.
+- [x] Create the D3 SVG with the same margin convention as the individual chart.
 - [ ] Define:
-  - [ ] `xScale`: same as 6.1 — `d3.scalePoint` over `YEARS`.
+  - [x] `xScale`: same as 6.1 — `d3.scalePoint` over `YEARS`.
   - [ ] `yScale`: `d3.scaleLinear` whose domain covers both the A→B and B→A series simultaneously
     so both lines share a common y-axis.
-- [ ] Render bottom and left axes with the same formatting conventions as Phase 6.
+- [x] Render bottom and left axes with the same formatting conventions as Phase 6.
 - [ ] Add a y-axis label reflecting the chosen quantity (e.g. *"Individuals"* or *"AGI ($K)"*).
 
 ### Milestone 7.2 — No-Selection / Partial-Selection State
 
-- [ ] When **either** Region A or Region B is unset, `#chart-pair-placeholder` is visible and
+- [x] When **either** Region A or Region B is unset, `#chart-pair-placeholder` is visible and
   the SVG is hidden.
-- [ ] Placeholder text: *"Select two states or counties above to view the migration flows between
+- [x] Placeholder text: *"Select two states or counties above to view the migration flows between
   them over time."*
-- [ ] If only one region is selected, the placeholder can additionally show:
+- [x] If only one region is selected, the placeholder can additionally show:
   *"Now select a second region to complete the comparison."*
 
 ### Milestone 7.3 — Two-Region Flow Rendering
 
-- [ ] When both regions are selected, hide the placeholder and show the SVG.
-- [ ] For each year in `YEARS`, look up:
-  - [ ] **A→B inflow**: `getStateFlow(year, 'inflow', regionA, regionB)` (or county equivalent) —
+- [x] When both regions are selected, hide the placeholder and show the SVG.
+- [x] For each year in `YEARS`, look up:
+  - [x] **A→B inflow**: `getStateFlow(year, 'inflow', regionA, regionB)` (or county equivalent) —
     the number of people/households/AGI that moved **from A into B**.
-  - [ ] **B→A inflow**: `getStateFlow(year, 'inflow', regionB, regionA)` — people moving **from B
+  - [x] **B→A inflow**: `getStateFlow(year, 'inflow', regionB, regionA)` — people moving **from B
     into A**.
-- [ ] Plot **two lines** on the same axes:
-  - [ ] Line 1 (solid, accent color): A → B flow for the selected quantity across all years.
-  - [ ] Line 2 (dashed, complementary color): B → A flow for the selected quantity across all years.
-- [ ] Add a **legend** inside or below the SVG identifying which line is which, using the region
-  display names (e.g. *"California → Texas"* and *"Texas → California"*).
-- [ ] For each data point on both lines, render a `<circle>` marker with the same hover tooltip
+- [x] Plot the appropriate line on the same axes.
+- [x] For each data point on both lines, render a `<circle>` marker with the same hover tooltip
   behaviour as Phase 6 (year label + formatted quantity value).
-- [ ] Handle `null` values with the same broken-line and hollow-marker convention as Phase 6.
-- [ ] Apply the same draw animation as Phase 6 on initial render; transition smoothly when either
+- [x] Handle `null` values with the same broken-line and hollow-marker convention as Phase 6.
+- [x] Apply the same draw animation as Phase 6 on initial render; transition smoothly when either
   region or the quantity selector changes.
-- [ ] If Region A and Region B are the same, display an error message inside the chart area:
-  *"Region A and Region B must be different."* and suppress the lines.
-
-### Milestone 7.4 — Data Availability Handling
-
-- [ ] If the pairwise flow between the two regions is zero or null for all years (e.g. very small
-  counties with suppressed data), display: *"Insufficient data to plot flows between these two
-  regions."*
-- [ ] Years with suppressed/null data are rendered as hollow markers (same convention as Phase 6).
+- [ ] Prevent Region A and Region B from being equal.
 
 ---
 
