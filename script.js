@@ -1465,7 +1465,8 @@ function buildIndComboboxEntries() {
 
 function _appendRegionOption(listbox, entry, showLevelBadge) {
     const opt = document.createElement('div');
-    const isActive = entry.key === indChartState.regionKey;
+    // Check against stagedKey since regionKey is no longer used for the combobox
+    const isActive = entry.key === indChartState.stagedKey;
     opt.className = 'region-option' + (isActive ? ' region-option--active' : '');
     opt.textContent = showLevelBadge ? `${entry.label}\u2002(${entry.level})` : entry.label;
     opt.dataset.key = entry.key;
@@ -1483,9 +1484,16 @@ function _renderIndComboboxListbox(filterText) {
     const lower = (filterText || '').toLowerCase().trim();
     indComboboxHighlightIdx = -1;
 
-    const filtered = lower
-        ? indComboboxEntries.filter(e => e.label.toLowerCase().includes(lower))
-        : indComboboxEntries;
+    // NEW: Filter out any regions that are already plotted in the chart
+    const plottedKeys = new Set(indChartState.regions.map(r => r.key));
+
+    const filtered = indComboboxEntries.filter(e => {
+        // Exclude if already plotted
+        if (plottedKeys.has(e.key)) return false;
+        // Exclude if it doesn't match the search filter
+        if (lower && !e.label.toLowerCase().includes(lower)) return false;
+        return true;
+    });
 
     listbox.innerHTML = '';
 
@@ -1502,14 +1510,14 @@ function _renderIndComboboxListbox(filterText) {
         filtered.forEach(e => _appendRegionOption(listbox, e, false));
     } else {
         // Structured list: selected first, then States, then Counties
-        const selectedEntry = indChartState.regionKey
-            ? indComboboxEntries.find(e => e.key === indChartState.regionKey)
+        const selectedEntry = indChartState.stagedKey
+            ? indComboboxEntries.find(e => e.key === indChartState.stagedKey)
             : null;
 
         const states = filtered.filter(e => e.level === 'state' && e.key !== selectedEntry?.key);
         const counties = filtered.filter(e => e.level === 'county' && e.key !== selectedEntry?.key);
 
-        if (selectedEntry) {
+        if (selectedEntry && !plottedKeys.has(selectedEntry.key)) {
             const grp = document.createElement('div');
             grp.className = 'region-group-label';
             grp.textContent = 'Selected';
