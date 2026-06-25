@@ -441,7 +441,7 @@ them across all available years.
 - [x] Handle `null` values with the same broken-line and hollow-marker convention as Phase 6.
 - [x] Apply the same draw animation as Phase 6 on initial render; transition smoothly when either
   region or the quantity selector changes.
-- [ ] Prevent Region A and Region B from being equal.
+- [x] Prevent Region A and Region B from being equal.
 
 ---
 

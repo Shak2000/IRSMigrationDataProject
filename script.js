@@ -2037,7 +2037,7 @@ function renderPairChart() {
     const isDiverging = METRIC_META[metricKey]?.direction === 'both';
 
     if (isDiverging) {
-        // NEW: Strictly pad around the actual data envelope. No more forced -100 to +100 symmetry.
+        // Strictly pad around the actual data envelope. No more forced -100 to +100 symmetry.
         yMin = yMin - pad;
         yMax = yMax + pad;
     } else {
@@ -2067,7 +2067,7 @@ function renderPairChart() {
 
     // Zero-line (for net/diverging metrics)
     const zeroY = pairChartYScale(0);
-    // NEW: We must hide the zero-line if the tight padding pushes 0 off the screen
+    // We must hide the zero-line if the tight padding pushes 0 off the screen
     const showZero = isDiverging && zeroY >= 0 && zeroY <= height;
 
     pairChartInner.select('.ind-chart-zero-line')
@@ -2150,7 +2150,7 @@ function renderPairChart() {
 }
 
 /** Helper to generate region comboboxes cleanly */
-function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel) {
+function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, getExcludedKey) {
     let isOpen = false;
     let highlightIdx = -1;
 
@@ -2174,13 +2174,17 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel) 
         const lower = (filterText || '').toLowerCase().trim();
         highlightIdx = -1;
 
-        // NEW: Check if the other combobox has forced a specific level (state/county)
         const allowedLevel = getAllowedLevel ? getAllowedLevel() : null;
         let availableEntries = indComboboxEntries;
 
-        // NEW: Filter the available options to match the other combobox's level
         if (allowedLevel) {
             availableEntries = availableEntries.filter(e => e.level === allowedLevel);
+        }
+
+        // Exclude the selection from the other combobox so they can't be identical
+        const excludedKey = getExcludedKey ? getExcludedKey() : null;
+        if (excludedKey) {
+            availableEntries = availableEntries.filter(e => e.key !== excludedKey);
         }
 
         const filtered = lower ? availableEntries.filter(e => e.label.toLowerCase().includes(lower)) : availableEntries;
@@ -2211,7 +2215,6 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel) 
                 listbox.insertAdjacentHTML('beforeend', '<div class="region-group-label">Counties</div>');
                 counties.forEach(e => appendOption(e, false));
             }
-            // NEW: Only show the county loading message if counties are actually allowed
             if (!countyDataLoaded && (!allowedLevel || allowedLevel === 'county')) {
                 listbox.insertAdjacentHTML('beforeend', '<div class="region-option region-option--no-results">Loading county data…</div>');
             }
@@ -2274,7 +2277,8 @@ function initPairComboboxes() {
             document.getElementById('pair-region-a-input').value = key ? label : '';
             renderPairChart();
         },
-        () => pairChartState.regionBLevel // NEW: Tells A to only show B's level
+        () => pairChartState.regionBLevel, // Tells A to only show B's level
+        () => pairChartState.regionBKey    // Tells A to exclude B's selected region
     );
 
     bindGenericCombobox(
@@ -2286,7 +2290,8 @@ function initPairComboboxes() {
             document.getElementById('pair-region-b-input').value = key ? label : '';
             renderPairChart();
         },
-        () => pairChartState.regionALevel // NEW: Tells B to only show A's level
+        () => pairChartState.regionALevel, // Tells B to only show A's level
+        () => pairChartState.regionAKey    // Tells B to exclude A's selected region
     );
 }
 
