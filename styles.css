@@ -1492,3 +1492,11 @@ body {
 #scroll-down-btn:hover {
   transform: translateY(-50%) scale(1.1);
 }
+
+/* Pairwise Combobox Layout */
+.pair-combobox-group {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--sp-md);
+}

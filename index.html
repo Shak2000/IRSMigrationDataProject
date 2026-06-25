@@ -353,28 +353,34 @@
     <div class="chart-controls-wrapper">
       <div class="chart-controls-row" role="group" aria-label="Pairwise chart controls">
 
-        <div class="chart-control-group">
-          <label class="control-label" for="pair-region-a-input">Region A</label>
-          <div class="region-combobox" id="pair-region-a-combobox">
-            <input type="text" id="pair-region-a-input" class="region-combobox-input"
-              placeholder="Search states and counties…" autocomplete="off" spellcheck="false" role="combobox"
-              aria-expanded="false" aria-haspopup="listbox" aria-autocomplete="list"
-              aria-controls="pair-region-a-listbox" />
-            <div id="pair-region-a-listbox" class="region-combobox-listbox" role="listbox" aria-label="Region options"
-              hidden></div>
+        <div class="pair-combobox-group">
+          <div class="chart-control-group">
+            <label class="control-label" for="pair-region-a-input">Region A</label>
+            <div class="region-combobox" id="pair-region-a-combobox">
+              <input type="text" id="pair-region-a-input" class="region-combobox-input"
+                placeholder="Search states and counties…" autocomplete="off" spellcheck="false" role="combobox"
+                aria-expanded="false" aria-haspopup="listbox" aria-autocomplete="list"
+                aria-controls="pair-region-a-listbox" />
+              <div id="pair-region-a-listbox" class="region-combobox-listbox" role="listbox" aria-label="Region options"
+                hidden></div>
+            </div>
           </div>
-        </div>
 
-        <div class="chart-control-group">
-          <label class="control-label" for="pair-region-b-input">Region B</label>
-          <div class="region-combobox" id="pair-region-b-combobox">
-            <input type="text" id="pair-region-b-input" class="region-combobox-input"
-              placeholder="Search states and counties…" autocomplete="off" spellcheck="false" role="combobox"
-              aria-expanded="false" aria-haspopup="listbox" aria-autocomplete="list"
-              aria-controls="pair-region-b-listbox" />
-            <div id="pair-region-b-listbox" class="region-combobox-listbox" role="listbox" aria-label="Region options"
-              hidden></div>
+          <div class="chart-control-group">
+            <label class="control-label" for="pair-region-b-input">Region B</label>
+            <div class="region-combobox" id="pair-region-b-combobox">
+              <input type="text" id="pair-region-b-input" class="region-combobox-input"
+                placeholder="Search states and counties…" autocomplete="off" spellcheck="false" role="combobox"
+                aria-expanded="false" aria-haspopup="listbox" aria-autocomplete="list"
+                aria-controls="pair-region-b-listbox" />
+              <div id="pair-region-b-listbox" class="region-combobox-listbox" role="listbox" aria-label="Region options"
+                hidden></div>
+            </div>
           </div>
+
+          <button id="pair-add-btn" type="button" class="chart-add-btn" aria-label="Add pair to chart" disabled>
+            Add
+          </button>
         </div>
 
         <div class="chart-control-group">
@@ -426,6 +432,9 @@
       <button id="scroll-up-pair-btn" class="nav-arrow" aria-label="Scroll to individual chart"
         title="Back to Individual Trend">↑</button>
     </div>
+
+    <div id="pair-selected-regions" class="selected-regions-container" aria-live="polite"></div>
+
     <div id="chart-pair-area">
       <div id="chart-pair-placeholder" class="chart-placeholder" role="status" aria-live="polite">
         <p>Select two states or counties above to view the migration flows between them over time.</p>

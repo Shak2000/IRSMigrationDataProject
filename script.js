@@ -2028,12 +2028,94 @@ function renderIndividualChart() {
 ═══════════════════════════════════════════════════════════════════════════ */
 
 const pairChartState = {
-    regionAKey: null,
-    regionALevel: null,
-    regionBKey: null,
-    regionBLevel: null,
-    metric: 'pop_outflow'
+    // Array of exactly 12 slots. Each is either null or an object with regionA and regionB
+    pairs: new Array(12).fill(null),
+    metric: 'pop_outflow',
+
+    // Temporarily hold the selections before "Add" is clicked
+    stagedAKey: null,
+    stagedALevel: null,
+    stagedALabel: null,
+
+    stagedBKey: null,
+    stagedBLevel: null,
+    stagedBLabel: null
 };
+
+// D3 color scale for up to 12 lines (reused from individual chart)
+const pairChartColors = d3.scaleOrdinal(d3.schemePaired);
+
+function _updatePairInputStates() {
+    const inputA = document.getElementById('pair-region-a-input');
+    const inputB = document.getElementById('pair-region-b-input');
+    const addBtn = document.getElementById('pair-add-btn');
+    if (!inputA || !inputB) return;
+
+    const activeCount = pairChartState.pairs.filter(p => p !== null).length;
+
+    if (activeCount >= 12) {
+        inputA.disabled = true;
+        inputB.disabled = true;
+        inputA.placeholder = "Max 12 pairs reached";
+        inputB.placeholder = "Max 12 pairs reached";
+    } else {
+        inputA.disabled = false;
+        inputB.disabled = false;
+        inputA.placeholder = "Search states and counties…";
+        inputB.placeholder = "Search states and counties…";
+    }
+
+    // Evaluate Add button
+    if (addBtn) {
+        const hasA = !!pairChartState.stagedAKey;
+        const hasB = !!pairChartState.stagedBKey;
+        const isDuplicate = pairChartState.pairs.some(p =>
+            p !== null &&
+            p.regionA.key === pairChartState.stagedAKey &&
+            p.regionB.key === pairChartState.stagedBKey
+        );
+        addBtn.disabled = !hasA || !hasB || isDuplicate || activeCount >= 12;
+    }
+}
+
+function renderPairRegionBubbles() {
+    const container = document.getElementById('pair-selected-regions');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const activePairs = pairChartState.pairs
+        .map((pair, i) => pair ? { ...pair, slotIndex: i } : null)
+        .filter(p => p !== null);
+
+    activePairs.forEach((pair) => {
+        const i = pair.slotIndex;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'region-bubble';
+        bubble.style.borderColor = pairChartColors(i);
+        bubble.style.backgroundColor = `${pairChartColors(i)}15`;
+
+        const label = document.createElement('span');
+        label.innerHTML = `${pair.regionA.label} &leftrightarrow; ${pair.regionB.label}`;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'bubble-remove-btn';
+        removeBtn.innerHTML = '×';
+        removeBtn.setAttribute('aria-label', `Remove pair`);
+
+        removeBtn.addEventListener('click', () => {
+            pairChartState.pairs[i] = null;
+            _updatePairInputStates();
+            renderPairRegionBubbles();
+            renderPairChart();
+        });
+
+        bubble.appendChild(label);
+        bubble.appendChild(removeBtn);
+        container.appendChild(bubble);
+    });
+}
 
 let pairChartSvg = null;
 let pairChartInner = null;
@@ -2092,15 +2174,17 @@ function renderPairChart() {
     const svgContainer = document.getElementById('chart-pair-svg-container');
     if (!placeholder || !svgContainer) return;
 
-    // ── 1. Check if both regions are selected ─────────────────────────────────
-    if (!pairChartState.regionAKey || !pairChartState.regionBKey) {
+    const activePairs = pairChartState.pairs
+        .map((p, i) => p ? { ...p, slotIndex: i } : null)
+        .filter(p => p !== null);
+
+    // ── 1. Check if ANY pair is selected ─────────────────────────────────
+    if (activePairs.length === 0) {
         placeholder.removeAttribute('hidden');
         svgContainer.setAttribute('hidden', '');
         const p = placeholder.querySelector('p');
         if (p) {
-            p.innerHTML = (pairChartState.regionAKey || pairChartState.regionBKey)
-                ? "Now select a second region to complete the comparison."
-                : "Select two states or counties above to view the migration flows between them over time.";
+            p.innerHTML = "Select two states or counties above and click 'Add' to view the migration flows between them over time.";
         }
         return;
     }
@@ -2108,49 +2192,45 @@ function renderPairChart() {
     placeholder.setAttribute('hidden', '');
     svgContainer.removeAttribute('hidden');
 
-    // ── 2. Setup Dimensions and Skeleton ──────────────────────────────────────
     const { width, height } = setupPairChart();
     if (width <= 0 || height <= 0) return;
 
     const metricKey = pairChartState.metric;
 
     // ── 3. Build Data Series ──────────────────────────────────────────────────
-    // Treating Region A as the "Perspective" (Primary Region) and Region B as the target
-    const series = YEARS.map(year => {
-        let value = null;
-        if (pairChartState.regionALevel === 'state') {
-            value = _getStateMapValue(pairChartState.regionBKey, year, metricKey, pairChartState.regionAKey);
-        } else {
-            value = _getCountyMapValue(pairChartState.regionBKey, year, metricKey, pairChartState.regionAKey);
-        }
+    const allSeries = activePairs.map((pair) => {
+        const seriesData = YEARS.map(year => {
+            let value = null;
+            if (pair.regionA.level === 'state') {
+                value = _getStateMapValue(pair.regionB.key, year, metricKey, pair.regionA.key);
+            } else {
+                value = _getCountyMapValue(pair.regionB.key, year, metricKey, pair.regionA.key);
+            }
+            return { year, label: YEAR_LABELS[year] ?? year, value };
+        });
 
         return {
-            year,
-            label: YEAR_LABELS[year] ?? year,
-            value
+            pairKey: `${pair.regionA.key}_${pair.regionB.key}`,
+            regionALabel: pair.regionA.label,
+            regionBLabel: pair.regionB.label,
+            color: pairChartColors(pair.slotIndex),
+            data: seriesData
         };
     });
 
     const defined = d => d.value !== null && Number.isFinite(d.value);
-    const validVals = series.filter(defined).map(d => d.value);
+    const validVals = allSeries.flatMap(s => s.data.filter(defined).map(d => d.value));
 
     // ── 4. Dynamic Y Scale ────────────────────────────────────────────────────
-    let [yMin, yMax] = validVals.length > 0
-        ? [d3.min(validVals), d3.max(validVals)]
-        : [0, 1];
-
+    let [yMin, yMax] = validVals.length > 0 ? [d3.min(validVals), d3.max(validVals)] : [0, 1];
     const range = yMax - yMin;
-    // If the line is perfectly flat (range = 0), apply a minimal 5% pad so the axis doesn't break
     const pad = range === 0 ? (Math.abs(yMax) * 0.05 || 1) : range * 0.1;
-
     const isDiverging = METRIC_META[metricKey]?.direction === 'both';
 
     if (isDiverging) {
-        // Strictly pad around the actual data envelope. No more forced -100 to +100 symmetry.
         yMin = yMin - pad;
         yMax = yMax + pad;
     } else {
-        // For absolute metrics, allow it to zoom in, but never drop the axis below 0
         yMin = Math.max(0, yMin - pad);
         yMax = yMax + pad;
     }
@@ -2158,104 +2238,109 @@ function renderPairChart() {
     pairChartYScale.domain([yMin, yMax]).nice();
 
     // ── 5. Axes & Grid ────────────────────────────────────────────────────────
-    pairChartInner.select('.ind-chart-axis-y')
-        .call(
-            d3.axisLeft(pairChartYScale)
-                .ticks(6)
-                .tickFormat(v => formatMetricValue(v, metricKey))
-        );
+    pairChartInner.select('.ind-chart-axis-y').call(d3.axisLeft(pairChartYScale).ticks(6).tickFormat(v => formatMetricValue(v, metricKey)));
+    pairChartInner.select('.ind-chart-grid-y').call(d3.axisLeft(pairChartYScale).ticks(6).tickSize(-width).tickFormat('')).select('.domain').remove();
 
-    pairChartInner.select('.ind-chart-grid-y')
-        .call(
-            d3.axisLeft(pairChartYScale)
-                .ticks(6)
-                .tickSize(-width)
-                .tickFormat('')
-        )
-        .select('.domain').remove();
-
-    // Zero-line (for net/diverging metrics)
     const zeroY = pairChartYScale(0);
-    // We must hide the zero-line if the tight padding pushes 0 off the screen
     const showZero = isDiverging && zeroY >= 0 && zeroY <= height;
-
     pairChartInner.select('.ind-chart-zero-line')
-        .attr('x1', 0).attr('x2', width)
-        .attr('y1', zeroY).attr('y2', zeroY)
+        .attr('x1', 0).attr('x2', width).attr('y1', zeroY).attr('y2', zeroY)
         .attr('stroke', showZero ? 'rgba(0,0,0,0.25)' : 'none')
-        .attr('stroke-width', 1)
-        .attr('stroke-dasharray', '4 3');
+        .attr('stroke-width', 1).attr('stroke-dasharray', '4 3');
 
-    // ── 6. Line Path ──────────────────────────────────────────────────────────
-    const lineGen = d3.line()
-        .defined(defined)
-        .x(d => pairChartXScale(d.year))
-        .y(d => pairChartYScale(d.value))
-        .curve(d3.curveMonotoneX);
+    // ── 6. Line Paths ──────────────────────────────────────────────────────────
+    const lineGen = d3.line().defined(defined).x(d => pairChartXScale(d.year)).y(d => pairChartYScale(d.value)).curve(d3.curveMonotoneX);
 
-    pairChartInner.select('.pair-chart-line')
-        .datum(series)
+    pairChartInner.select('path.pair-chart-line').remove();
+
+    let lineGroup = pairChartInner.select('.pair-chart-lines-group');
+    if (lineGroup.empty()) lineGroup = pairChartInner.insert('g', '.pair-chart-dots').attr('class', 'pair-chart-lines-group');
+
+    lineGroup.selectAll('path.multi-line')
+        .data(allSeries, d => d.pairKey)
+        .join('path')
+        .attr('class', 'multi-line')
         .attr('fill', 'none')
-        .attr('stroke', 'var(--accent)')
+        .attr('stroke', d => d.color)
         .attr('stroke-width', 2.5)
         .attr('stroke-linejoin', 'round')
         .attr('stroke-linecap', 'round')
-        .attr('d', lineGen);
+        .attr('d', d => lineGen(d.data));
 
     // ── 7. Circle Markers & Tooltip ───────────────────────────────────────────
     let tooltip = d3.select('body').select('#chart-tooltip');
+
+    // Ensure the tooltip exists even if the user hasn't hovered the map yet
     if (tooltip.empty()) {
         tooltip = d3.select('body').append('div').attr('id', 'chart-tooltip');
     }
 
-    const dots = pairChartInner.select('.pair-chart-dots').selectAll('circle').data(series, d => d.year);
+    const dotsGroups = pairChartInner.select('.pair-chart-dots')
+        .selectAll('g.pair-dots')
+        .data(allSeries, d => d.pairKey)
+        .join('g')
+        .attr('class', 'pair-dots');
 
-    dots.join(
-        enter => enter.append('circle')
-            .attr('r', 4)
-            .attr('cx', d => pairChartXScale(d.year))
-            .attr('cy', d => defined(d) ? pairChartYScale(d.value) : 0)
-            .attr('fill', 'var(--surface)')
-            .attr('stroke', 'var(--accent)')
-            .attr('stroke-width', 2)
-            .style('cursor', 'pointer')
-            .style('display', d => defined(d) ? null : 'none'),
-        update => update
-            .attr('cx', d => pairChartXScale(d.year))
-            .attr('cy', d => defined(d) ? pairChartYScale(d.value) : 0)
-            .style('display', d => defined(d) ? null : 'none')
-    )
+    dotsGroups.selectAll('circle')
+        .data(d => d.data.map(point => ({ ...point, regionALabel: d.regionALabel, regionBLabel: d.regionBLabel, color: d.color })))
+        .join(
+            enter => enter.append('circle')
+                .attr('r', 4)
+                .attr('cx', d => pairChartXScale(d.year))
+                .attr('cy', d => defined(d) ? pairChartYScale(d.value) : 0)
+                .attr('fill', 'var(--surface)')
+                .attr('stroke', d => d.color)
+                .attr('stroke-width', 2)
+                .style('cursor', 'pointer')
+                .style('display', d => defined(d) ? null : 'none'),
+            update => update
+                .attr('cx', d => pairChartXScale(d.year))
+                .attr('cy', d => defined(d) ? pairChartYScale(d.value) : 0)
+                .attr('stroke', d => d.color)
+                .style('display', d => defined(d) ? null : 'none')
+        )
+        // Add a thick, invisible border so the user's mouse doesn't have to be pixel-perfect
+        .style('stroke', 'transparent')
+        .style('stroke-width', '10px')
         .on('mouseenter', function (event, d) {
-            d3.select(this).attr('r', 6);
+            d3.select(this.parentNode).raise();
+
+            // Expand the visible circle, but keep the invisible hit-area large
+            d3.select(this).attr('r', 6).style('stroke-width', '10px');
+
             const valStr = formatMetricValue(d.value, metricKey);
-
-            // Contextual labels from the UI dropdowns
-            const inputA = document.getElementById('pair-region-a-input');
-            const inputB = document.getElementById('pair-region-b-input');
-            const nameA = inputA ? inputA.value : 'Region A';
-            const nameB = inputB ? inputB.value : 'Region B';
-
-            tooltip
-                .style('display', 'block')
+            tooltip.style('display', 'block')
                 .html(`<strong>${d.label}</strong><br/>
-                       <span style="color: #666;">Region A:</span> ${nameA}<br/>
-                       <span style="color: #666;">Region B:</span> ${nameB}<br/>
+                       <span style="color: #666;">Region A:</span> <span style="color: ${d.color}; font-weight: bold;">${d.regionALabel}</span><br/>
+                       <span style="color: #666;">Region B:</span> <span style="color: ${d.color}; font-weight: bold;">${d.regionBLabel}</span><br/>
                        <span style="color: #666;">${getMetricLabel(metricKey)}:</span> ${valStr}`);
         })
         .on('mousemove', function (event) {
             const tipNode = tooltip.node();
             const tipW = tipNode ? tipNode.offsetWidth : 180;
             const rightOverflow = event.pageX + 14 + tipW > window.innerWidth - 16;
-            tooltip
-                .style('left', rightOverflow
-                    ? (event.pageX - tipW - 14) + 'px'
-                    : (event.pageX + 14) + 'px')
+            tooltip.style('left', rightOverflow ? (event.pageX - tipW - 14) + 'px' : (event.pageX + 14) + 'px')
                 .style('top', (event.pageY - 10) + 'px');
         })
         .on('mouseleave', function () {
-            d3.select(this).attr('r', 4);
+            // Restore visual size and hit-area
+            d3.select(this).attr('r', 4).style('stroke-width', '10px');
             tooltip.style('display', 'none');
         });
+
+    // Clean up the inner visual ring inside the large transparent hit area
+    dotsGroups.selectAll('circle.inner-ring')
+        .data(d => d.data.map(point => ({ ...point, color: d.color })))
+        .join('circle')
+        .attr('class', 'inner-ring')
+        .attr('r', 4)
+        .attr('cx', d => pairChartXScale(d.year))
+        .attr('cy', d => defined(d) ? pairChartYScale(d.value) : 0)
+        .attr('fill', 'var(--surface)')
+        .attr('stroke', d => d.color)
+        .attr('stroke-width', 2)
+        .style('pointer-events', 'none') // Ensure the invisible hit area gets the mouse events
+        .style('display', d => defined(d) ? null : 'none');
 }
 
 /** Helper to generate region comboboxes cleanly */
@@ -2379,28 +2464,32 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
 function initPairComboboxes() {
     bindGenericCombobox(
         'pair-region-a',
-        () => pairChartState.regionAKey,
+        () => pairChartState.stagedAKey,
         (key, level, label) => {
-            pairChartState.regionAKey = key || null;
-            pairChartState.regionALevel = level || null;
-            document.getElementById('pair-region-a-input').value = key ? label : '';
-            renderPairChart();
+            pairChartState.stagedAKey = key || null;
+            pairChartState.stagedALevel = level || null;
+            pairChartState.stagedALabel = label || null;
+            const inputA = document.getElementById('pair-region-a-input');
+            if (inputA) inputA.value = key ? label : '';
+            _updatePairInputStates();
         },
-        () => pairChartState.regionBLevel, // Tells A to only show B's level
-        () => pairChartState.regionBKey    // Tells A to exclude B's selected region
+        () => pairChartState.stagedBLevel, // Tells A to only show B's level
+        () => pairChartState.stagedBKey    // Tells A to exclude B's selected region
     );
 
     bindGenericCombobox(
         'pair-region-b',
-        () => pairChartState.regionBKey,
+        () => pairChartState.stagedBKey,
         (key, level, label) => {
-            pairChartState.regionBKey = key || null;
-            pairChartState.regionBLevel = level || null;
-            document.getElementById('pair-region-b-input').value = key ? label : '';
-            renderPairChart();
+            pairChartState.stagedBKey = key || null;
+            pairChartState.stagedBLevel = level || null;
+            pairChartState.stagedBLabel = label || null;
+            const inputB = document.getElementById('pair-region-b-input');
+            if (inputB) inputB.value = key ? label : '';
+            _updatePairInputStates();
         },
-        () => pairChartState.regionALevel, // Tells B to only show A's level
-        () => pairChartState.regionAKey    // Tells B to exclude A's selected region
+        () => pairChartState.stagedALevel, // Tells B to only show A's level
+        () => pairChartState.stagedAKey    // Tells B to exclude A's selected region
     );
 }
 
@@ -2453,6 +2542,7 @@ function wireControls() {
     if (flowTypeSelect) {
         flowTypeSelect.addEventListener('change', e => {
             appState.flowType = e.target.value;
+            if (typeof renderChart === 'function') renderChart();
         });
     }
 
@@ -2562,7 +2652,7 @@ function wireControls() {
 
                 indAddBtn.disabled = true;
 
-                _updateIndRegionInputState();
+                if (typeof _updateIndRegionInputState === 'function') _updateIndRegionInputState();
                 renderIndRegionBubbles();
                 renderIndividualChart();
             }
@@ -2588,7 +2678,7 @@ function wireControls() {
 
             if (typeof _closeIndCombobox === 'function') _closeIndCombobox();
 
-            _updateIndRegionInputState();
+            if (typeof _updateIndRegionInputState === 'function') _updateIndRegionInputState();
             renderIndRegionBubbles();
             renderIndividualChart();
         });
@@ -2611,7 +2701,6 @@ function wireControls() {
         });
     }
 
-    // Scroll down to Pairwise Chart
     const scrollDownIndBtn = document.getElementById('scroll-down-ind-btn');
     if (scrollDownIndBtn) {
         scrollDownIndBtn.addEventListener('click', () => {
@@ -2619,7 +2708,6 @@ function wireControls() {
         });
     }
 
-    // Scroll up to Individual Chart
     const scrollUpPairBtn = document.getElementById('scroll-up-pair-btn');
     if (scrollUpPairBtn) {
         scrollUpPairBtn.addEventListener('click', () => {
@@ -2636,18 +2724,72 @@ function wireControls() {
         });
     }
 
-    // ── Pairwise chart: clear button ───────────────────────────────────────
+    // ── Pairwise chart: ADD button ─────────────────────────────────────────
+    const pairAddBtn = document.getElementById('pair-add-btn');
+    if (pairAddBtn) {
+        pairAddBtn.addEventListener('click', () => {
+            const activeCount = pairChartState.pairs.filter(p => p !== null).length;
+            if (pairChartState.stagedAKey && pairChartState.stagedBKey && activeCount < 12) {
+
+                // Ensure duplicate isn't added
+                const isDuplicate = pairChartState.pairs.some(p =>
+                    p !== null &&
+                    p.regionA.key === pairChartState.stagedAKey &&
+                    p.regionB.key === pairChartState.stagedBKey
+                );
+
+                if (!isDuplicate) {
+                    const emptyIdx = pairChartState.pairs.findIndex(p => p === null);
+                    if (emptyIdx !== -1) {
+                        pairChartState.pairs[emptyIdx] = {
+                            regionA: { key: pairChartState.stagedAKey, level: pairChartState.stagedALevel, label: pairChartState.stagedALabel },
+                            regionB: { key: pairChartState.stagedBKey, level: pairChartState.stagedBLevel, label: pairChartState.stagedBLabel }
+                        };
+                    }
+                }
+
+                // Clear staged inputs
+                pairChartState.stagedAKey = null;
+                pairChartState.stagedALevel = null;
+                pairChartState.stagedALabel = null;
+                pairChartState.stagedBKey = null;
+                pairChartState.stagedBLevel = null;
+                pairChartState.stagedBLabel = null;
+
+                const inputA = document.getElementById('pair-region-a-input');
+                const inputB = document.getElementById('pair-region-b-input');
+                if (inputA) inputA.value = '';
+                if (inputB) inputB.value = '';
+
+                if (typeof _updatePairInputStates === 'function') _updatePairInputStates();
+                renderPairRegionBubbles();
+                renderPairChart();
+            }
+        });
+    }
+
+    // ── Pairwise chart: CLEAR button ───────────────────────────────────────
     const pairClearBtn = document.getElementById('pair-clear-btn');
     if (pairClearBtn) {
         pairClearBtn.addEventListener('click', () => {
-            pairChartState.regionAKey = null;
-            pairChartState.regionALevel = null;
-            pairChartState.regionBKey = null;
-            pairChartState.regionBLevel = null;
+            // Empty the array by filling with 12 nulls
+            pairChartState.pairs = new Array(12).fill(null);
+
+            // Clear staged inputs
+            pairChartState.stagedAKey = null;
+            pairChartState.stagedALevel = null;
+            pairChartState.stagedALabel = null;
+            pairChartState.stagedBKey = null;
+            pairChartState.stagedBLevel = null;
+            pairChartState.stagedBLabel = null;
+
             const inputA = document.getElementById('pair-region-a-input');
             const inputB = document.getElementById('pair-region-b-input');
             if (inputA) inputA.value = '';
             if (inputB) inputB.value = '';
+
+            if (typeof _updatePairInputStates === 'function') _updatePairInputStates();
+            renderPairRegionBubbles();
             renderPairChart();
         });
     }
