@@ -1577,6 +1577,21 @@ function _closeIndCombobox() {
     input.value = indChartState.stagedLabel || '';
 }
 
+function _updateIndRegionInputState() {
+    const input = document.getElementById('ind-region-input');
+    if (!input) return;
+
+    if (indChartState.regions.length >= 12) {
+        input.disabled = true;
+        input.placeholder = "Maximum of 12 regions reached";
+        // Force close if it somehow stayed open
+        if (typeof _closeIndCombobox === 'function') _closeIndCombobox();
+    } else {
+        input.disabled = false;
+        input.placeholder = "Search states and counties…";
+    }
+}
+
 function _selectIndComboboxEntry(key, level, label) {
     indChartState.stagedKey = key || null;
     indChartState.stagedLevel = level || null;
@@ -1627,6 +1642,9 @@ function renderIndRegionBubbles() {
                 const isAlreadyAdded = indChartState.regions.some(r => r.key === indChartState.stagedKey);
                 addBtn.disabled = isAlreadyAdded || indChartState.regions.length >= 12;
             }
+
+            // Re-enable the dropdown input if we dropped below 12
+            _updateIndRegionInputState();
 
             renderIndRegionBubbles();
             renderIndividualChart();
@@ -2511,6 +2529,9 @@ function wireControls() {
 
                 indAddBtn.disabled = true;
 
+                // Check if we just hit the limit of 12 and disable the input
+                _updateIndRegionInputState();
+
                 renderIndRegionBubbles();
                 renderIndividualChart();
             }
@@ -2535,6 +2556,10 @@ function wireControls() {
             if (indAddBtn) indAddBtn.disabled = true;
 
             if (typeof _closeIndCombobox === 'function') _closeIndCombobox();
+
+            // Ensure the input is re-enabled
+            _updateIndRegionInputState();
+
             renderIndRegionBubbles();
             renderIndividualChart();
         });
