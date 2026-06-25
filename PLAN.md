@@ -449,9 +449,9 @@ them across all available years.
 
 ### Milestone 8.1 – Individual Region Selector
 
-- [ ] Introduce an "Add" button to add a state or county to a graph.
-- [ ] Create bubbles for individual states or counties that have been selected and "X" buttons in those bubbles to remove the state or county from the graph.
-- [ ] Enable the graph to plot data for up to 12 states or counties, with the lines incorporating the schemePaired D3 schema.
+- [x] Introduce an "Add" button to add a state or county to a graph.
+- [x] Create bubbles for individual states or counties that have been selected and "X" buttons in those bubbles to remove the state or county from the graph.
+- [x] Enable the graph to plot data for up to 12 states or counties, with the lines incorporating the schemePaired D3 schema.
 
 ### Milestone 8.2 - Pairwise Region Selector
 
