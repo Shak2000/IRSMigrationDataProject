@@ -2373,12 +2373,10 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
         const allowedLevel = getAllowedLevel ? getAllowedLevel() : null;
         let availableEntries = indComboboxEntries;
 
-        // Filter by level (state or county) if restricted
         if (allowedLevel) {
             availableEntries = availableEntries.filter(e => e.level === allowedLevel);
         }
 
-        // Filter out excluded keys (can be a single key or an array of keys)
         const excludedKeys = getExcludedKey ? getExcludedKey() : null;
         if (excludedKeys) {
             if (Array.isArray(excludedKeys)) {
@@ -2389,7 +2387,6 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
             }
         }
 
-        // Filter by user search input
         const filtered = lower ? availableEntries.filter(e => e.label.toLowerCase().includes(lower)) : availableEntries;
 
         listbox.innerHTML = '';
@@ -2399,10 +2396,8 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
         }
 
         if (lower) {
-            // Flat list when searching
             filtered.forEach(e => appendOption(e, false));
         } else {
-            // Grouped list when not searching
             const selKey = getSelectedKey();
             const selectedEntry = selKey ? availableEntries.find(e => e.key === selKey) : null;
             const states = filtered.filter(e => e.level === 'state' && e.key !== selKey);
@@ -2434,14 +2429,50 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
         renderList(input.value);
     }
 
-    function closeBox() {
+    // Accept a validation flag to check what the user typed before closing
+    function closeBox(validateInput = false) {
+        if (validateInput && isOpen) {
+            const currentText = input.value.trim();
+            const lower = currentText.toLowerCase();
+            const selKey = getSelectedKey();
+
+            if (currentText === '') {
+                // User erased the text box, clear the selection
+                if (selKey !== null) onSelect(null, null, null);
+            } else {
+                // User typed text but didn't click. See if it matches exactly
+                const match = indComboboxEntries.find(e => e.label.toLowerCase() === lower);
+                if (match) {
+                    let isValid = true;
+                    const allowedLevel = getAllowedLevel ? getAllowedLevel() : null;
+                    if (allowedLevel && match.level !== allowedLevel) isValid = false;
+
+                    const excludedKeys = getExcludedKey ? getExcludedKey() : null;
+                    if (excludedKeys) {
+                        if (Array.isArray(excludedKeys) && excludedKeys.includes(match.key)) isValid = false;
+                        else if (match.key === excludedKeys) isValid = false;
+                    }
+
+                    if (isValid) {
+                        if (match.key !== selKey) onSelect(match.key, match.level, match.label);
+                    } else {
+                        onSelect(null, null, null); // Matches but is excluded
+                    }
+                } else {
+                    onSelect(null, null, null); // Typed gibberish, clear selection
+                }
+            }
+        }
+
         listbox.setAttribute('hidden', '');
         input.setAttribute('aria-expanded', 'false');
         isOpen = false;
         highlightIdx = -1;
-        const selKey = getSelectedKey();
-        const entry = selKey ? indComboboxEntries.find(e => e.key === selKey) : null;
-        input.value = entry ? entry.label : '';
+
+        // Restore input value to whatever the firmly confirmed state is
+        const confirmedKey = getSelectedKey();
+        const confirmedEntry = confirmedKey ? indComboboxEntries.find(e => e.key === confirmedKey) : null;
+        input.value = confirmedEntry ? confirmedEntry.label : '';
     }
 
     input.addEventListener('focus', openBox);
@@ -2470,25 +2501,28 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
             const h = options[highlightIdx];
             if (h) {
                 onSelect(h.dataset.key, h.dataset.level, h.dataset.label);
-                closeBox();
+                closeBox(false); // Validated by click/enter
+            } else {
+                closeBox(true); // Attempt to validate what they typed
             }
         } else if (e.key === 'Escape') {
-            closeBox();
+            closeBox(false); // Cancel out, do not validate
         }
     });
 
     listbox.addEventListener('mousedown', e => {
         const opt = e.target.closest('.region-option');
         if (!opt || opt.classList.contains('region-option--no-results')) return;
-        e.preventDefault();
+        e.preventDefault(); // Prevents input blur
         onSelect(opt.dataset.key, opt.dataset.level, opt.dataset.label);
-        closeBox();
+        closeBox(false); // Explicit selection made, no typing validation needed
     });
 
-    input.addEventListener('blur', () => setTimeout(closeBox, 150));
+    // Fire validation instantly on blur so other UI elements (like the Add button) see it immediately
+    input.addEventListener('blur', () => closeBox(true));
 
     document.addEventListener('click', e => {
-        if (!combobox.contains(e.target)) closeBox();
+        if (!combobox.contains(e.target)) closeBox(true);
     });
 }
 
