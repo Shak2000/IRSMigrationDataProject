@@ -2361,6 +2361,8 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
         opt.dataset.key = entry.key;
         opt.dataset.level = entry.level;
         opt.dataset.label = entry.label;
+        opt.setAttribute('role', 'option');
+        opt.setAttribute('aria-selected', isActive ? 'true' : 'false');
         listbox.appendChild(opt);
     }
 
@@ -2371,16 +2373,23 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
         const allowedLevel = getAllowedLevel ? getAllowedLevel() : null;
         let availableEntries = indComboboxEntries;
 
+        // Filter by level (state or county) if restricted
         if (allowedLevel) {
             availableEntries = availableEntries.filter(e => e.level === allowedLevel);
         }
 
-        // Exclude the selection from the other combobox so they can't be identical
-        const excludedKey = getExcludedKey ? getExcludedKey() : null;
-        if (excludedKey) {
-            availableEntries = availableEntries.filter(e => e.key !== excludedKey);
+        // Filter out excluded keys (can be a single key or an array of keys)
+        const excludedKeys = getExcludedKey ? getExcludedKey() : null;
+        if (excludedKeys) {
+            if (Array.isArray(excludedKeys)) {
+                const excludeSet = new Set(excludedKeys);
+                availableEntries = availableEntries.filter(e => !excludeSet.has(e.key));
+            } else {
+                availableEntries = availableEntries.filter(e => e.key !== excludedKeys);
+            }
         }
 
+        // Filter by user search input
         const filtered = lower ? availableEntries.filter(e => e.label.toLowerCase().includes(lower)) : availableEntries;
 
         listbox.innerHTML = '';
@@ -2390,8 +2399,10 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
         }
 
         if (lower) {
+            // Flat list when searching
             filtered.forEach(e => appendOption(e, false));
         } else {
+            // Grouped list when not searching
             const selKey = getSelectedKey();
             const selectedEntry = selKey ? availableEntries.find(e => e.key === selKey) : null;
             const states = filtered.filter(e => e.level === 'state' && e.key !== selKey);
@@ -2434,22 +2445,38 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
     }
 
     input.addEventListener('focus', openBox);
-    input.addEventListener('input', () => { if (!isOpen) openBox(); renderList(input.value); });
+    input.addEventListener('input', () => {
+        if (!isOpen) openBox();
+        renderList(input.value);
+    });
+
     input.addEventListener('keydown', e => {
         if (!isOpen && e.key !== 'Tab') openBox();
         const options = Array.from(listbox.querySelectorAll('.region-option:not(.region-option--no-results)'));
+
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
             e.preventDefault();
             highlightIdx = e.key === 'ArrowDown' ? Math.min(highlightIdx + 1, options.length - 1) : Math.max(highlightIdx - 1, 0);
             options.forEach((opt, i) => {
-                if (i === highlightIdx) { opt.classList.add('region-option--highlighted'); opt.scrollIntoView({ block: 'nearest' }); }
-                else opt.classList.remove('region-option--highlighted');
+                if (i === highlightIdx) {
+                    opt.classList.add('region-option--highlighted');
+                    opt.scrollIntoView({ block: 'nearest' });
+                } else {
+                    opt.classList.remove('region-option--highlighted');
+                }
             });
         } else if (e.key === 'Enter') {
-            e.preventDefault(); const h = options[highlightIdx];
-            if (h) { onSelect(h.dataset.key, h.dataset.level, h.dataset.label); closeBox(); }
-        } else if (e.key === 'Escape') closeBox();
+            e.preventDefault();
+            const h = options[highlightIdx];
+            if (h) {
+                onSelect(h.dataset.key, h.dataset.level, h.dataset.label);
+                closeBox();
+            }
+        } else if (e.key === 'Escape') {
+            closeBox();
+        }
     });
+
     listbox.addEventListener('mousedown', e => {
         const opt = e.target.closest('.region-option');
         if (!opt || opt.classList.contains('region-option--no-results')) return;
@@ -2457,8 +2484,12 @@ function bindGenericCombobox(prefix, getSelectedKey, onSelect, getAllowedLevel, 
         onSelect(opt.dataset.key, opt.dataset.level, opt.dataset.label);
         closeBox();
     });
+
     input.addEventListener('blur', () => setTimeout(closeBox, 150));
-    document.addEventListener('click', e => { if (!combobox.contains(e.target)) closeBox(); });
+
+    document.addEventListener('click', e => {
+        if (!combobox.contains(e.target)) closeBox();
+    });
 }
 
 function initPairComboboxes() {
@@ -2471,10 +2502,24 @@ function initPairComboboxes() {
             pairChartState.stagedALabel = label || null;
             const inputA = document.getElementById('pair-region-a-input');
             if (inputA) inputA.value = key ? label : '';
-            _updatePairInputStates();
+            if (typeof _updatePairInputStates === 'function') _updatePairInputStates();
         },
-        () => pairChartState.stagedBLevel, // Tells A to only show B's level
-        () => pairChartState.stagedBKey    // Tells A to exclude B's selected region
+        () => pairChartState.stagedBLevel,
+        () => {
+            const excludes = [];
+            if (pairChartState.stagedBKey) {
+                // 1. A cannot be the exact same region as B
+                excludes.push(pairChartState.stagedBKey);
+
+                // 2. Exclude any region that ALREADY forms a direct (A → B) pair with stagedBKey
+                pairChartState.pairs.forEach(p => {
+                    if (p !== null && p.regionB.key === pairChartState.stagedBKey) {
+                        excludes.push(p.regionA.key);
+                    }
+                });
+            }
+            return excludes;
+        }
     );
 
     bindGenericCombobox(
@@ -2486,10 +2531,24 @@ function initPairComboboxes() {
             pairChartState.stagedBLabel = label || null;
             const inputB = document.getElementById('pair-region-b-input');
             if (inputB) inputB.value = key ? label : '';
-            _updatePairInputStates();
+            if (typeof _updatePairInputStates === 'function') _updatePairInputStates();
         },
-        () => pairChartState.stagedALevel, // Tells B to only show A's level
-        () => pairChartState.stagedAKey    // Tells B to exclude A's selected region
+        () => pairChartState.stagedALevel,
+        () => {
+            const excludes = [];
+            if (pairChartState.stagedAKey) {
+                // 1. B cannot be the exact same region as A
+                excludes.push(pairChartState.stagedAKey);
+
+                // 2. Exclude any region that ALREADY forms a direct (A → B) pair with stagedAKey
+                pairChartState.pairs.forEach(p => {
+                    if (p !== null && p.regionA.key === pairChartState.stagedAKey) {
+                        excludes.push(p.regionB.key);
+                    }
+                });
+            }
+            return excludes;
+        }
     );
 }
 
