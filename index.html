@@ -90,54 +90,19 @@
         </div>
       </div>
 
-      <!-- Metric dropdown -->
+      <!-- Metric category + statistic dropdowns -->
       <div id="metric-control" class="control-group">
-        <label class="control-label" for="metric-select">Metric</label>
-        <select id="metric-select" name="metric">
-          <optgroup label="Population">
-            <option value="pop_inflow">Population inflow</option>
-            <option value="pop_outflow">Population outflow</option>
-            <option value="pop_net_inflow">Net population inflow</option>
-            <option value="pop_net_outflow">Net population outflow</option>
-            <option value="pop_inflow_share">Population inflow as share of population</option>
-            <option value="pop_outflow_share">Population outflow as share of population</option>
-            <option value="pop_net_inflow_share">Net population inflow as share of population</option>
-            <option value="pop_net_outflow_share">Net population outflow as share of population</option>
-          </optgroup>
-          <optgroup label="Households">
-            <option value="hh_inflow">Households inflow</option>
-            <option value="hh_outflow">Households outflow</option>
-            <option value="hh_net_inflow">Net household inflow</option>
-            <option value="hh_net_outflow">Net household outflow</option>
-            <option value="hh_inflow_share">Households inflow as share of households</option>
-            <option value="hh_outflow_share">Households outflow as share of households</option>
-            <option value="hh_net_inflow_share">Net household inflow as share of households</option>
-            <option value="hh_net_outflow_share">Net household outflow as share of households</option>
-          </optgroup>
-          <optgroup label="AGI">
-            <option value="agi_inflow">AGI inflow</option>
-            <option value="agi_outflow">AGI outflow</option>
-            <option value="agi_net_inflow">Net AGI inflow</option>
-            <option value="agi_net_outflow">Net AGI outflow</option>
-            <option value="agi_inflow_share">AGI inflow as share of AGI</option>
-            <option value="agi_outflow_share">AGI outflow as share of AGI</option>
-            <option value="agi_net_inflow_share">Net AGI inflow as share of AGI</option>
-            <option value="agi_net_outflow_share">Net AGI outflow as share of AGI</option>
-          </optgroup>
-          <optgroup label="Inbound / Outbound Rates">
-            <option value="pop_inbound_rate">Population inbound rate</option>
-            <option value="pop_outbound_rate">Population outbound rate</option>
-            <option value="hh_inbound_rate">Household inbound rate</option>
-            <option value="hh_outbound_rate">Household outbound rate</option>
-            <option value="agi_inbound_rate">AGI inbound rate</option>
-            <option value="agi_outbound_rate">AGI outbound rate</option>
-          </optgroup>
-          <optgroup label="Average AGI">
-            <option value="avg_agi_in_individual">Avg AGI of individual moving in</option>
-            <option value="avg_agi_in_household">Avg AGI of household moving in</option>
-            <option value="avg_agi_out_individual">Avg AGI of individual moving out</option>
-            <option value="avg_agi_out_household">Avg AGI of household moving out</option>
-          </optgroup>
+        <label class="control-label" for="metric-category-select">Category</label>
+        <select id="metric-category-select" name="metric-category">
+          <option value="pop" selected>Population</option>
+          <option value="hh">Households</option>
+          <option value="agi">AGI</option>
+        </select>
+      </div>
+      <div id="metric-stat-control" class="control-group">
+        <label class="control-label" for="metric-stat-select">Statistic</label>
+        <select id="metric-stat-select" name="metric-stat">
+          <!-- Populated dynamically by JS -->
         </select>
       </div>
 
@@ -289,52 +254,17 @@
         </div>
 
         <div class="chart-control-group">
-          <label class="control-label" for="ind-metric-select">Metric</label>
-          <select id="ind-metric-select" aria-label="Select metric for individual trend chart">
-            <optgroup label="Population">
-              <option value="pop_inflow">Population inflow</option>
-              <option value="pop_outflow">Population outflow</option>
-              <option value="pop_net_inflow">Net population inflow</option>
-              <option value="pop_net_outflow">Net population outflow</option>
-              <option value="pop_inflow_share">Population inflow as share of population</option>
-              <option value="pop_outflow_share">Population outflow as share of population</option>
-              <option value="pop_net_inflow_share">Net population inflow as share of population</option>
-              <option value="pop_net_outflow_share">Net population outflow as share of population</option>
-            </optgroup>
-            <optgroup label="Households">
-              <option value="hh_inflow">Households inflow</option>
-              <option value="hh_outflow">Households outflow</option>
-              <option value="hh_net_inflow">Net household inflow</option>
-              <option value="hh_net_outflow">Net household outflow</option>
-              <option value="hh_inflow_share">Households inflow as share of households</option>
-              <option value="hh_outflow_share">Households outflow as share of households</option>
-              <option value="hh_net_inflow_share">Net household inflow as share of households</option>
-              <option value="hh_net_outflow_share">Net household outflow as share of households</option>
-            </optgroup>
-            <optgroup label="AGI">
-              <option value="agi_inflow">AGI inflow</option>
-              <option value="agi_outflow">AGI outflow</option>
-              <option value="agi_net_inflow">Net AGI inflow</option>
-              <option value="agi_net_outflow">Net AGI outflow</option>
-              <option value="agi_inflow_share">AGI inflow as share of AGI</option>
-              <option value="agi_outflow_share">AGI outflow as share of AGI</option>
-              <option value="agi_net_inflow_share">Net AGI inflow as share of AGI</option>
-              <option value="agi_net_outflow_share">Net AGI outflow as share of AGI</option>
-            </optgroup>
-            <optgroup label="Inbound / Outbound Rates">
-              <option value="pop_inbound_rate">Population inbound rate</option>
-              <option value="pop_outbound_rate">Population outbound rate</option>
-              <option value="hh_inbound_rate">Household inbound rate</option>
-              <option value="hh_outbound_rate">Household outbound rate</option>
-              <option value="agi_inbound_rate">AGI inbound rate</option>
-              <option value="agi_outbound_rate">AGI outbound rate</option>
-            </optgroup>
-            <optgroup label="Average AGI">
-              <option value="avg_agi_in_individual">Avg AGI of individual moving in</option>
-              <option value="avg_agi_in_household">Avg AGI of household moving in</option>
-              <option value="avg_agi_out_individual">Avg AGI of individual moving out</option>
-              <option value="avg_agi_out_household">Avg AGI of household moving out</option>
-            </optgroup>
+          <label class="control-label" for="ind-metric-category-select">Category</label>
+          <select id="ind-metric-category-select" aria-label="Select category for individual trend chart">
+            <option value="pop" selected>Population</option>
+            <option value="hh">Households</option>
+            <option value="agi">AGI</option>
+          </select>
+        </div>
+        <div class="chart-control-group">
+          <label class="control-label" for="ind-metric-stat-select">Statistic</label>
+          <select id="ind-metric-stat-select" aria-label="Select statistic for individual trend chart">
+            <!-- Populated dynamically by JS -->
           </select>
         </div>
 
@@ -412,51 +342,17 @@
         </div>
 
         <div class="chart-control-group">
-          <label class="control-label" for="pair-metric-select">Metric</label>
-          <select id="pair-metric-select" aria-label="Select metric for pairwise chart">
-            <optgroup label="Population">
-              <option value="pop_inflow">Population inflow (B → A)</option>
-              <option value="pop_outflow" selected>Population outflow (A → B)</option>
-              <option value="pop_net_inflow">Net population inflow (B → A)</option>
-              <option value="pop_net_outflow">Net population outflow (A → B)</option>
-              <option value="pop_inflow_share">Population inflow as share of population (B → A)</option>
-              <option value="pop_outflow_share">Population outflow as share of population (A → B)</option>
-              <option value="pop_net_inflow_share">Net population inflow as share of population (B → A)</option>
-              <option value="pop_net_outflow_share">Net population outflow as share of population (A → B)</option>
-            </optgroup>
-            <optgroup label="Households">
-              <option value="hh_inflow">Households inflow (B → A)</option>
-              <option value="hh_outflow">Households outflow (A → B)</option>
-              <option value="hh_net_inflow">Net household inflow (B → A)</option>
-              <option value="hh_net_outflow">Net household outflow (A → B)</option>
-              <option value="hh_inflow_share">Households inflow as share of households (B → A)</option>
-              <option value="hh_outflow_share">Households outflow as share of households (A → B)</option>
-              <option value="hh_net_inflow_share">Net household inflow as share of households (B → A)</option>
-              <option value="hh_net_outflow_share">Net household outflow as share of households (A → B)</option>
-            </optgroup>
-            <optgroup label="AGI">
-              <option value="agi_inflow">AGI inflow (B → A)</option>
-              <option value="agi_outflow">AGI outflow (A → B)</option>
-              <option value="agi_net_inflow">Net AGI inflow (B → A)</option>
-              <option value="agi_net_outflow">Net AGI outflow (A → B)</option>
-              <option value="agi_inflow_share">AGI inflow as share of AGI (B → A)</option>
-              <option value="agi_outflow_share">AGI outflow as share of AGI (A → B)</option>
-              <option value="agi_net_share">Net AGI flow as share of AGI (A → B)</option>
-            </optgroup>
-            <optgroup label="Inbound / Outbound Rates">
-              <option value="pop_inbound_rate">Population inbound rate</option>
-              <option value="pop_outbound_rate">Population outbound rate</option>
-              <option value="hh_inbound_rate">Household inbound rate</option>
-              <option value="hh_outbound_rate">Household outbound rate</option>
-              <option value="agi_inbound_rate">AGI inbound rate</option>
-              <option value="agi_outbound_rate">AGI outbound rate</option>
-            </optgroup>
-            <optgroup label="Average AGI">
-              <option value="avg_agi_in_individual">Avg AGI of individual moving in (B → A)</option>
-              <option value="avg_agi_in_household">Avg AGI of household moving in (B → A)</option>
-              <option value="avg_agi_out_individual">Avg AGI of individual moving out (A → B)</option>
-              <option value="avg_agi_out_household">Avg AGI of household moving out (A → B)</option>
-            </optgroup>
+          <label class="control-label" for="pair-metric-category-select">Category</label>
+          <select id="pair-metric-category-select" aria-label="Select category for pairwise chart">
+            <option value="pop" selected>Population</option>
+            <option value="hh">Households</option>
+            <option value="agi">AGI</option>
+          </select>
+        </div>
+        <div class="chart-control-group">
+          <label class="control-label" for="pair-metric-stat-select">Statistic</label>
+          <select id="pair-metric-stat-select" aria-label="Select statistic for pairwise chart">
+            <!-- Populated dynamically by JS -->
           </select>
         </div>
 

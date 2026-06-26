@@ -563,6 +563,110 @@ const METRIC_META = {
     avg_agi_out_household: { label: 'Avg AGI of household moving out ($K)', direction: 'outflow', format: 'currency' },
 };
 
+/* ── Two-dropdown metric selection ──────────────────────────────────────────
+ * Instead of one large dropdown, the UI uses a Category selector (Population /
+ * Households / AGI) paired with a Statistic selector whose options depend on
+ * the chosen category.  AGI has extra stats (avg AGI metrics) that the other
+ * categories lack.
+ *
+ * STAT_OPTIONS lists the common statistics available in ALL categories.
+ * AGI_EXTRA_STATS lists additional statistics available only when AGI is selected.
+ */
+
+const STAT_OPTIONS = [
+    { suffix: 'inflow', label: 'Inflow', pairLabel: 'Inflow (B → A)' },
+    { suffix: 'outflow', label: 'Outflow', pairLabel: 'Outflow (A → B)' },
+    { suffix: 'net_inflow', label: 'Net inflow', pairLabel: 'Net inflow (B → A)' },
+    { suffix: 'net_outflow', label: 'Net outflow', pairLabel: 'Net outflow (A → B)' },
+    { suffix: 'inflow_share', label: 'Inflow share', pairLabel: 'Inflow share (B → A)' },
+    { suffix: 'outflow_share', label: 'Outflow share', pairLabel: 'Outflow share (A → B)' },
+    { suffix: 'net_inflow_share', label: 'Net inflow share', pairLabel: 'Net inflow share (B → A)' },
+    { suffix: 'net_outflow_share', label: 'Net outflow share', pairLabel: 'Net outflow share (A → B)' },
+    { suffix: 'inbound_rate', label: 'Inbound rate', pairLabel: 'Inbound rate' },
+    { suffix: 'outbound_rate', label: 'Outbound rate', pairLabel: 'Outbound rate' },
+];
+
+const AGI_EXTRA_STATS = [
+    { suffix: 'avg_agi_in_individual', label: 'Avg AGI of individual moving in ($K)', pairLabel: 'Avg AGI of individual moving in (B → A)' },
+    { suffix: 'avg_agi_in_household', label: 'Avg AGI of household moving in ($K)', pairLabel: 'Avg AGI of household moving in (B → A)' },
+    { suffix: 'avg_agi_out_individual', label: 'Avg AGI of individual moving out ($K)', pairLabel: 'Avg AGI of individual moving out (A → B)' },
+    { suffix: 'avg_agi_out_household', label: 'Avg AGI of household moving out ($K)', pairLabel: 'Avg AGI of household moving out (A → B)' },
+];
+
+/**
+ * Build the full METRIC_META key from a category prefix and stat suffix.
+ * AGI-only stats (avg_agi_*) use their suffix as the full key.
+ */
+function buildMetricKey(category, statSuffix) {
+    if (statSuffix.startsWith('avg_agi_')) return statSuffix;
+    return `${category}_${statSuffix}`;
+}
+
+/**
+ * Extract the stat suffix from a full metric key.
+ * Returns the suffix that, combined with a category, reproduces the key.
+ */
+function extractStatSuffix(metricKey) {
+    if (metricKey.startsWith('avg_agi_')) return metricKey;
+    for (const p of ['pop_', 'hh_', 'agi_']) {
+        if (metricKey.startsWith(p)) return metricKey.slice(p.length);
+    }
+    return metricKey;
+}
+
+/**
+ * Extract the category prefix from a full metric key.
+ */
+function extractMetricCategory(metricKey) {
+    if (metricKey.startsWith('avg_agi_')) return 'agi';
+    if (metricKey.startsWith('pop_')) return 'pop';
+    if (metricKey.startsWith('hh_')) return 'hh';
+    if (metricKey.startsWith('agi_')) return 'agi';
+    return 'pop';
+}
+
+/**
+ * Populate a stat <select> with options appropriate for the given category.
+ * Tries to preserve the currently-selected stat suffix when the category changes.
+ * Returns the resulting full metric key.
+ *
+ * @param {HTMLSelectElement} selectEl
+ * @param {string} category  'pop' | 'hh' | 'agi'
+ * @param {boolean} isPairMode  If true, use pairLabel with directional annotations
+ * @param {string|null} preferredSuffix  Stat suffix to try to preserve
+ */
+function populateStatSelect(selectEl, category, isPairMode = false, preferredSuffix = null) {
+    if (!selectEl) return '';
+
+    const currentSuffix = preferredSuffix ?? extractStatSuffix(selectEl.value || '');
+    selectEl.innerHTML = '';
+
+    // Common stats
+    for (const stat of STAT_OPTIONS) {
+        const opt = document.createElement('option');
+        opt.value = buildMetricKey(category, stat.suffix);
+        opt.textContent = isPairMode ? stat.pairLabel : stat.label;
+        selectEl.appendChild(opt);
+    }
+
+    // AGI-only extras
+    if (category === 'agi') {
+        for (const stat of AGI_EXTRA_STATS) {
+            const opt = document.createElement('option');
+            opt.value = stat.suffix; // Full key for AGI extras
+            opt.textContent = isPairMode ? stat.pairLabel : stat.label;
+            selectEl.appendChild(opt);
+        }
+    }
+
+    // Try to preserve selection
+    const targetKey = buildMetricKey(category, currentSuffix);
+    const hasTarget = Array.from(selectEl.options).some(o => o.value === targetKey);
+    selectEl.value = hasTarget ? targetKey : selectEl.options[0]?.value || '';
+
+    return selectEl.value;
+}
+
 /**
  * computeMetric(metricKey, records) → number | null
  *
@@ -812,6 +916,7 @@ function getMetricLabel(metricKey) {
 const appState = {
     level: 'state',
     yearIndex: 14,
+    metricCategory: 'pop',
     metric: 'pop_inflow',
     primaryRegion: null,
     secondaryRegion: null,
@@ -1423,6 +1528,7 @@ function renderChart() {
 const indChartState = {
     // Array of exactly 12 slots. Each is either null or { key, level, label }
     regions: new Array(12).fill(null),
+    metricCategory: 'pop',
     metric: 'pop_inflow',
     stagedKey: null,
     stagedLevel: null,
@@ -2104,6 +2210,7 @@ function renderIndividualChart() {
 const pairChartState = {
     // Array of exactly 12 slots. Each is either null or an object with regionA and regionB
     pairs: new Array(12).fill(null),
+    metricCategory: 'pop',
     metric: 'pop_outflow',
 
     // Temporarily hold the selections before "Add" is clicked
@@ -2695,11 +2802,17 @@ function wireControls() {
         });
     }
 
-    // ── Metric select ─────────────────────────────────────────────────────────
-    const metricSel = document.getElementById('metric-select');
-    if (metricSel) {
-        metricSel.addEventListener('change', e => {
-            appState.metric = e.target.value;
+    // ── Map: Category + Statistic selects ─────────────────────────────────────
+    const mapCatSel = document.getElementById('metric-category-select');
+    const mapStatSel = document.getElementById('metric-stat-select');
+    if (mapCatSel && mapStatSel) {
+        mapCatSel.addEventListener('change', () => {
+            appState.metricCategory = mapCatSel.value;
+            appState.metric = populateStatSelect(mapStatSel, mapCatSel.value, false);
+            render();
+        });
+        mapStatSel.addEventListener('change', () => {
+            appState.metric = mapStatSel.value;
             render();
         });
     }
@@ -2782,10 +2895,17 @@ function wireControls() {
     }
 
     // ── Individual chart: metric selector ────────────────────────────────────
-    const indMetricSel = document.getElementById('ind-metric-select');
-    if (indMetricSel) {
-        indMetricSel.addEventListener('change', () => {
-            indChartState.metric = indMetricSel.value;
+    // ── Individual chart: Category + Statistic selects ──────────────────────
+    const indCatSel = document.getElementById('ind-metric-category-select');
+    const indStatSel = document.getElementById('ind-metric-stat-select');
+    if (indCatSel && indStatSel) {
+        indCatSel.addEventListener('change', () => {
+            indChartState.metricCategory = indCatSel.value;
+            indChartState.metric = populateStatSelect(indStatSel, indCatSel.value, false);
+            renderIndividualChart();
+        });
+        indStatSel.addEventListener('change', () => {
+            indChartState.metric = indStatSel.value;
             renderIndividualChart();
         });
     }
@@ -2883,10 +3003,17 @@ function wireControls() {
     }
 
     // ── Pairwise chart: metric selector ────────────────────────────────────
-    const pairMetricSel = document.getElementById('pair-metric-select');
-    if (pairMetricSel) {
-        pairMetricSel.addEventListener('change', () => {
-            pairChartState.metric = pairMetricSel.value;
+    // ── Pairwise chart: Category + Statistic selects ──────────────────────
+    const pairCatSel = document.getElementById('pair-metric-category-select');
+    const pairStatSel = document.getElementById('pair-metric-stat-select');
+    if (pairCatSel && pairStatSel) {
+        pairCatSel.addEventListener('change', () => {
+            pairChartState.metricCategory = pairCatSel.value;
+            pairChartState.metric = populateStatSelect(pairStatSel, pairCatSel.value, true);
+            renderPairChart();
+        });
+        pairStatSel.addEventListener('change', () => {
+            pairChartState.metric = pairStatSel.value;
             renderPairChart();
         });
     }
@@ -2989,9 +3116,14 @@ function initUI() {
         slider.setAttribute('aria-valuetext', YEAR_LABELS[tag]);
     }
 
-    // ── Metric select ─────────────────────────────────────────────────────────
-    const metricEl = document.getElementById('metric-select');
-    if (metricEl) metricEl.value = appState.metric;
+    // ── Map metric selects ────────────────────────────────────────────────────
+    const mapCatEl = document.getElementById('metric-category-select');
+    const mapStatEl = document.getElementById('metric-stat-select');
+    if (mapCatEl) mapCatEl.value = appState.metricCategory;
+    if (mapStatEl) {
+        populateStatSelect(mapStatEl, appState.metricCategory, false, extractStatSuffix(appState.metric));
+        mapStatEl.value = appState.metric;
+    }
 
     // ── Flow-type select ─────────────────────────────────────────────────────
     const ftEl = document.getElementById('flow-type-select');
@@ -3033,15 +3165,25 @@ function initUI() {
     // ── Selection sidebar ─────────────────────────────────────────────────────
     updateSelectionUI();
 
-    // ── Individual chart: sync metric select + populate region dropdown ────────
-    const indMetricEl = document.getElementById('ind-metric-select');
-    if (indMetricEl) indMetricEl.value = indChartState.metric;
+    // ── Individual chart: sync category + stat selects ────────────────────────
+    const indCatEl = document.getElementById('ind-metric-category-select');
+    const indStatEl = document.getElementById('ind-metric-stat-select');
+    if (indCatEl) indCatEl.value = indChartState.metricCategory;
+    if (indStatEl) {
+        populateStatSelect(indStatEl, indChartState.metricCategory, false, extractStatSuffix(indChartState.metric));
+        indStatEl.value = indChartState.metric;
+    }
     initIndividualCombobox(); // builds entries, wires all combobox events
     renderIndividualChart();
 
-    // ── Pairwise chart: sync state & populate dropdowns ───────────────────────
-    const pairMetricEl = document.getElementById('pair-metric-select');
-    if (pairMetricEl) pairMetricEl.value = pairChartState.metric;
+    // ── Pairwise chart: sync category + stat selects ──────────────────────────
+    const pairCatEl = document.getElementById('pair-metric-category-select');
+    const pairStatEl = document.getElementById('pair-metric-stat-select');
+    if (pairCatEl) pairCatEl.value = pairChartState.metricCategory;
+    if (pairStatEl) {
+        populateStatSelect(pairStatEl, pairChartState.metricCategory, true, extractStatSuffix(pairChartState.metric));
+        pairStatEl.value = pairChartState.metric;
+    }
     initPairComboboxes();
     renderPairChart();
 }

@@ -347,7 +347,19 @@ body {
 
 /* ── 4c. Metric select ───────────────────────────────────── */
 #metric-control {
+  width: 140px;
+  min-width: 140px;
+}
+
+#metric-stat-control {
   min-width: 260px;
+}
+
+#metric-category-select,
+#ind-metric-category-select,
+#pair-metric-category-select {
+  width: 140px;
+  min-width: 140px;
 }
 
 /* ── Slider Layout & Tick Marks ── */
@@ -1000,8 +1012,9 @@ body {
   max-width: 320px;
 }
 
-/* Metric selector — same as map's */
-#ind-metric-select {
+/* Metric selectors — same as map's */
+#ind-metric-stat-select,
+#pair-metric-stat-select {
   min-width: 260px;
   max-width: 380px;
 }
@@ -1144,7 +1157,8 @@ body {
   }
 
   .region-combobox,
-  #ind-metric-select {
+  #ind-metric-stat-select,
+  #pair-metric-stat-select {
     min-width: 240px;
     /* Increased from 180px so the placeholder is still readable on tablets */
     max-width: 100%;
@@ -1158,9 +1172,14 @@ body {
   }
 
   .region-combobox,
-  #ind-metric-select {
+  #ind-metric-stat-select,
+  #pair-metric-stat-select,
+  #metric-category-select,
+  #ind-metric-category-select,
+  #pair-metric-category-select {
     width: 100%;
     max-width: none;
+    min-width: 0;
   }
 
   .chart-clear-btn {
