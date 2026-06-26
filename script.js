@@ -548,6 +548,14 @@ const METRIC_META = {
     agi_net_inflow_share: { label: 'Net AGI inflow as share of AGI', direction: 'both', format: 'percent' },
     agi_net_outflow_share: { label: 'Net AGI outflow as share of AGI', direction: 'both', format: 'percent' },
 
+    // ── Inbound / Outbound Rates ─────────────────────────────────────────────
+    pop_inbound_rate: { label: 'Population inbound rate', direction: 'both', format: 'percent' },
+    pop_outbound_rate: { label: 'Population outbound rate', direction: 'both', format: 'percent' },
+    hh_inbound_rate: { label: 'Household inbound rate', direction: 'both', format: 'percent' },
+    hh_outbound_rate: { label: 'Household outbound rate', direction: 'both', format: 'percent' },
+    agi_inbound_rate: { label: 'AGI inbound rate', direction: 'both', format: 'percent' },
+    agi_outbound_rate: { label: 'AGI outbound rate', direction: 'both', format: 'percent' },
+
     // ── Average AGI ─────────────────────────────────────────────────────────
     avg_agi_in_individual: { label: 'Avg AGI of individual moving in ($K)', direction: 'inflow', format: 'currency' },
     avg_agi_in_household: { label: 'Avg AGI of household moving in ($K)', direction: 'inflow', format: 'currency' },
@@ -660,6 +668,14 @@ function computeMetric(metricKey, { inflow, outflow, totalInflow, totalOutflow }
             const denom = Math.max(ti.AGI, to.AGI);
             return denom > 0 ? netOutflowAGI / denom : null;
         }
+
+        // ── Inbound / Outbound Rates ─────────────────────────────────────────────
+        case 'pop_inbound_rate': { const sum = i.n2 + o.n2; return sum > 0 ? i.n2 / sum : null; }
+        case 'pop_outbound_rate': { const sum = i.n2 + o.n2; return sum > 0 ? o.n2 / sum : null; }
+        case 'hh_inbound_rate': { const sum = i.n1 + o.n1; return sum > 0 ? i.n1 / sum : null; }
+        case 'hh_outbound_rate': { const sum = i.n1 + o.n1; return sum > 0 ? o.n1 / sum : null; }
+        case 'agi_inbound_rate': { const sum = i.AGI + o.AGI; return sum > 0 ? i.AGI / sum : null; }
+        case 'agi_outbound_rate': { const sum = i.AGI + o.AGI; return sum > 0 ? o.AGI / sum : null; }
 
         // ── Average AGI ─────────────────────────────────────────────────────────
         case 'avg_agi_in_individual': return i.n2 > 0 ? i.AGI / i.n2 : null;
@@ -1023,7 +1039,10 @@ async function renderMap() {
         legendGradientCss = 'var(--accent-bg)';
         tickValues = [];
     } else {
-        if (metricMeta.direction === 'both') {
+        // Use diverging scale only for metrics that can actually go negative (net metrics).
+        // Rate metrics have direction='both' but are always 0–1, so they get a sequential scale.
+        const isDivergingMetric = metricMeta.direction === 'both' && appState.metric.includes('net');
+        if (isDivergingMetric) {
             // Diverging scale: Split the data to ensure 0 remains the true center of the legend.
             const negVals = validValues.filter(v => v < 0);
             const posVals = validValues.filter(v => v >= 0);
@@ -1964,7 +1983,7 @@ function renderIndividualChart() {
 
     const range = yMax - yMin;
     const pad = range === 0 ? (Math.abs(yMax) * 0.05 || 1) : range * 0.1;
-    const isDiverging = METRIC_META[metricKey]?.direction === 'both';
+    const isDiverging = METRIC_META[metricKey]?.direction === 'both' && metricKey.includes('net');
 
     if (isDiverging) {
         yMin = yMin - pad;
@@ -2280,7 +2299,7 @@ function renderPairChart() {
     let [yMin, yMax] = validVals.length > 0 ? [d3.min(validVals), d3.max(validVals)] : [0, 1];
     const range = yMax - yMin;
     const pad = range === 0 ? (Math.abs(yMax) * 0.05 || 1) : range * 0.1;
-    const isDiverging = METRIC_META[metricKey]?.direction === 'both';
+    const isDiverging = METRIC_META[metricKey]?.direction === 'both' && metricKey.includes('net');
 
     if (isDiverging) {
         yMin = yMin - pad;

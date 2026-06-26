@@ -465,9 +465,9 @@ them across all available years.
 
 ### Milestone 9.1 – Inbound and Outbound Rates
 
-- [ ] For population, households, and AGI—in the map and both line graphs—add statistics to show the inbound and outbound rates:
-  - [ ] The inbound rate is inflow divided by the sum of inflow and outflow
-  - [ ] The outbound rate is outflow divided by the sum of inflow and outflow
+- [x] For population, households, and AGI—in the map and both line graphs—add statistics to show the inbound and outbound rates:
+  - [x] The inbound rate is inflow divided by the sum of inflow and outflow
+  - [x] The outbound rate is outflow divided by the sum of inflow and outflow
 
 ### Milestone 9.2 – Ratio of Average AGIs of In-Migrants vs. Out-Migrants
 
