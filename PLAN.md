@@ -463,12 +463,26 @@ them across all available years.
 
 ## Phase 9 – Further Data Extensions
 
-### Milestone 9.1 – Rearrange Map Control Panel
+### Milestone 9.1 – Inbound and Outbound Rates
+
+- [ ] For population, households, and AGI—in the map and both line graphs—add statistics to show the inbound and outbound rates:
+  - [ ] The inbound rate is inflow divided by the sum of inflow and outflow
+  - [ ] The outbound rate is outflow divided by the sum of inflow and outflow
+
+### Milestone 9.2 – Ratio of Average AGIs of In-Migrants vs. Out-Migrants
+
+- [ ] For population, households, and AGI—in the map and both line graphs—add statistics to show the ratio of average AGIs of in-migrants vs. out-migrants:
+  - [ ] Ratio of Average In-Migrant Individual AGI to Average Out-Migrant Individual AGI
+  - [ ] Ratio of Average In-Migrant Household AGI to Average Out-Migrant Household AGI
+  - [ ] Ratio of Average Out-Migrant Individual AGI to Average In-Migrant Individual AGI
+  - [ ] Ratio of Average Out-Migrant Household AGI to Average In-Migrant Household AGI
+
+### Milestone 9.3 – Rearrange Map Control Panel
 
 - [ ] Move every component of the map control panel to the left side of the map instead of the top, where it is now
 - [ ] Extend the year slider's length so that it would be long enough to go as far back as 1990-91
 
-### Milestone 9.2 – Extend Data Back to 1990-91
+### Milestone 9.4 – Extend Data Back to 1990-91
 
 - [ ] Collect IRS data on migration dating as far back as 1990-91
 - [ ] Expand the Python data enrichment files in data/original/ and data/enriched to process this data, too
