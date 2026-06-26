@@ -1145,7 +1145,8 @@ body {
 
   .region-combobox,
   #ind-metric-select {
-    min-width: 180px;
+    min-width: 240px;
+    /* Increased from 180px so the placeholder is still readable on tablets */
     max-width: 100%;
   }
 }
@@ -1305,8 +1306,10 @@ body {
 /* Wrapper provides the positioning context for the dropdown */
 .region-combobox {
   position: relative;
-  min-width: 220px;
-  max-width: 360px;
+  min-width: 280px;
+  /* Increased from 220px to fit the full placeholder text */
+  max-width: 400px;
+  /* Slightly increased to give the bar more room to stretch */
 }
 
 /* Text input styled to look like the app's <select> elements */
