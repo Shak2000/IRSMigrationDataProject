@@ -549,10 +549,10 @@ const METRIC_META = {
     agi_net_outflow_share: { label: 'Net AGI outflow as share of AGI', direction: 'both', format: 'percent' },
 
     // ── Average AGI ─────────────────────────────────────────────────────────
-    avg_agi_in_individual: { label: 'Avg AGI per individual moving in ($K)', direction: 'inflow', format: 'currency' },
-    avg_agi_in_household: { label: 'Avg AGI per household moving in ($K)', direction: 'inflow', format: 'currency' },
-    avg_agi_out_individual: { label: 'Avg AGI per individual moving out ($K)', direction: 'outflow', format: 'currency' },
-    avg_agi_out_household: { label: 'Avg AGI per household moving out ($K)', direction: 'outflow', format: 'currency' },
+    avg_agi_in_individual: { label: 'Avg AGI of individual moving in ($K)', direction: 'inflow', format: 'currency' },
+    avg_agi_in_household: { label: 'Avg AGI of household moving in ($K)', direction: 'inflow', format: 'currency' },
+    avg_agi_out_individual: { label: 'Avg AGI of individual moving out ($K)', direction: 'outflow', format: 'currency' },
+    avg_agi_out_household: { label: 'Avg AGI of household moving out ($K)', direction: 'outflow', format: 'currency' },
 };
 
 /**
