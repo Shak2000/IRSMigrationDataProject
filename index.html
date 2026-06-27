@@ -257,6 +257,7 @@
         <!-- Hover / selection status bar -->
         <div id="map-status-bar" role="status" aria-live="polite" aria-atomic="true">
           <span id="map-status-text">Hover over a state, county, or county equivalent to see details</span>
+          <span id="map-statistic-description" class="map-statistic-description-inline"></span>
         </div>
 
         <!-- Color-scale legend -->
@@ -343,6 +344,7 @@
     <div id="ind-selected-regions" class="selected-regions-container" aria-live="polite"></div>
 
     <div id="chart-individual-area">
+      <p id="ind-statistic-description" class="statistic-description" aria-live="polite"></p>
 
       <div id="chart-individual-placeholder" class="chart-placeholder" role="status" aria-live="polite">
         <p>Select a state or county above to view its migration trend over time.</p>
@@ -432,11 +434,14 @@
     <div id="pair-selected-regions" class="selected-regions-container" aria-live="polite"></div>
 
     <div id="chart-pair-area">
+      <p id="pair-statistic-description" class="statistic-description" aria-live="polite"></p>
+
       <div id="chart-pair-placeholder" class="chart-placeholder" role="status" aria-live="polite">
         <p>Select two states or counties above to view the migration flows between them over time.</p>
       </div>
 
       <div id="chart-pair-svg-container" aria-label="Pairwise region migration trend chart" hidden></div>
+
     </div>
   </section>
 

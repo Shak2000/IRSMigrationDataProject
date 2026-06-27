@@ -585,6 +585,15 @@ select:focus {
   min-height: 32px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-md);
+}
+
+.map-statistic-description-inline {
+  font-style: italic;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-align: right;
 }
 
 /* ── Color-scale legend ─────────────────────────────────── */
@@ -1170,7 +1179,18 @@ body {
 }
 
 /* ────────────────────────────────────────────────────────────
-   14. PLACEHOLDER HIDDEN FIX
+   14. STATISTIC DESCRIPTION
+──────────────────────────────────────────────────────────── */
+.statistic-description {
+  margin: var(--sp-sm) var(--sp-lg);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+/* ────────────────────────────────────────────────────────────
+   15. PLACEHOLDER HIDDEN FIX
    CSS display: flex on .chart-placeholder can override the
    browser's default [hidden] = display: none.
 ──────────────────────────────────────────────────────────── */

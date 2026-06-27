@@ -581,28 +581,56 @@ const METRIC_META = {
  */
 
 const STAT_OPTIONS = [
-    { suffix: 'inflow', label: 'Inflow', pairLabel: 'Inflow (B → A)' },
-    { suffix: 'outflow', label: 'Outflow', pairLabel: 'Outflow (A → B)' },
-    { suffix: 'net_inflow', label: 'Net inflow', pairLabel: 'Net inflow (B → A)' },
-    { suffix: 'net_outflow', label: 'Net outflow', pairLabel: 'Net outflow (A → B)' },
-    { suffix: 'inflow_share', label: 'Inflow rate', pairLabel: 'Inflow rate (B → A)' },
-    { suffix: 'outflow_share', label: 'Outflow rate', pairLabel: 'Outflow rate (A → B)' },
-    { suffix: 'net_inflow_share', label: 'Net inflow rate', pairLabel: 'Net inflow rate (B → A)' },
-    { suffix: 'net_outflow_share', label: 'Net outflow rate', pairLabel: 'Net outflow rate (A → B)' },
-    { suffix: 'inbound_rate', label: 'Inbound rate', pairLabel: 'Inbound rate' },
-    { suffix: 'outbound_rate', label: 'Outbound rate', pairLabel: 'Outbound rate' },
+    { suffix: 'inflow', label: 'Inflow', pairLabel: 'Inflow (B → A)', desc: 'The number of people, households, or dollars (AGI) moving into a region during a given tax year.' },
+    { suffix: 'outflow', label: 'Outflow', pairLabel: 'Outflow (A → B)', desc: 'The number of people, households, or dollars (AGI) moving out of a region during a given tax year.' },
+    { suffix: 'net_inflow', label: 'Net inflow', pairLabel: 'Net inflow (B → A)', desc: 'The difference between inflow and outflow. Net inflow = inflow − outflow (positive means the region gained).' },
+    { suffix: 'net_outflow', label: 'Net outflow', pairLabel: 'Net outflow (A → B)', desc: 'The difference between inflow and outflow. Net outflow = outflow − inflow (positive means the region lost).' },
+    { suffix: 'inflow_share', label: 'Inflow rate', pairLabel: 'Inflow rate (B → A)', desc: "A region's inflow expressed as a percentage of the region's total population, number of households, or AGI." },
+    { suffix: 'outflow_share', label: 'Outflow rate', pairLabel: 'Outflow rate (A → B)', desc: "A region's outflow expressed as a percentage of the region's total population, number of households, or AGI." },
+    { suffix: 'net_inflow_share', label: 'Net inflow rate', pairLabel: 'Net inflow rate (B → A)', desc: "A region's net inflow expressed as a percentage of the region's total population, number of households, or AGI." },
+    { suffix: 'net_outflow_share', label: 'Net outflow rate', pairLabel: 'Net outflow rate (A → B)', desc: "A region's net outflow expressed as a percentage of the region's total population, number of households, or AGI." },
+    { suffix: 'inbound_rate', label: 'Inbound rate', pairLabel: 'Inbound rate', desc: 'The proportion of total migration volume that is inbound. Calculated as inflow ÷ (inflow + outflow). A rate above 50% indicates the region attracts more migrants than it loses.' },
+    { suffix: 'outbound_rate', label: 'Outbound rate', pairLabel: 'Outbound rate', desc: 'The proportion of total migration volume that is outbound. Calculated as outflow ÷ (inflow + outflow). Equal to 1 − inbound rate.' },
 ];
 
 const AGI_EXTRA_STATS = [
-    { suffix: 'avg_agi_in_individual', label: 'Avg AGI of individual moving in', pairLabel: 'Avg AGI of individual moving in (B → A)' },
-    { suffix: 'avg_agi_in_household', label: 'Avg AGI of household moving in', pairLabel: 'Avg AGI of household moving in (B → A)' },
-    { suffix: 'avg_agi_out_individual', label: 'Avg AGI of individual moving out', pairLabel: 'Avg AGI of individual moving out (A → B)' },
-    { suffix: 'avg_agi_out_household', label: 'Avg AGI of household moving out', pairLabel: 'Avg AGI of household moving out (A → B)' },
-    { suffix: 'agi_ratio_in_out_individual', label: 'Avg AGI ratio, in- to out-mover individual', pairLabel: 'Avg AGI ratio, in- to out-mover individual' },
-    { suffix: 'agi_ratio_in_out_household', label: 'Avg AGI ratio, in- to out-mover household', pairLabel: 'Avg AGI ratio, in- to out-mover household' },
-    { suffix: 'agi_ratio_out_in_individual', label: 'Avg AGI ratio, out- to in-mover individual', pairLabel: 'Avg AGI ratio, out- to in-mover individual' },
-    { suffix: 'agi_ratio_out_in_household', label: 'Avg AGI ratio, out- to in-mover household', pairLabel: 'Avg AGI ratio, out- to in-mover household' },
+    { suffix: 'avg_agi_in_individual', label: 'Avg AGI of individual moving in', pairLabel: 'Avg AGI of individual moving in (B → A)', desc: 'The average Adjusted Gross Income (AGI) of each individual moving into a region.' },
+    { suffix: 'avg_agi_in_household', label: 'Avg AGI of household moving in', pairLabel: 'Avg AGI of household moving in (B → A)', desc: 'The average Adjusted Gross Income (AGI) of each household moving into a region.' },
+    { suffix: 'avg_agi_out_individual', label: 'Avg AGI of individual moving out', pairLabel: 'Avg AGI of individual moving out (A → B)', desc: 'The average Adjusted Gross Income (AGI) of each individual moving out of a region.' },
+    { suffix: 'avg_agi_out_household', label: 'Avg AGI of household moving out', pairLabel: 'Avg AGI of household moving out (A → B)', desc: 'The average Adjusted Gross Income (AGI) of each household moving out of a region.' },
+    { suffix: 'agi_ratio_in_out_individual', label: 'Avg AGI ratio, in- to out-mover individual', pairLabel: 'Avg AGI ratio, in- to out-mover individual', desc: 'The ratio of the average AGI per individual moving in to the average AGI per individual moving out. A ratio above 1.0 means in-movers have higher average incomes than out-movers.' },
+    { suffix: 'agi_ratio_in_out_household', label: 'Avg AGI ratio, in- to out-mover household', pairLabel: 'Avg AGI ratio, in- to out-mover household', desc: 'The ratio of the average AGI per household moving in to the average AGI per household moving out. A ratio above 1.0 means in-movers have higher average incomes than out-movers.' },
+    { suffix: 'agi_ratio_out_in_individual', label: 'Avg AGI ratio, out- to in-mover individual', pairLabel: 'Avg AGI ratio, out- to in-mover individual', desc: 'The ratio of the average AGI per individual moving out to the average AGI per individual moving in. A ratio above 1.0 means out-movers have higher average incomes than in-movers.' },
+    { suffix: 'agi_ratio_out_in_household', label: 'Avg AGI ratio, out- to in-mover household', pairLabel: 'Avg AGI ratio, out- to in-mover household', desc: 'The ratio of the average AGI per household moving out to the average AGI per household moving in. A ratio above 1.0 means out-movers have higher average incomes than in-movers.' },
 ];
+
+function getMetricDescription(metricKey) {
+    const suffix = extractStatSuffix(metricKey);
+    const category = extractMetricCategory(metricKey);
+    const allStats = [...STAT_OPTIONS, ...AGI_EXTRA_STATS];
+    const stat = allStats.find(s => s.suffix === suffix);
+    let desc = stat && stat.desc ? stat.desc : '';
+
+    if (category === 'pop') {
+        desc = desc.replace('people, households, or dollars (AGI)', 'people');
+        desc = desc.replace("population, number of households, or AGI", "population");
+    } else if (category === 'hh') {
+        desc = desc.replace('people, households, or dollars (AGI)', 'households');
+        desc = desc.replace("population, number of households, or AGI", "number of households");
+    } else if (category === 'agi') {
+        desc = desc.replace('people, households, or dollars (AGI)', 'dollars (AGI)');
+        desc = desc.replace("population, number of households, or AGI", "AGI");
+    }
+
+    return desc;
+}
+
+function updateStatisticDescription(elementId, metricKey) {
+    const el = document.getElementById(elementId);
+    if (el) {
+        el.textContent = getMetricDescription(metricKey);
+    }
+}
 
 /**
  * Build the full METRIC_META key from a category prefix and stat suffix.
@@ -1144,6 +1172,7 @@ function render() {
  * is actually painted.
  */
 async function renderMap() {
+    updateStatisticDescription('map-statistic-description', appState.metric);
     const gen = ++mapRenderGen;
 
     // ── Size the SVG ─────────────────────────────────────────────────────────────
@@ -2097,6 +2126,7 @@ function setupIndividualChart() {
  * - The Y-axis label text
  */
 function renderIndividualChart() {
+    updateStatisticDescription('ind-statistic-description', indChartState.metric);
     const placeholder = document.getElementById('chart-individual-placeholder');
     const svgContainer = document.getElementById('chart-individual-svg-container');
     if (!placeholder || !svgContainer) return;
@@ -2411,6 +2441,7 @@ function setupPairChart() {
 }
 
 function renderPairChart() {
+    updateStatisticDescription('pair-statistic-description', pairChartState.metric);
     const placeholder = document.getElementById('chart-pair-placeholder');
     const svgContainer = document.getElementById('chart-pair-svg-container');
     if (!placeholder || !svgContainer) return;
