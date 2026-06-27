@@ -471,7 +471,7 @@ them across all available years.
 
 ### Milestone 9.2 – Ratio of Average AGIs of In-Migrants vs. Out-Migrants
 
-- [ ] For population, households, and AGI—in the map and both line graphs—add statistics to show the ratio of average AGIs of in-migrants vs. out-migrants:
+- [ ] For AGI—in the map and both line graphs—add statistics to show the ratio of average AGIs of in-migrants vs. out-migrants:
   - [ ] Ratio of Average In-Migrant Individual AGI to Average Out-Migrant Individual AGI
   - [ ] Ratio of Average In-Migrant Household AGI to Average Out-Migrant Household AGI
   - [ ] Ratio of Average Out-Migrant Individual AGI to Average In-Migrant Individual AGI
