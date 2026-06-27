@@ -540,10 +540,10 @@ const METRIC_META = {
     hh_net_outflow_share: { label: 'Net household outflow as share of households', direction: 'both', format: 'percent' },
 
     // ── AGI ─────────────────────────────────────────────────────────────────
-    agi_inflow: { label: 'AGI inflow ($K)', direction: 'inflow', format: 'currency' },
-    agi_outflow: { label: 'AGI outflow ($K)', direction: 'outflow', format: 'currency' },
-    agi_net_inflow: { label: 'Net AGI inflow ($K)', direction: 'both', format: 'currency' },
-    agi_net_outflow: { label: 'Net AGI outflow ($K)', direction: 'both', format: 'currency' },
+    agi_inflow: { label: 'AGI inflow', direction: 'inflow', format: 'currency' },
+    agi_outflow: { label: 'AGI outflow', direction: 'outflow', format: 'currency' },
+    agi_net_inflow: { label: 'Net AGI inflow', direction: 'both', format: 'currency' },
+    agi_net_outflow: { label: 'Net AGI outflow', direction: 'both', format: 'currency' },
     agi_inflow_share: { label: 'AGI inflow as share of AGI', direction: 'inflow', format: 'percent' },
     agi_outflow_share: { label: 'AGI outflow as share of AGI', direction: 'outflow', format: 'percent' },
     agi_net_inflow_share: { label: 'Net AGI inflow as share of AGI', direction: 'both', format: 'percent' },
@@ -558,16 +558,16 @@ const METRIC_META = {
     agi_outbound_rate: { label: 'AGI outbound rate', direction: 'both', format: 'percent' },
 
     // ── Average AGI ─────────────────────────────────────────────────────────
-    avg_agi_in_individual: { label: 'Avg AGI of individual moving in ($K)', direction: 'inflow', format: 'currency' },
-    avg_agi_in_household: { label: 'Avg AGI of household moving in ($K)', direction: 'inflow', format: 'currency' },
-    avg_agi_out_individual: { label: 'Avg AGI of individual moving out ($K)', direction: 'outflow', format: 'currency' },
-    avg_agi_out_household: { label: 'Avg AGI of household moving out ($K)', direction: 'outflow', format: 'currency' },
+    avg_agi_in_individual: { label: 'Avg AGI of individual moving in', direction: 'inflow', format: 'currency' },
+    avg_agi_in_household: { label: 'Avg AGI of household moving in', direction: 'inflow', format: 'currency' },
+    avg_agi_out_individual: { label: 'Avg AGI of individual moving out', direction: 'outflow', format: 'currency' },
+    avg_agi_out_household: { label: 'Avg AGI of household moving out', direction: 'outflow', format: 'currency' },
 
     // ── Ratio of Average AGIs ────────────────────────────────────────────────
-    agi_ratio_in_out_individual: { label: 'Avg AGI ratio, in- to out-migrant individual', direction: 'both', format: 'decimal' },
-    agi_ratio_in_out_household: { label: 'Avg AGI ratio, in- to out-migrant household', direction: 'both', format: 'decimal' },
-    agi_ratio_out_in_individual: { label: 'Avg AGI ratio, out- to in-migrant individual', direction: 'both', format: 'decimal' },
-    agi_ratio_out_in_household: { label: 'Avg AGI ratio, out- to in-migrant household', direction: 'both', format: 'decimal' },
+    agi_ratio_in_out_individual: { label: 'Ratio of Avg In-Migrant to Out-Migrant Individual AGI', direction: 'both', format: 'decimal' },
+    agi_ratio_in_out_household: { label: 'Ratio of Avg In-Migrant to Out-Migrant Household AGI', direction: 'both', format: 'decimal' },
+    agi_ratio_out_in_individual: { label: 'Ratio of Avg Out-Migrant to In-Migrant Individual AGI', direction: 'both', format: 'decimal' },
+    agi_ratio_out_in_household: { label: 'Ratio of Avg Out-Migrant to In-Migrant Household AGI', direction: 'both', format: 'decimal' },
 };
 
 /* ── Two-dropdown metric selection ──────────────────────────────────────────
@@ -594,14 +594,14 @@ const STAT_OPTIONS = [
 ];
 
 const AGI_EXTRA_STATS = [
-    { suffix: 'avg_agi_in_individual', label: 'Avg AGI of individual moving in ($K)', pairLabel: 'Avg AGI of individual moving in (B → A)' },
-    { suffix: 'avg_agi_in_household', label: 'Avg AGI of household moving in ($K)', pairLabel: 'Avg AGI of household moving in (B → A)' },
-    { suffix: 'avg_agi_out_individual', label: 'Avg AGI of individual moving out ($K)', pairLabel: 'Avg AGI of individual moving out (A → B)' },
-    { suffix: 'avg_agi_out_household', label: 'Avg AGI of household moving out ($K)', pairLabel: 'Avg AGI of household moving out (A → B)' },
-    { suffix: 'agi_ratio_in_out_individual', label: 'Avg AGI ratio, in- to out-migrant individual', pairLabel: 'Avg AGI ratio, in- to out-migrant individual' },
-    { suffix: 'agi_ratio_in_out_household', label: 'Avg AGI ratio, in- to out-migrant household', pairLabel: 'Avg AGI ratio, in- to out-migrant household' },
-    { suffix: 'agi_ratio_out_in_individual', label: 'Avg AGI ratio, out- to in-migrant individual', pairLabel: 'Avg AGI ratio, out- to in-migrant individual' },
-    { suffix: 'agi_ratio_out_in_household', label: 'Avg AGI ratio, out- to in-migrant household', pairLabel: 'Avg AGI ratio, out- to in-migrant household' },
+    { suffix: 'avg_agi_in_individual', label: 'Avg AGI of individual moving in', pairLabel: 'Avg AGI of individual moving in (B → A)' },
+    { suffix: 'avg_agi_in_household', label: 'Avg AGI of household moving in', pairLabel: 'Avg AGI of household moving in (B → A)' },
+    { suffix: 'avg_agi_out_individual', label: 'Avg AGI of individual moving out', pairLabel: 'Avg AGI of individual moving out (A → B)' },
+    { suffix: 'avg_agi_out_household', label: 'Avg AGI of household moving out', pairLabel: 'Avg AGI of household moving out (A → B)' },
+    { suffix: 'agi_ratio_in_out_individual', label: 'Ratio of Avg In-Migrant to Out-Migrant Individual AGI', pairLabel: 'Ratio of Avg In-Migrant (B → A) to Out-Migrant (A → B) Individual AGI' },
+    { suffix: 'agi_ratio_in_out_household', label: 'Ratio of Avg In-Migrant to Out-Migrant Household AGI', pairLabel: 'Ratio of Avg In-Migrant (B → A) to Out-Migrant (A → B) Household AGI' },
+    { suffix: 'agi_ratio_out_in_individual', label: 'Ratio of Avg Out-Migrant to In-Migrant Individual AGI', pairLabel: 'Ratio of Avg Out-Migrant (A → B) to In-Migrant (B → A) Individual AGI' },
+    { suffix: 'agi_ratio_out_in_household', label: 'Ratio of Avg Out-Migrant to In-Migrant Household AGI', pairLabel: 'Ratio of Avg Out-Migrant (A → B) to In-Migrant (B → A) Household AGI' },
 ];
 
 /**
@@ -921,8 +921,10 @@ function formatMetricValue(value, metricKey) {
             // Value is a fraction (0–1); display as percentage with 2 decimal places.
             return `${(value * 100).toFixed(2)} %`;
         case 'currency':
-            // Value is in thousands of dollars.
-            return `$${Math.round(value).toLocaleString('en-US')}K`;
+            // Value is in thousands of dollars. Replace K with ,000
+            if (Math.round(value) === 0) return '$0';
+            const formattedVal = Math.abs(Math.round(value)).toLocaleString('en-US');
+            return value < 0 ? `-$${formattedVal},000` : `$${formattedVal},000`;
         case 'decimal':
             // E.g. for ratios
             return value.toFixed(2);
