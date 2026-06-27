@@ -564,10 +564,10 @@ const METRIC_META = {
     avg_agi_out_household: { label: 'Avg AGI of household moving out', direction: 'outflow', format: 'currency' },
 
     // ── Ratio of Average AGIs ────────────────────────────────────────────────
-    agi_ratio_in_out_individual: { label: 'Avg AGI ratio, in- to out-migrant individual', direction: 'both', format: 'decimal' },
-    agi_ratio_in_out_household: { label: 'Avg AGI ratio, in- to out-migrant household', direction: 'both', format: 'decimal' },
-    agi_ratio_out_in_individual: { label: 'Avg AGI ratio, out- to in-migrant individual', direction: 'both', format: 'decimal' },
-    agi_ratio_out_in_household: { label: 'Avg AGI ratio, out- to in-migrant household', direction: 'both', format: 'decimal' },
+    agi_ratio_in_out_individual: { label: 'Avg AGI ratio, in- to out-mover individual', direction: 'both', format: 'decimal' },
+    agi_ratio_in_out_household: { label: 'Avg AGI ratio, in- to out-mover household', direction: 'both', format: 'decimal' },
+    agi_ratio_out_in_individual: { label: 'Avg AGI ratio, out- to in-mover individual', direction: 'both', format: 'decimal' },
+    agi_ratio_out_in_household: { label: 'Avg AGI ratio, out- to in-mover household', direction: 'both', format: 'decimal' },
 };
 
 /* ── Two-dropdown metric selection ──────────────────────────────────────────
@@ -585,10 +585,10 @@ const STAT_OPTIONS = [
     { suffix: 'outflow', label: 'Outflow', pairLabel: 'Outflow (A → B)' },
     { suffix: 'net_inflow', label: 'Net inflow', pairLabel: 'Net inflow (B → A)' },
     { suffix: 'net_outflow', label: 'Net outflow', pairLabel: 'Net outflow (A → B)' },
-    { suffix: 'inflow_share', label: 'Inflow share', pairLabel: 'Inflow share (B → A)' },
-    { suffix: 'outflow_share', label: 'Outflow share', pairLabel: 'Outflow share (A → B)' },
-    { suffix: 'net_inflow_share', label: 'Net inflow share', pairLabel: 'Net inflow share (B → A)' },
-    { suffix: 'net_outflow_share', label: 'Net outflow share', pairLabel: 'Net outflow share (A → B)' },
+    { suffix: 'inflow_share', label: 'Inflow rate', pairLabel: 'Inflow rate (B → A)' },
+    { suffix: 'outflow_share', label: 'Outflow rate', pairLabel: 'Outflow rate (A → B)' },
+    { suffix: 'net_inflow_share', label: 'Net inflow rate', pairLabel: 'Net inflow rate (B → A)' },
+    { suffix: 'net_outflow_share', label: 'Net outflow rate', pairLabel: 'Net outflow rate (A → B)' },
     { suffix: 'inbound_rate', label: 'Inbound rate', pairLabel: 'Inbound rate' },
     { suffix: 'outbound_rate', label: 'Outbound rate', pairLabel: 'Outbound rate' },
 ];
@@ -598,10 +598,10 @@ const AGI_EXTRA_STATS = [
     { suffix: 'avg_agi_in_household', label: 'Avg AGI of household moving in', pairLabel: 'Avg AGI of household moving in (B → A)' },
     { suffix: 'avg_agi_out_individual', label: 'Avg AGI of individual moving out', pairLabel: 'Avg AGI of individual moving out (A → B)' },
     { suffix: 'avg_agi_out_household', label: 'Avg AGI of household moving out', pairLabel: 'Avg AGI of household moving out (A → B)' },
-    { suffix: 'agi_ratio_in_out_individual', label: 'Avg AGI ratio, in- to out-migrant individual', pairLabel: 'Avg AGI ratio, in- to out-migrant individual' },
-    { suffix: 'agi_ratio_in_out_household', label: 'Avg AGI ratio, in- to out-migrant household', pairLabel: 'Avg AGI ratio, in- to out-migrant household' },
-    { suffix: 'agi_ratio_out_in_individual', label: 'Avg AGI ratio, out- to in-migrant individual', pairLabel: 'Avg AGI ratio, out- to in-migrant individual' },
-    { suffix: 'agi_ratio_out_in_household', label: 'Avg AGI ratio, out- to in-migrant household', pairLabel: 'Avg AGI ratio, out- to in-migrant household' },
+    { suffix: 'agi_ratio_in_out_individual', label: 'Avg AGI ratio, in- to out-mover individual', pairLabel: 'Avg AGI ratio, in- to out-mover individual' },
+    { suffix: 'agi_ratio_in_out_household', label: 'Avg AGI ratio, in- to out-mover household', pairLabel: 'Avg AGI ratio, in- to out-mover household' },
+    { suffix: 'agi_ratio_out_in_individual', label: 'Avg AGI ratio, out- to in-mover individual', pairLabel: 'Avg AGI ratio, out- to in-mover individual' },
+    { suffix: 'agi_ratio_out_in_household', label: 'Avg AGI ratio, out- to in-mover household', pairLabel: 'Avg AGI ratio, out- to in-mover household' },
 ];
 
 /**
@@ -984,7 +984,7 @@ const appState = {
     metric: 'pop_inflow',
     primaryRegion: null,
     secondaryRegion: null,
-    flowType: 'total',
+
     zoomLevel: 1,
     panX: 0, // Horizontal pan
     panY: 0, // Vertical pan
@@ -1124,14 +1124,12 @@ function setupMapSvg() {
  * Master render function — called whenever appState changes.
  *
  * Responsibilities:
- * 1. Keep the selection sidebar (summary, flow-type control) in sync.
+ * 1. Update the map status text for the current selection.
  * 2. Re-draw the choropleth map with the current metric values.
- * 3. Re-draw the line chart for the selected region(s).
  */
 function render() {
-    updateSelectionUI();   // always keep sidebar in sync
+    updateMapStatusText();
     renderMap();           // async, fire-and-forget
-    renderChart();
 }
 
 /**
@@ -1576,9 +1574,7 @@ async function renderMap() {
     console.debug(`[Map] geo rendered (gen=${gen}, level=${appState.level}, zoom=${zoomFactor})`);
 }
 
-function renderChart() {
-    // Disabled — replaced by the standalone #chart-individual section (Phase 6).
-}
+
 
 /* ════════════════════════════════════════════════════════════════════════════
    SECTION 8.5 — PHASE 6: INDIVIDUAL REGION TREND CHART  (Milestone 6.1)
@@ -2842,7 +2838,7 @@ function wireControls() {
             appState.level = radio.value;
             appState.primaryRegion = null;
             appState.secondaryRegion = null;
-            updateSelectionUI();
+            updateMapStatusText();
             // County data is loaded eagerly at startup — no lazy load needed here.
             render();
         });
@@ -2881,25 +2877,7 @@ function wireControls() {
         });
     }
 
-    // ── Flow-type select (sidebar) ────────────────────────────────────────────
-    const flowTypeSelect = document.getElementById('flow-type-select');
-    if (flowTypeSelect) {
-        flowTypeSelect.addEventListener('change', e => {
-            appState.flowType = e.target.value;
-            if (typeof renderChart === 'function') renderChart();
-        });
-    }
 
-    // ── Clear-selection button ────────────────────────────────────────────────
-    const clrBtn = document.getElementById('clear-selection-btn');
-    if (clrBtn) {
-        clrBtn.addEventListener('click', () => {
-            appState.primaryRegion = null;
-            appState.secondaryRegion = null;
-            updateSelectionUI();
-            render();
-        });
-    }
 
     // ── Zoom slider ───────────────────────────────────────────────────────────
     const zoomSlider = document.getElementById('zoom-slider');
@@ -3036,6 +3014,12 @@ function wireControls() {
     }
 
     // ── Navigation arrows ─────────────────────────────────────────────────────
+    const scrollUpMapBtn = document.getElementById('scroll-up-map-btn');
+    if (scrollUpMapBtn) {
+        scrollUpMapBtn.addEventListener('click', () => {
+            document.getElementById('page-toc').scrollIntoView({ behavior: 'instant' });
+        });
+    }
     const scrollDownBtn = document.getElementById('scroll-down-btn');
     if (scrollDownBtn) {
         scrollDownBtn.addEventListener('click', () => {
@@ -3048,7 +3032,7 @@ function wireControls() {
     if (scrollUpBtn) {
         scrollUpBtn.addEventListener('click', () => {
             // Instantly jump back to the top of the map interface
-            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            document.getElementById('page-map').scrollIntoView({ behavior: 'instant' });
         });
     }
 
@@ -3065,6 +3049,37 @@ function wireControls() {
             document.getElementById('chart-individual').scrollIntoView({ behavior: 'instant' });
         });
     }
+
+    const scrollDownPairBtn = document.getElementById('scroll-down-pair-btn');
+    if (scrollDownPairBtn) {
+        scrollDownPairBtn.addEventListener('click', () => {
+            document.getElementById('page-guide').scrollIntoView({ behavior: 'instant' });
+        });
+    }
+
+    const scrollUpGuideBtn = document.getElementById('scroll-up-guide-btn');
+    if (scrollUpGuideBtn) {
+        scrollUpGuideBtn.addEventListener('click', () => {
+            document.getElementById('chart-pair').scrollIntoView({ behavior: 'instant' });
+        });
+    }
+
+    const scrollDownTocBtn = document.getElementById('scroll-down-toc-btn');
+    if (scrollDownTocBtn) {
+        scrollDownTocBtn.addEventListener('click', () => {
+            document.getElementById('page-map').scrollIntoView({ behavior: 'instant' });
+        });
+    }
+
+    // ── Table of Contents link click handlers ─────────────────────────────────
+    document.querySelectorAll('.toc-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = link.dataset.target;
+            const el = document.getElementById(target);
+            if (el) el.scrollIntoView({ behavior: 'instant' });
+        });
+    });
 
     // ── Pairwise chart: metric selector ────────────────────────────────────
     // ── Pairwise chart: Category + Statistic selects ──────────────────────
@@ -3189,9 +3204,6 @@ function initUI() {
         mapStatEl.value = appState.metric;
     }
 
-    // ── Flow-type select ─────────────────────────────────────────────────────
-    const ftEl = document.getElementById('flow-type-select');
-    if (ftEl) ftEl.value = appState.flowType;
 
     // ── Zoom slider ───────────────────────────────────────────────────────────
     const zoomSlider = document.getElementById('zoom-slider');
@@ -3226,8 +3238,8 @@ function initUI() {
         panYSlider.style.setProperty('--pan-y-pct', `${((appState.panY - min) / (max - min)) * 100}`);
     }
 
-    // ── Selection sidebar ─────────────────────────────────────────────────────
-    updateSelectionUI();
+    // ── Map status text ───────────────────────────────────────────────────────
+    updateMapStatusText();
 
     // ── Individual chart: sync category + stat selects ────────────────────────
     const indCatEl = document.getElementById('ind-metric-category-select');
@@ -3253,52 +3265,38 @@ function initUI() {
 }
 
 /**
- * Update the contextual text showing current hover or selection state.
- * Gracefully handles the absence of the sidebar components which we have hidden.
+ * Update the map status text based on the current selection.
  */
-function updateSelectionUI() {
-    const summary = document.getElementById('selection-summary');
-    const ftControl = document.getElementById('flow-type-control');
-    const primaryLbl = document.getElementById('primary-label');
-    const secondaryLbl = document.getElementById('secondary-label');
+function updateMapStatusText() {
     const statusText = document.getElementById('map-status-text');
+    if (!statusText) return;
 
     if (!appState.primaryRegion) {
-        if (summary) summary.hidden = true;
-        if (ftControl) ftControl.hidden = true;
-        if (statusText) statusText.textContent = 'Hover over a state, county, or county equivalent to see details';
+        statusText.textContent = 'Hover over a state, county, or county equivalent to see details';
         return;
     }
 
     // Build display labels
     let pLabel = appState.primaryRegion;
-    let sLabel = appState.secondaryRegion ?? '';
+    let sLabel = '';
 
     if (appState.level === 'state') {
         const pm = stateMeta[appState.primaryRegion];
         if (pm) pLabel = `${pm.name} (${pm.postal})`;
         if (appState.secondaryRegion) {
             const sm = stateMeta[appState.secondaryRegion];
-            if (sm) sLabel = `→ ${sm.name} (${sm.postal})`;
+            if (sm) sLabel = ` → ${sm.name} (${sm.postal})`;
         }
     } else {
         const pm = countyMeta[appState.primaryRegion];
         if (pm) pLabel = `${pm.countyName}, ${pm.statePostal}`;
         if (appState.secondaryRegion) {
             const sm = countyMeta[appState.secondaryRegion];
-            if (sm) sLabel = `→ ${sm.countyName}, ${sm.statePostal}`;
+            if (sm) sLabel = ` → ${sm.countyName}, ${sm.statePostal}`;
         }
     }
 
-    if (primaryLbl) primaryLbl.textContent = pLabel;
-    if (secondaryLbl) {
-        secondaryLbl.textContent = sLabel;
-        secondaryLbl.hidden = !appState.secondaryRegion;
-    }
-
-    if (summary) summary.hidden = false;
-    // Show flow-type dropdown only when primary is set but secondary is not
-    if (ftControl) ftControl.hidden = !!appState.secondaryRegion;
+    statusText.textContent = `Selected: ${pLabel}${sLabel}`;
 }
 
 /** Show or hide a loading overlay on the map. */
@@ -3327,21 +3325,7 @@ function setLoadingState(loading, message = '') {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('[App] Initialising U.S. Migration Explorer …');
 
-    // Dynamically inject CSS to completely remove the line graph space from the right.
-    // This allows the map to spread across the full width, anticipating a separate
-    // tab view for trends down the road.
-    const layoutStyle = document.createElement('style');
-    layoutStyle.textContent = `
-        /* Hide the right column containing the line graph entirely */
-        aside, .sidebar, #right-panel, #flow-type-control, #selection-summary {
-            display: none !important;
-        }
-        /* Force any CSS grids holding the map to condense to a single column */
-        main, #app, .layout-container {
-            grid-template-columns: 1fr !important;
-        }
-    `;
-    document.head.appendChild(layoutStyle);
+
 
     // Wire all UI controls before data arrives so the page feels interactive
     wireControls();
@@ -3440,7 +3424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         get mapLayerBase() { return mapLayerBase; },
         get mapLayerBorder() { return mapLayerBorder; },
         // Section 9 — UI helpers
-        initUI, wireControls, updateSelectionUI, setLoadingState,
+        initUI, wireControls, updateMapStatusText, setLoadingState,
         // Loaders
         loadCountyData,
         // Render

@@ -479,13 +479,13 @@ them across all available years.
 
 ### Milestone 9.3 – Instructions and Glossary Page at the End
 
-- [ ] Create a page at the end of the website that:
-  - [ ] Explains how to use the website
-  - [ ] Includes a glossary of terms used on the website
+- [x] Create a page at the end of the website that:
+  - [x] Explains how to use the website
+  - [x] Includes a glossary of terms used on the website
 
 ### Milestone 9.4 – Table of Contents Page
 
-- [ ] Create a page with a table of contents that links to all other pages
+- [x] Create a page with a table of contents that links to all other pages
 
 ### Milestone 9.5 – Rearrange Map Control Panel
 

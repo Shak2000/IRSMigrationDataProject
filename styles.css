@@ -48,7 +48,7 @@
   /* Layout */
   --header-h: 64px;
   --controls-h: 72px;
-  --sidebar-w: 320px;
+
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -84,11 +84,11 @@ body {
   background: var(--bg);
   min-height: 100dvh;
   display: grid;
-  grid-template-rows: var(--header-h) var(--controls-h) 1fr;
+  grid-template-rows: var(--header-h) 100dvh 100dvh;
   grid-template-areas:
     "header"
-    "controls"
-    "main";
+    "toc"
+    "map-page";
 }
 
 /* Screen-reader utility */
@@ -160,8 +160,16 @@ body {
 /* ────────────────────────────────────────────────────────────
    4. CONTROL BAR
 ──────────────────────────────────────────────────────────── */
+#page-map {
+  grid-area: map-page;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
 #control-bar {
-  grid-area: controls;
+  flex-shrink: 0;
+  height: var(--controls-h);
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
@@ -501,15 +509,11 @@ select:focus {
 
 
 /* ────────────────────────────────────────────────────────────
-   5. MAIN LAYOUT — CSS Grid (map | sidebar)
+   5. MAIN LAYOUT — full-width map
 ──────────────────────────────────────────────────────────── */
 #main-layout {
-  grid-area: main;
-  display: grid;
-  grid-template-columns: 1fr var(--sidebar-w);
-  grid-template-areas: "map sidebar";
+  flex: 1;
   overflow: hidden;
-  height: 100%;
 }
 
 
@@ -517,12 +521,12 @@ select:focus {
    6. MAP PANEL (left)
 ──────────────────────────────────────────────────────────── */
 #map-panel {
-  grid-area: map;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: var(--bg);
   position: relative;
+  height: 100%;
 }
 
 /* SVG map fills the available space */
@@ -620,115 +624,6 @@ select:focus {
 }
 
 
-/* ────────────────────────────────────────────────────────────
-   7. SIDEBAR PANEL (right)
-──────────────────────────────────────────────────────────── */
-#sidebar-panel {
-  grid-area: sidebar;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-md);
-  padding: var(--sp-md);
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  overflow-y: auto;
-  box-shadow: -2px 0 8px rgba(42, 47, 54, 0.04);
-}
-
-/* ── Selection summary ──────────────────────────────────── */
-#selection-summary {
-  background: var(--accent-bg);
-  border: 1px solid rgba(184, 134, 11, 0.2);
-  border-radius: var(--radius-md);
-  padding: var(--sp-sm) var(--sp-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-xs);
-}
-
-.selection-region {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: var(--sp-xs);
-}
-
-.selection-region::before {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.primary-region::before {
-  background: var(--accent);
-}
-
-.secondary-region::before {
-  background: var(--accent-dark);
-  opacity: 0.6;
-}
-
-#clear-selection-btn {
-  align-self: flex-end;
-  margin-top: var(--sp-xs);
-  padding: 4px 12px;
-  font-family: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--accent-dark);
-  background: transparent;
-  border: 1.5px solid var(--accent);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background var(--t-fast), color var(--t-fast), transform var(--t-fast);
-}
-
-#clear-selection-btn:hover {
-  background: var(--accent);
-  color: var(--surface);
-}
-
-#clear-selection-btn:active {
-  transform: scale(0.97);
-}
-
-#clear-selection-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* ── Flow-type control ──────────────────────────────────── */
-#flow-type-control {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: var(--sp-sm) var(--sp-md);
-}
-
-/* ── Line chart container ───────────────────────────────── */
-#linechart {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  position: relative;
-  min-height: 220px;
-  box-shadow: var(--shadow-sm);
-}
-
-/* D3 chart SVG */
-#linechart svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
 /* Placeholder */
 .chart-placeholder {
   position: absolute;
@@ -789,33 +684,9 @@ select:focus {
 
 
 /* ────────────────────────────────────────────────────────────
-   9. RESPONSIVE — collapse sidebar below map on narrow screens
+   9. RESPONSIVE
 ──────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  body {
-    grid-template-rows: var(--header-h) auto 1fr auto;
-    grid-template-areas:
-      "header"
-      "controls"
-      "main"
-      "main";
-  }
-
-  #main-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: 60vh auto;
-    grid-template-areas:
-      "map"
-      "sidebar";
-    overflow-y: auto;
-  }
-
-  #sidebar-panel {
-    border-left: none;
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -2px 8px rgba(42, 47, 54, 0.04);
-  }
-
   .controls-inner {
     gap: var(--sp-md);
     padding: var(--sp-sm) var(--sp-md);
@@ -842,25 +713,6 @@ select:focus {
 }
 
 
-/* ────────────────────────────────────────────────────────────
-   10. SCROLLBAR STYLING (WebKit)
-──────────────────────────────────────────────────────────── */
-#sidebar-panel::-webkit-scrollbar {
-  width: 5px;
-}
-
-#sidebar-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#sidebar-panel::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
-}
-
-#sidebar-panel::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
-}
 
 
 /* ────────────────────────────────────────────────────────────
@@ -918,14 +770,15 @@ body {
   min-height: 100dvh;
   height: auto;
   overflow-y: auto;
-  /* Add an extra 100dvh for the 5th row (pair chart) */
-  grid-template-rows: var(--header-h) var(--controls-h) calc(100dvh - var(--header-h) - var(--controls-h)) 100dvh 100dvh;
+  /* 6 rows: header, toc, map-page, individual chart, pair chart, guide */
+  grid-template-rows: var(--header-h) 100dvh 100dvh 100dvh 100dvh auto;
   grid-template-areas:
     "header"
-    "controls"
-    "main"
+    "toc"
+    "map-page"
     "charts"
-    "pair";
+    "pair"
+    "guide";
 }
 
 /* ── Section shell ───────────────────────────────────────── */
@@ -951,6 +804,14 @@ body {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--sp-sm);
+}
+
+#page-map .chart-section-header {
+  padding: var(--sp-md) var(--sp-lg);
+  max-width: 1800px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .chart-section-title-group {
@@ -1503,16 +1364,15 @@ body {
   transform: scale(1.1);
 }
 
-#scroll-down-btn {
+.map-nav-arrows {
   position: absolute;
   right: var(--sp-lg);
   top: 50%;
   transform: translateY(-50%);
   z-index: 1000;
-}
-
-#scroll-down-btn:hover {
-  transform: translateY(-50%) scale(1.1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
 }
 
 /* Pairwise Combobox Layout */
@@ -1521,4 +1381,251 @@ body {
   align-items: flex-end;
   flex-wrap: wrap;
   gap: var(--sp-md);
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   15. MILESTONE 9.3 — INSTRUCTIONS & GLOSSARY
+──────────────────────────────────────────────────────────── */
+
+#page-guide {
+  grid-area: guide;
+  background: var(--bg);
+  border-top: 2px solid var(--border);
+  padding: var(--sp-lg) var(--sp-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-md);
+  width: 100vw;
+  box-sizing: border-box;
+  min-height: 100dvh;
+}
+
+.guide-nav-row {
+  display: flex;
+  gap: var(--sp-sm);
+  align-items: center;
+}
+
+.guide-content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.guide-columns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-lg);
+}
+
+.guide-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-card-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--surface);
+  background: var(--accent);
+  padding: var(--sp-sm) var(--sp-md);
+  letter-spacing: -0.01em;
+}
+
+.guide-card-body {
+  padding: var(--sp-md) var(--sp-lg);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.guide-card-body p {
+  margin-bottom: var(--sp-sm);
+}
+
+.guide-card-body ul {
+  margin: var(--sp-xs) 0 var(--sp-sm) var(--sp-lg);
+  padding: 0;
+}
+
+.guide-card-body ul li {
+  margin-bottom: var(--sp-xs);
+}
+
+.guide-subheading {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  margin-top: var(--sp-md);
+  margin-bottom: var(--sp-xs);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--accent-light);
+}
+
+.guide-card-body .guide-subheading:first-child {
+  margin-top: 0;
+}
+
+/* ── Glossary definition list ────────────────────────────── */
+.glossary-list {
+  margin: 0;
+  padding: 0;
+}
+
+.glossary-list dt {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--accent-dark);
+  margin-top: var(--sp-md);
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--accent-light);
+}
+
+.glossary-list dt:first-child {
+  margin-top: 0;
+}
+
+.glossary-list dd {
+  margin: var(--sp-xs) 0 0 0;
+  padding: 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.glossary-list code {
+  background: var(--accent-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  font-family: 'Menlo', 'Consolas', monospace;
+}
+
+@media (max-width: 900px) {
+  #page-guide {
+    padding: var(--sp-md);
+  }
+}
+
+
+/* ────────────────────────────────────────────────────────────
+   16. MILESTONE 9.4 — TABLE OF CONTENTS
+──────────────────────────────────────────────────────────── */
+
+#page-toc {
+  grid-area: toc;
+  background: var(--bg);
+  border-top: 2px solid var(--border);
+  padding: var(--sp-lg) var(--sp-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-md);
+  width: 100vw;
+  box-sizing: border-box;
+  min-height: 100dvh;
+}
+
+.toc-nav-row {
+  display: flex;
+  gap: var(--sp-sm);
+  align-items: center;
+}
+
+.toc-card {
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--sp-md) var(--sp-lg);
+}
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toc-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  padding: var(--sp-sm) var(--sp-md);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--text);
+  transition:
+    background var(--t-fast),
+    box-shadow var(--t-fast),
+    transform var(--t-fast);
+}
+
+.toc-link:hover {
+  background: var(--accent-bg);
+  box-shadow: var(--shadow-sm);
+  transform: translateX(4px);
+}
+
+.toc-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.toc-link--active {
+  background: var(--accent-bg);
+  border: 1px solid rgba(184, 134, 11, 0.2);
+}
+
+.toc-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--surface);
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.toc-link-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toc-link-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.toc-link-desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+@media (max-width: 600px) {
+  #page-toc {
+    padding: var(--sp-md);
+  }
+
+  .toc-card {
+    padding: var(--sp-sm) var(--sp-md);
+  }
 }
