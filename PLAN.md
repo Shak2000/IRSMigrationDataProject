@@ -487,12 +487,26 @@ them across all available years.
 
 - [x] Create a page with a table of contents that links to all other pages
 
-### Milestone 9.5 – Rearrange Map Control Panel
+### Milestone 9.5 – Inflow and Outflow Shares
+
+- [ ] In the map and both line graphs, add statistics to show the inflow and outflow shares:
+  - [ ] When a state/county is not selected, an inflow share is the share of national interstate/intercounty inflow that went into that state/county.
+  - [ ] When a state/county is not selected, an outflow share is the share of national interstate/intercounty outflow that went out of that state/county.
+  - [ ] When a state/county is selected, an inflow share is the share of that state/county's total inflow from a different state/county.
+  - [ ] When a state/county is selected, an outflow share is the share of that state/county's total outflow to a different state/county.
+
+### Milestone 9.6 – Rearrange Map Control Panel
 
 - [ ] Move every component of the map control panel to the left side of the map instead of the top, where it is now
 - [ ] Extend the year slider's length so that it would be long enough to go as far back as 1990-91
 
-### Milestone 9.6 – Extend Data Back to 1990-91
+### Milestone 9.7 – Data Dropdown for In or Out
+
+- [ ] In the map and both line graphs, split the dropdown for statistic into:
+  - [ ] A dropdown for inflow or outflow
+  - [ ] A dropdown for the actual statistic (inflow/outflow, net inflow/outflow, etc.)
+
+### Milestone 9.8 – Extend Data Back to 1990-91
 
 - [ ] Collect IRS data on migration dating as far back as 1990-91
 - [ ] Expand the Python data enrichment files in data/original/ and data/enriched to process this data, too
