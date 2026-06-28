@@ -489,11 +489,11 @@ them across all available years.
 
 ### Milestone 9.5 – Inflow and Outflow Shares
 
-- [ ] In the map and both line graphs, add statistics to show the inflow and outflow shares:
-  - [ ] When a state/county is not selected, an inflow share is the share of national interstate/intercounty inflow that went into that state/county.
-  - [ ] When a state/county is not selected, an outflow share is the share of national interstate/intercounty outflow that went out of that state/county.
-  - [ ] When a state/county is selected, an inflow share is the share of that state/county's total inflow from a different state/county.
-  - [ ] When a state/county is selected, an outflow share is the share of that state/county's total outflow to a different state/county.
+- [x] In the map and both line graphs, add statistics to show the inflow and outflow shares:
+  - [x] When a state/county is not selected, an inflow share is the share of national interstate/intercounty inflow that went into that state/county.
+  - [x] When a state/county is not selected, an outflow share is the share of national interstate/intercounty outflow that went out of that state/county.
+  - [x] When a state/county is selected, an inflow share is the share of that state/county's total inflow from a different state/county.
+  - [x] When a state/county is selected, an outflow share is the share of that state/county's total outflow to a different state/county.
 
 ### Milestone 9.6 – Rearrange Map Control Panel
 

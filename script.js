@@ -528,6 +528,8 @@ const METRIC_META = {
     pop_outflow_share: { label: 'Population outflow as share of population', direction: 'outflow', format: 'percent' },
     pop_net_inflow_share: { label: 'Net population inflow as share of population', direction: 'both', format: 'percent' },
     pop_net_outflow_share: { label: 'Net population outflow as share of population', direction: 'both', format: 'percent' },
+    pop_inflow_total_share: { label: 'Share of total population inflow', direction: 'inflow', format: 'percent' },
+    pop_outflow_total_share: { label: 'Share of total population outflow', direction: 'outflow', format: 'percent' },
 
     // ── Households ──────────────────────────────────────────────────────────
     hh_inflow: { label: 'Household inflow', direction: 'inflow', format: 'integer' },
@@ -538,6 +540,8 @@ const METRIC_META = {
     hh_outflow_share: { label: 'Household outflow as share of households', direction: 'outflow', format: 'percent' },
     hh_net_inflow_share: { label: 'Net household inflow as share of households', direction: 'both', format: 'percent' },
     hh_net_outflow_share: { label: 'Net household outflow as share of households', direction: 'both', format: 'percent' },
+    hh_inflow_total_share: { label: 'Share of total household inflow', direction: 'inflow', format: 'percent' },
+    hh_outflow_total_share: { label: 'Share of total household outflow', direction: 'outflow', format: 'percent' },
 
     // ── AGI ─────────────────────────────────────────────────────────────────
     agi_inflow: { label: 'AGI inflow', direction: 'inflow', format: 'currency' },
@@ -548,6 +552,8 @@ const METRIC_META = {
     agi_outflow_share: { label: 'AGI outflow as share of AGI', direction: 'outflow', format: 'percent' },
     agi_net_inflow_share: { label: 'Net AGI inflow as share of AGI', direction: 'both', format: 'percent' },
     agi_net_outflow_share: { label: 'Net AGI outflow as share of AGI', direction: 'both', format: 'percent' },
+    agi_inflow_total_share: { label: 'Share of total AGI inflow', direction: 'inflow', format: 'percent' },
+    agi_outflow_total_share: { label: 'Share of total AGI outflow', direction: 'outflow', format: 'percent' },
 
     // ── Inbound / Outbound Rates ─────────────────────────────────────────────
     pop_inbound_rate: { label: 'Population inbound rate', direction: 'both', format: 'percent' },
@@ -589,6 +595,8 @@ const STAT_OPTIONS = [
     { suffix: 'outflow_share', label: 'Outflow rate', pairLabel: 'Outflow rate (A → B)', desc: "A region's outflow expressed as a percentage of the region's total population, number of households, or AGI." },
     { suffix: 'net_inflow_share', label: 'Net inflow rate', pairLabel: 'Net inflow rate (B → A)', desc: "A region's net inflow expressed as a percentage of the region's total population, number of households, or AGI." },
     { suffix: 'net_outflow_share', label: 'Net outflow rate', pairLabel: 'Net outflow rate (A → B)', desc: "A region's net outflow expressed as a percentage of the region's total population, number of households, or AGI." },
+    { suffix: 'inflow_total_share', label: 'Inflow share', pairLabel: 'Inflow share (B → A)', desc: "When unselected, the region's share of the total national inflow of people, households, or dollars (AGI). When selected, the region's share of the primary region's total inflow." },
+    { suffix: 'outflow_total_share', label: 'Outflow share', pairLabel: 'Outflow share (A → B)', desc: "When unselected, the region's share of the total national outflow of people, households, or dollars (AGI). When selected, the region's share of the primary region's total outflow." },
     { suffix: 'inbound_rate', label: 'Inbound rate', pairLabel: 'Inbound rate', desc: 'The proportion of total migration volume that is inbound. Calculated as inflow ÷ (inflow + outflow). A rate above 50% indicates the region attracts more migrants than it loses.' },
     { suffix: 'outbound_rate', label: 'Outbound rate', pairLabel: 'Outbound rate', desc: 'The proportion of total migration volume that is outbound. Calculated as outflow ÷ (inflow + outflow). Equal to 1 − inbound rate.' },
 ];
@@ -769,48 +777,54 @@ function computeMetric(metricKey, { inflow, outflow, totalInflow, totalOutflow }
         case 'pop_outflow': return o.n2;
         case 'pop_net_inflow': return netInflowN2;
         case 'pop_net_outflow': return netOutflowN2;
-        case 'pop_inflow_share': return ti.n2 > 0 ? i.n2 / ti.n2 : null;
-        case 'pop_outflow_share': return to.n2 > 0 ? o.n2 / to.n2 : null;
+        case 'pop_inflow_share': return bi.n2 > 0 ? i.n2 / bi.n2 : null;
+        case 'pop_outflow_share': return bo.n2 > 0 ? o.n2 / bo.n2 : null;
         case 'pop_net_inflow_share': {
-            const denom = Math.max(ti.n2, to.n2);
+            const denom = Math.max(bi.n2, bo.n2);
             return denom > 0 ? netInflowN2 / denom : null;
         }
         case 'pop_net_outflow_share': {
-            const denom = Math.max(ti.n2, to.n2);
+            const denom = Math.max(bi.n2, bo.n2);
             return denom > 0 ? netOutflowN2 / denom : null;
         }
+        case 'pop_inflow_total_share': return ti.n2 > 0 ? i.n2 / ti.n2 : null;
+        case 'pop_outflow_total_share': return to.n2 > 0 ? o.n2 / to.n2 : null;
 
         // ── Households ──────────────────────────────────────────────────────────
         case 'hh_inflow': return i.n1;
         case 'hh_outflow': return o.n1;
         case 'hh_net_inflow': return netInflowN1;
         case 'hh_net_outflow': return netOutflowN1;
-        case 'hh_inflow_share': return ti.n1 > 0 ? i.n1 / ti.n1 : null;
-        case 'hh_outflow_share': return to.n1 > 0 ? o.n1 / to.n1 : null;
+        case 'hh_inflow_share': return bi.n1 > 0 ? i.n1 / bi.n1 : null;
+        case 'hh_outflow_share': return bo.n1 > 0 ? o.n1 / bo.n1 : null;
         case 'hh_net_inflow_share': {
-            const denom = Math.max(ti.n1, to.n1);
+            const denom = Math.max(bi.n1, bo.n1);
             return denom > 0 ? netInflowN1 / denom : null;
         }
         case 'hh_net_outflow_share': {
-            const denom = Math.max(ti.n1, to.n1);
+            const denom = Math.max(bi.n1, bo.n1);
             return denom > 0 ? netOutflowN1 / denom : null;
         }
+        case 'hh_inflow_total_share': return ti.n1 > 0 ? i.n1 / ti.n1 : null;
+        case 'hh_outflow_total_share': return to.n1 > 0 ? o.n1 / to.n1 : null;
 
         // ── AGI ─────────────────────────────────────────────────────────────────
         case 'agi_inflow': return i.AGI;
         case 'agi_outflow': return o.AGI;
         case 'agi_net_inflow': return netInflowAGI;
         case 'agi_net_outflow': return netOutflowAGI;
-        case 'agi_inflow_share': return ti.AGI > 0 ? i.AGI / ti.AGI : null;
-        case 'agi_outflow_share': return to.AGI > 0 ? o.AGI / to.AGI : null;
+        case 'agi_inflow_share': return bi.AGI > 0 ? i.AGI / bi.AGI : null;
+        case 'agi_outflow_share': return bo.AGI > 0 ? o.AGI / bo.AGI : null;
         case 'agi_net_inflow_share': {
-            const denom = Math.max(ti.AGI, to.AGI);
+            const denom = Math.max(bi.AGI, bo.AGI);
             return denom > 0 ? netInflowAGI / denom : null;
         }
         case 'agi_net_outflow_share': {
-            const denom = Math.max(ti.AGI, to.AGI);
+            const denom = Math.max(bi.AGI, bo.AGI);
             return denom > 0 ? netOutflowAGI / denom : null;
         }
+        case 'agi_inflow_total_share': return ti.AGI > 0 ? i.AGI / ti.AGI : null;
+        case 'agi_outflow_total_share': return to.AGI > 0 ? o.AGI / to.AGI : null;
 
         // ── Inbound / Outbound Rates ─────────────────────────────────────────────
         case 'pop_inbound_rate': { const sum = i.n2 + o.n2; return sum > 0 ? i.n2 / sum : null; }
@@ -892,11 +906,14 @@ function getMapValue(regionKey, year, metricKey, level, primaryRegion) {
 function _getStateMapValue(fips, year, metricKey, primaryFips) {
     if (!primaryFips) {
         const t = stateTotals[year]?.[fips];
+        const nt = nationalTotals[year];
         return computeMetric(metricKey, {
             inflow: t?.inflow ?? null,
             outflow: t?.outflow ?? null,
-            totalInflow: t?.base_outflow ?? null,
-            totalOutflow: t?.base_outflow ?? null,
+            baseInflow: t?.base_outflow ?? null,
+            baseOutflow: t?.base_outflow ?? null,
+            totalInflow: nt?.inflow ?? null,
+            totalOutflow: nt?.outflow ?? null,
         }, false, 'state'); // Explicitly pass 'state'
     } else {
         const inflow = getStateFlow(year, 'inflow', fips, primaryFips);
@@ -905,8 +922,10 @@ function _getStateMapValue(fips, year, metricKey, primaryFips) {
         return computeMetric(metricKey, {
             inflow,
             outflow,
-            totalInflow: pt?.base_outflow ?? null,
-            totalOutflow: pt?.base_outflow ?? null,
+            baseInflow: pt?.base_outflow ?? null,
+            baseOutflow: pt?.base_outflow ?? null,
+            totalInflow: pt?.inflow ?? null,
+            totalOutflow: pt?.outflow ?? null,
         }, true, 'state'); // Explicitly pass 'state'
     }
 }
@@ -914,11 +933,14 @@ function _getStateMapValue(fips, year, metricKey, primaryFips) {
 function _getCountyMapValue(countyKey, year, metricKey, primaryCountyKey) {
     if (!primaryCountyKey) {
         const t = countyTotals[year]?.[countyKey];
+        const nt = nationalTotals[year];
         return computeMetric(metricKey, {
             inflow: t?.inflow ?? null,
             outflow: t?.outflow ?? null,
-            totalInflow: t?.base_outflow ?? null,
-            totalOutflow: t?.base_outflow ?? null,
+            baseInflow: t?.base_outflow ?? null,
+            baseOutflow: t?.base_outflow ?? null,
+            totalInflow: nt?.inflow ?? null,
+            totalOutflow: nt?.outflow ?? null,
         }, false, 'county'); // Explicitly pass 'county'
     } else {
         const inflow = getCountyFlow(year, 'inflow', countyKey, primaryCountyKey);
@@ -927,8 +949,10 @@ function _getCountyMapValue(countyKey, year, metricKey, primaryCountyKey) {
         return computeMetric(metricKey, {
             inflow,
             outflow,
-            totalInflow: pt?.base_outflow ?? null,
-            totalOutflow: pt?.base_outflow ?? null,
+            baseInflow: pt?.base_outflow ?? null,
+            baseOutflow: pt?.base_outflow ?? null,
+            totalInflow: pt?.inflow ?? null,
+            totalOutflow: pt?.outflow ?? null,
         }, true, 'county'); // Explicitly pass 'county'
     }
 }
