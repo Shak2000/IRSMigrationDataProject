@@ -193,6 +193,13 @@
               <option value="agi">AGI</option>
             </select>
           </div>
+          <div id="metric-direction-control" class="control-group">
+            <label class="control-label" for="metric-direction-select">Direction</label>
+            <select id="metric-direction-select" name="metric-direction">
+              <option value="in" selected>Inflow</option>
+              <option value="out">Outflow</option>
+            </select>
+          </div>
           <div id="metric-stat-control" class="control-group">
             <label class="control-label" for="metric-stat-select">Statistic</label>
             <select id="metric-stat-select" name="metric-stat">
@@ -252,7 +259,7 @@
 
         <!-- Choropleth map -->
         <section id="map-panel" aria-label="Choropleth map">
-          
+
           <p id="map-statistic-description" class="statistic-description" aria-live="polite"></p>
 
           <!-- Map SVG is injected here by D3 -->
@@ -331,6 +338,13 @@
             <option value="pop" selected>Population</option>
             <option value="hh">Households</option>
             <option value="agi">AGI</option>
+          </select>
+        </div>
+        <div class="chart-control-group">
+          <label class="control-label" for="ind-metric-direction-select">Direction</label>
+          <select id="ind-metric-direction-select" aria-label="Select direction for individual trend chart">
+            <option value="in" selected>Inflow</option>
+            <option value="out">Outflow</option>
           </select>
         </div>
         <div class="chart-control-group">
@@ -423,6 +437,13 @@
           </select>
         </div>
         <div class="chart-control-group">
+          <label class="control-label" for="pair-metric-direction-select">Direction</label>
+          <select id="pair-metric-direction-select" aria-label="Select direction for pairwise chart">
+            <option value="in" selected>Inflow</option>
+            <option value="out">Outflow</option>
+          </select>
+        </div>
+        <div class="chart-control-group">
           <label class="control-label" for="pair-metric-stat-select">Statistic</label>
           <select id="pair-metric-stat-select" aria-label="Select statistic for pairwise chart">
             <!-- Populated dynamically by JS -->
@@ -497,9 +518,8 @@
                 region.</li>
             </ul>
             <p>
-              <strong>Click a state or county</strong> to select it as the <em>primary region</em>. The map will
-              re-shade to show migration flows <em>to and from</em> that primary region. Click another region to see the
-              specific bilateral flow. Click the primary region again to deselect.
+              <strong>Click a state or county</strong>, and the map will re-shade to show migration flows <em>to and
+                from</em> that region. Click that region again to deselect.
             </p>
 
             <h4 class="guide-subheading">Individual Trend Chart</h4>
@@ -576,7 +596,8 @@
 
               <dt>Inflow Share</dt>
               <dd>
-                When unselected, the region's share of the total national inflow of people, households, or dollars (AGI). When selected, the region's share of the primary region's total inflow.
+                When unselected, the region's share of the total national inflow of people, households, or dollars
+                (AGI). When selected, the region's share of the selected region's total inflow.
               </dd>
 
               <dt>IRS SOI (Statistics of Income)</dt>
@@ -612,7 +633,8 @@
 
               <dt>Outflow Share</dt>
               <dd>
-                When unselected, the region's share of the total national outflow of people, households, or dollars (AGI). When selected, the region's share of the primary region's total outflow.
+                When unselected, the region's share of the total national outflow of people, households, or dollars
+                (AGI). When selected, the region's share of the selected region's total outflow.
               </dd>
 
               <dt>Population</dt>
@@ -621,23 +643,11 @@
                 number of people who moved.
               </dd>
 
-              <dt>Primary Region</dt>
-              <dd>
-                The region selected by clicking on the map. When active, the map re-shades to show flows relative to
-                this region.
-              </dd>
-
               <dt>Avg AGI Ratio (In-to-Out / Out-to-In)</dt>
               <dd>
                 The ratio of the average AGI per migrant (individual or household) moving in to the average AGI per
                 migrant moving out, or vice versa. A ratio above 1.0 for in-to-out means in-movers have higher
                 average incomes than out-movers.
-              </dd>
-
-              <dt>Secondary Region</dt>
-              <dd>
-                A second region selected while a primary region is already active. The map then shows the
-                bilateral flow between the primary and secondary regions.
               </dd>
 
               <dt>Tax Year</dt>

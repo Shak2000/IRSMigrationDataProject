@@ -1,2 +1,4 @@
 __pycache__/
 errors.txt
+*.png
+*.txt

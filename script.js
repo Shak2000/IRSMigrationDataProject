@@ -601,6 +601,23 @@ const STAT_OPTIONS = [
     { suffix: 'outbound_rate', label: 'Outbound rate', pairLabel: 'Outbound rate', desc: 'The proportion of total migration volume that is outbound. Calculated as outflow ÷ (inflow + outflow). Equal to 1 − inbound rate.' },
 ];
 
+/* ── Split dropdown options (Base stats) ─────────────────────────────────── */
+const STAT_BASE_OPTIONS = [
+    { base: 'total', label: 'Total', pairLabel: 'Total', desc: 'The total number of people, households, or dollars (AGI) moving.' },
+    { base: 'net', label: 'Net', pairLabel: 'Net', desc: 'The difference between inflow and outflow.' },
+    { base: 'rate', label: 'Rate (relative to population)', pairLabel: 'Rate', desc: "The migration expressed as a percentage of the region's total population, households, or AGI." },
+    { base: 'net_rate', label: 'Net rate (relative to population)', pairLabel: 'Net rate', desc: "The net migration expressed as a percentage of the region's total population, households, or AGI." },
+    { base: 'share', label: 'Share of total migration', pairLabel: 'Share', desc: "The region's share of the total national or primary region's migration flow." },
+    { base: 'volume_share', label: 'Share of combined in/out volume', pairLabel: 'Volume share', desc: 'The proportion of total migration volume (inflow + outflow) that is in this direction.' }
+];
+
+const AGI_EXTRA_BASE_STATS = [
+    { base: 'avg_individual', label: 'Average AGI per individual', pairLabel: 'Average AGI per individual', desc: 'The average AGI of each individual moving.' },
+    { base: 'avg_household', label: 'Average AGI per household', pairLabel: 'Average AGI per household', desc: 'The average AGI of each household moving.' },
+    { base: 'ratio_individual', label: 'Ratio of avg AGI per individual', pairLabel: 'Ratio of avg AGI per individual', desc: 'The ratio of average AGI between in-movers and out-movers.' },
+    { base: 'ratio_household', label: 'Ratio of avg AGI per household', pairLabel: 'Ratio of avg AGI per household', desc: 'The ratio of average AGI between in-movers and out-movers.' }
+];
+
 const AGI_EXTRA_STATS = [
     { suffix: 'avg_agi_in_individual', label: 'Avg AGI of individual moving in', pairLabel: 'Avg AGI of individual moving in (B → A)', desc: 'The average Adjusted Gross Income (AGI) of each individual moving into a region.' },
     { suffix: 'avg_agi_in_household', label: 'Avg AGI of household moving in', pairLabel: 'Avg AGI of household moving in (B → A)', desc: 'The average Adjusted Gross Income (AGI) of each household moving into a region.' },
@@ -641,12 +658,63 @@ function updateStatisticDescription(elementId, metricKey) {
 }
 
 /**
- * Build the full METRIC_META key from a category prefix and stat suffix.
- * AGI-only stats (avg_agi_* and agi_ratio_*) use their suffix as the full key.
+ * Build the full METRIC_META key from category, direction, and baseStat.
  */
-function buildMetricKey(category, statSuffix) {
-    if (statSuffix.startsWith('avg_agi_') || statSuffix.startsWith('agi_ratio_')) return statSuffix;
-    return `${category}_${statSuffix}`;
+function buildMetricKey(category, direction, baseStat) {
+    const isOut = (direction === 'out');
+    
+    // AGI Extras
+    if (baseStat === 'avg_individual') return isOut ? 'avg_agi_out_individual' : 'avg_agi_in_individual';
+    if (baseStat === 'avg_household') return isOut ? 'avg_agi_out_household' : 'avg_agi_in_household';
+    if (baseStat === 'ratio_individual') return isOut ? 'agi_ratio_out_in_individual' : 'agi_ratio_in_out_individual';
+    if (baseStat === 'ratio_household') return isOut ? 'agi_ratio_out_in_household' : 'agi_ratio_in_out_household';
+    
+    // Standard Stats
+    let suffix = '';
+    if (baseStat === 'total') suffix = isOut ? 'outflow' : 'inflow';
+    if (baseStat === 'net') suffix = isOut ? 'net_outflow' : 'net_inflow';
+    if (baseStat === 'rate') suffix = isOut ? 'outflow_share' : 'inflow_share';
+    if (baseStat === 'net_rate') suffix = isOut ? 'net_outflow_share' : 'net_inflow_share';
+    if (baseStat === 'share') suffix = isOut ? 'outflow_total_share' : 'inflow_total_share';
+    if (baseStat === 'volume_share') suffix = isOut ? 'outbound_rate' : 'inbound_rate';
+    
+    return `${category}_${suffix}`;
+}
+
+/**
+ * Extract category, direction, and baseStat from a full metric key.
+ */
+function parseMetricKey(metricKey) {
+    let category = 'pop';
+    if (metricKey.startsWith('agi_') || metricKey.startsWith('avg_agi_') || metricKey.startsWith('agi_ratio_')) category = 'agi';
+    else if (metricKey.startsWith('hh_')) category = 'hh';
+
+    let suffix = metricKey;
+    for (const p of ['pop_', 'hh_', 'agi_']) {
+        if (metricKey.startsWith(p)) {
+            suffix = metricKey.slice(p.length);
+            break;
+        }
+    }
+    
+    let direction = 'in';
+    if (metricKey.includes('outbound_rate') || metricKey.includes('outflow') || metricKey.includes('avg_agi_out') || metricKey.includes('agi_ratio_out_in')) {
+        direction = 'out';
+    }
+    
+    let baseStat = 'total';
+    if (metricKey.includes('net_inflow_share') || metricKey.includes('net_outflow_share')) baseStat = 'net_rate';
+    else if (metricKey.includes('inflow_share') || metricKey.includes('outflow_share')) baseStat = 'rate';
+    else if (metricKey.includes('total_share')) baseStat = 'share';
+    else if (metricKey.includes('inbound_rate') || metricKey.includes('outbound_rate')) baseStat = 'volume_share';
+    else if (metricKey.includes('net_inflow') || metricKey.includes('net_outflow')) baseStat = 'net';
+    else if (metricKey.includes('inflow') || metricKey.includes('outflow')) baseStat = 'total';
+    else if (metricKey.includes('avg_agi_in_individual') || metricKey.includes('avg_agi_out_individual')) baseStat = 'avg_individual';
+    else if (metricKey.includes('avg_agi_in_household') || metricKey.includes('avg_agi_out_household')) baseStat = 'avg_household';
+    else if (metricKey.includes('agi_ratio_in_out_individual') || metricKey.includes('agi_ratio_out_in_individual')) baseStat = 'ratio_individual';
+    else if (metricKey.includes('agi_ratio_in_out_household') || metricKey.includes('agi_ratio_out_in_household')) baseStat = 'ratio_household';
+    
+    return { category, direction, baseStat };
 }
 
 /**
@@ -673,43 +741,37 @@ function extractMetricCategory(metricKey) {
 }
 
 /**
- * Populate a stat <select> with options appropriate for the given category.
- * Tries to preserve the currently-selected stat suffix when the category changes.
- * Returns the resulting full metric key.
- *
- * @param {HTMLSelectElement} selectEl
- * @param {string} category  'pop' | 'hh' | 'agi'
- * @param {boolean} isPairMode  If true, use pairLabel with directional annotations
- * @param {string|null} preferredSuffix  Stat suffix to try to preserve
+ * Populate a stat <select> with base options appropriate for the given category.
+ * Tries to preserve the currently-selected baseStat when the category changes.
+ * Returns the selected baseStat.
  */
-function populateStatSelect(selectEl, category, isPairMode = false, preferredSuffix = null) {
+function populateStatSelect(selectEl, category, isPairMode = false, preferredBaseStat = null) {
     if (!selectEl) return '';
 
-    const currentSuffix = preferredSuffix ?? extractStatSuffix(selectEl.value || '');
+    const currentBaseStat = preferredBaseStat ?? selectEl.value;
     selectEl.innerHTML = '';
 
     // Common stats
-    for (const stat of STAT_OPTIONS) {
+    for (const stat of STAT_BASE_OPTIONS) {
         const opt = document.createElement('option');
-        opt.value = buildMetricKey(category, stat.suffix);
+        opt.value = stat.base;
         opt.textContent = isPairMode ? stat.pairLabel : stat.label;
         selectEl.appendChild(opt);
     }
 
     // AGI-only extras
     if (category === 'agi') {
-        for (const stat of AGI_EXTRA_STATS) {
+        for (const stat of AGI_EXTRA_BASE_STATS) {
             const opt = document.createElement('option');
-            opt.value = stat.suffix; // Full key for AGI extras
+            opt.value = stat.base; 
             opt.textContent = isPairMode ? stat.pairLabel : stat.label;
             selectEl.appendChild(opt);
         }
     }
 
     // Try to preserve selection
-    const targetKey = buildMetricKey(category, currentSuffix);
-    const hasTarget = Array.from(selectEl.options).some(o => o.value === targetKey);
-    selectEl.value = hasTarget ? targetKey : selectEl.options[0]?.value || '';
+    const hasTarget = Array.from(selectEl.options).some(o => o.value === currentBaseStat);
+    selectEl.value = hasTarget ? currentBaseStat : selectEl.options[0]?.value || '';
 
     return selectEl.value;
 }
@@ -2931,20 +2993,32 @@ function wireControls() {
         });
     }
 
-    // ── Map: Category + Statistic selects ─────────────────────────────────────
-    const mapCatSel = document.getElementById('metric-category-select');
-    const mapStatSel = document.getElementById('metric-stat-select');
-    if (mapCatSel && mapStatSel) {
-        mapCatSel.addEventListener('change', () => {
-            appState.metricCategory = mapCatSel.value;
-            appState.metric = populateStatSelect(mapStatSel, mapCatSel.value, false);
-            render();
+    // ── Helper to bind three dropdowns ────────────────────────────────────────
+    function bindDropdowns(catSelId, dirSelId, statSelId, isPairMode, stateObj, renderFn) {
+        const catSel = document.getElementById(catSelId);
+        const dirSel = document.getElementById(dirSelId);
+        const statSel = document.getElementById(statSelId);
+        if (!catSel || !dirSel || !statSel) return;
+
+        function updateState() {
+            stateObj.metric = buildMetricKey(catSel.value, dirSel.value, statSel.value);
+            if (stateObj.metricCategory !== undefined) {
+                stateObj.metricCategory = catSel.value;
+            }
+            renderFn();
+        }
+
+        catSel.addEventListener('change', () => {
+            populateStatSelect(statSel, catSel.value, isPairMode, statSel.value);
+            updateState();
         });
-        mapStatSel.addEventListener('change', () => {
-            appState.metric = mapStatSel.value;
-            render();
-        });
+
+        dirSel.addEventListener('change', updateState);
+        statSel.addEventListener('change', updateState);
     }
+
+    // ── Map: Category + Direction + Statistic selects ─────────────────────────
+    bindDropdowns('metric-category-select', 'metric-direction-select', 'metric-stat-select', false, appState, render);
 
 
 
@@ -3005,21 +3079,8 @@ function wireControls() {
         });
     }
 
-    // ── Individual chart: metric selector ────────────────────────────────────
-    // ── Individual chart: Category + Statistic selects ──────────────────────
-    const indCatSel = document.getElementById('ind-metric-category-select');
-    const indStatSel = document.getElementById('ind-metric-stat-select');
-    if (indCatSel && indStatSel) {
-        indCatSel.addEventListener('change', () => {
-            indChartState.metricCategory = indCatSel.value;
-            indChartState.metric = populateStatSelect(indStatSel, indCatSel.value, false);
-            renderIndividualChart();
-        });
-        indStatSel.addEventListener('change', () => {
-            indChartState.metric = indStatSel.value;
-            renderIndividualChart();
-        });
-    }
+    // ── Individual chart: Category + Direction + Statistic selects ────────────
+    bindDropdowns('ind-metric-category-select', 'ind-metric-direction-select', 'ind-metric-stat-select', false, indChartState, renderIndividualChart);
 
     // ── Individual chart: ADD button ─────────────────────────────────────────
     const indAddBtn = document.getElementById('ind-add-btn');
@@ -3150,21 +3211,8 @@ function wireControls() {
         });
     });
 
-    // ── Pairwise chart: metric selector ────────────────────────────────────
-    // ── Pairwise chart: Category + Statistic selects ──────────────────────
-    const pairCatSel = document.getElementById('pair-metric-category-select');
-    const pairStatSel = document.getElementById('pair-metric-stat-select');
-    if (pairCatSel && pairStatSel) {
-        pairCatSel.addEventListener('change', () => {
-            pairChartState.metricCategory = pairCatSel.value;
-            pairChartState.metric = populateStatSelect(pairStatSel, pairCatSel.value, true);
-            renderPairChart();
-        });
-        pairStatSel.addEventListener('change', () => {
-            pairChartState.metric = pairStatSel.value;
-            renderPairChart();
-        });
-    }
+    // ── Pairwise chart: Category + Direction + Statistic selects ──────────────
+    bindDropdowns('pair-metric-category-select', 'pair-metric-direction-select', 'pair-metric-stat-select', true, pairChartState, renderPairChart);
 
     // ── Pairwise chart: ADD button ─────────────────────────────────────────
     const pairAddBtn = document.getElementById('pair-add-btn');
@@ -3238,6 +3286,21 @@ function wireControls() {
 }
 
 /**
+ * Helper to initialize the three dropdowns from a full metric key.
+ */
+function initDropdowns(metricKey, catSelId, dirSelId, statSelId, isPairMode) {
+    const catSel = document.getElementById(catSelId);
+    const dirSel = document.getElementById(dirSelId);
+    const statSel = document.getElementById(statSelId);
+    if (!metricKey || !catSel || !dirSel || !statSel) return;
+    
+    const { category, direction, baseStat } = parseMetricKey(metricKey);
+    catSel.value = category;
+    dirSel.value = direction;
+    populateStatSelect(statSel, category, isPairMode, baseStat);
+}
+
+/**
  * initUI()
  *
  * Synchronises every HTML control with the current appState values.
@@ -3264,15 +3327,8 @@ function initUI() {
         slider.setAttribute('aria-valuetext', YEAR_LABELS[tag]);
     }
 
-    // ── Map metric selects ────────────────────────────────────────────────────
-    const mapCatEl = document.getElementById('metric-category-select');
-    const mapStatEl = document.getElementById('metric-stat-select');
-    if (mapCatEl) mapCatEl.value = appState.metricCategory;
-    if (mapStatEl) {
-        populateStatSelect(mapStatEl, appState.metricCategory, false, extractStatSuffix(appState.metric));
-        mapStatEl.value = appState.metric;
-    }
-
+    // ── Map: sync category + direction + stat selects ─────────────────────────
+    initDropdowns(appState.metric, 'metric-category-select', 'metric-direction-select', 'metric-stat-select', false);
 
     // ── Zoom slider ───────────────────────────────────────────────────────────
     const zoomSlider = document.getElementById('zoom-slider');
@@ -3310,26 +3366,14 @@ function initUI() {
     // ── Map status text ───────────────────────────────────────────────────────
     updateMapStatusText();
 
-    // ── Individual chart: sync category + stat selects ────────────────────────
-    const indCatEl = document.getElementById('ind-metric-category-select');
-    const indStatEl = document.getElementById('ind-metric-stat-select');
-    if (indCatEl) indCatEl.value = indChartState.metricCategory;
-    if (indStatEl) {
-        populateStatSelect(indStatEl, indChartState.metricCategory, false, extractStatSuffix(indChartState.metric));
-        indStatEl.value = indChartState.metric;
-    }
+    // ── Individual chart: sync category + direction + stat selects ────────────
+    initDropdowns(indChartState.metric, 'ind-metric-category-select', 'ind-metric-direction-select', 'ind-metric-stat-select', false);
     initIndividualCombobox(); // builds entries, wires all combobox events
     renderIndRegionBubbles();
     renderIndividualChart();
 
-    // ── Pairwise chart: sync category + stat selects ──────────────────────────
-    const pairCatEl = document.getElementById('pair-metric-category-select');
-    const pairStatEl = document.getElementById('pair-metric-stat-select');
-    if (pairCatEl) pairCatEl.value = pairChartState.metricCategory;
-    if (pairStatEl) {
-        populateStatSelect(pairStatEl, pairChartState.metricCategory, true, extractStatSuffix(pairChartState.metric));
-        pairStatEl.value = pairChartState.metric;
-    }
+    // ── Pairwise chart: sync category + direction + stat selects ──────────────
+    initDropdowns(pairChartState.metric, 'pair-metric-category-select', 'pair-metric-direction-select', 'pair-metric-stat-select', true);
     initPairComboboxes();
     renderPairRegionBubbles();
     renderPairChart();

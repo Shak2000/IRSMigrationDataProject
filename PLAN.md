@@ -502,9 +502,9 @@ them across all available years.
 
 ### Milestone 9.7 – Data Dropdown for In or Out
 
-- [ ] In the map and both line graphs, split the dropdown for statistic into:
-  - [ ] A dropdown for inflow or outflow
-  - [ ] A dropdown for the actual statistic (inflow/outflow, net inflow/outflow, etc.)
+- [x] In the map and both line graphs, split the dropdown for statistic into:
+  - [x] A dropdown for inflow or outflow
+  - [x] A dropdown for the actual statistic (inflow/outflow, net inflow/outflow, etc.)
 
 ### Milestone 9.8 – Extend Data Back to 1990-91
 
