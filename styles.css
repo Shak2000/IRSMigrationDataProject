@@ -167,11 +167,7 @@ body {
   flex-direction: column;
 }
 
-.map-header {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-}
+
 
 .map-middle-layout {
   display: flex;
@@ -287,10 +283,14 @@ body {
 
 /* ── 4b. Year slider ─────────────────────────────────────── */
 #year-control {
-  flex: 1;
-  padding: 0 var(--sp-lg);
-  margin-bottom: var(--sp-md);
-  margin-top: var(--sp-sm);
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--sp-md) var(--sp-xl);
+  margin-top: var(--sp-md);
 }
 
 #year-display {
