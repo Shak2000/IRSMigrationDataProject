@@ -2,3 +2,4 @@ __pycache__/
 errors.txt
 *.png
 *.txt
+data/database.sqlite

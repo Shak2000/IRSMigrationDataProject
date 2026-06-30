@@ -522,8 +522,8 @@ them across all available years.
 - [x] Update the Python pipeline to automatically fetch raw CSV/XLS files from IRS.gov URLs based on a configuration file, saving them to `data/original/`.
 
 ### Milestone 10.2 — Consolidate Enriched Data into SQLite
-- [ ] Create `scripts/build_sqlite_db.py` to read all `enriched/` CSVs and insert them into a single `data/database.sqlite` file.
-- [ ] Create optimized SQL tables with proper indexes (e.g., `state_flows`, `county_flows`) for fast querying.
+- [x] Create `scripts/build_sqlite_db.py` to read all `enriched/` CSVs and insert them into a single `data/database.sqlite` file.
+- [x] Create optimized SQL tables with proper indexes (e.g., `state_flows`, `county_flows`) for fast querying.
 
 ### Milestone 10.3 — Migrate Frontend to `sql.js`
 - [ ] Include `sql.js` (WebAssembly SQLite) in the frontend `index.html`.
