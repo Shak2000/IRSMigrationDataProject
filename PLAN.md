@@ -403,20 +403,21 @@ them across all available years.
     - [x] **Region A selector**: searchable `<select>` (same style as 6.1's region selector).
       Labeled *"Region A"* or *"From / To"*.
     - [x] **Region B selector**: searchable `<select>` (same style). Labeled *"Region B"*.
-    - [ ] A **quantity selector**: a small `<select>` with three options:
+    - [x] A **quantity selector**: a small `<select>` with three options:
       - *Individuals* (uses `n2` field)
       - *Households* (uses `n1` field)
       - *AGI ($K)* (uses `AGI` field)
+      *(Note: Replaced by the new Category/Direction/Statistic dropdowns in Milestone 9.7)*
     - [x] A **"clear" button** that resets both region selections.
   - [x] A `<div id="chart-pair-svg-container">` for the D3 SVG.
   - [x] A `<div id="chart-pair-placeholder">` for the no-selection message.
 - [x] Create the D3 SVG with the same margin convention as the individual chart.
-- [ ] Define:
+- [x] Define:
   - [x] `xScale`: same as 6.1 — `d3.scalePoint` over `YEARS`.
-  - [ ] `yScale`: `d3.scaleLinear` whose domain covers both the A→B and B→A series simultaneously
+  - [x] `yScale`: `d3.scaleLinear` whose domain covers both the A→B and B→A series simultaneously
     so both lines share a common y-axis.
 - [x] Render bottom and left axes with the same formatting conventions as Phase 6.
-- [ ] Add a y-axis label reflecting the chosen quantity (e.g. *"Individuals"* or *"AGI ($K)"*).
+- [x] Add a y-axis label reflecting the chosen quantity (e.g. *"Individuals"* or *"AGI ($K)"*).
 
 ### Milestone 7.2 — No-Selection / Partial-Selection State
 
@@ -568,38 +569,22 @@ IRSMigrationDataProject/
 │   │   └── county_fips.csv                     # output of parse_fips.py (unified: old CT + new CT)
 │   ├── original/
 │   │   ├── state_inflow/
-│   │   │   ├── stateinflow2021.csv
-│   │   │   ├── stateinflow2122.csv
-│   │   │   └── stateinflow2223.csv
+│   │   │   └── stateinflow0809.csv ... stateinflow2223.csv (15 files)
 │   │   ├── state_outflow/
-│   │   │   ├── stateoutflow2021.csv
-│   │   │   ├── stateoutflow2122.csv
-│   │   │   └── stateoutflow2223.csv
+│   │   │   └── stateoutflow0809.csv ... stateoutflow2223.csv (15 files)
 │   │   ├── county_inflow/
-│   │   │   ├── countyinflow2021.csv
-│   │   │   ├── countyinflow2122.csv
-│   │   │   └── countyinflow2223.csv
+│   │   │   └── countyinflow0809.csv ... countyinflow2223.csv (15 files)
 │   │   └── county_outflow/
-│   │       ├── countyoutflow2021.csv
-│   │       ├── countyoutflow2122.csv
-│   │       └── countyoutflow2223.csv
+│   │       └── countyoutflow0809.csv ... countyoutflow2223.csv (15 files)
 │   └── enriched/
 │       ├── state_inflow/
-│       │   ├── stateinflow2021_enriched.csv    # output of enrich_state_data.py
-│       │   ├── stateinflow2122_enriched.csv
-│       │   └── stateinflow2223_enriched.csv
+│       │   └── stateinflow0809_enriched.csv ... stateinflow2223_enriched.csv (15 files)
 │       ├── state_outflow/
-│       │   ├── stateoutflow2021_enriched.csv   # output of enrich_state_data.py
-│       │   ├── stateoutflow2122_enriched.csv
-│       │   └── stateoutflow2223_enriched.csv
+│       │   └── stateoutflow0809_enriched.csv ... stateoutflow2223_enriched.csv (15 files)
 │       ├── county_inflow/
-│       │   ├── countyinflow2021_enriched.csv   # output of enrich_county_data.py
-│       │   ├── countyinflow2122_enriched.csv
-│       │   └── countyinflow2223_enriched.csv
+│       │   └── countyinflow0809_enriched.csv ... countyinflow2223_enriched.csv (15 files)
 │       └── county_outflow/
-│           ├── countyoutflow2021_enriched.csv  # output of enrich_county_data.py
-│           ├── countyoutflow2122_enriched.csv
-│           └── countyoutflow2223_enriched.csv
+│           └── countyoutflow0809_enriched.csv ... countyoutflow2223_enriched.csv (15 files)
 ├── index.html                                  # Phase 2.1
 ├── styles.css                                  # Phase 2.2
 └── script.js                                   # Phases 3–7
