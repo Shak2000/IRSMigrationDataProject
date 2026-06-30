@@ -21,6 +21,11 @@
 
 'use strict';
 
+const workerUrl = new URL("./libs/sql.js-httpvfs/sqlite.worker.js", import.meta.url);
+const wasmUrl = new URL("./libs/sql.js-httpvfs/sql-wasm.wasm", import.meta.url);
+
+let sqlDb = null; // Global reference to the VFS database
+
 /* ════════════════════════════════════════════════════════════════════════════
    SECTION 1 — CONSTANTS & MANIFEST
 ═══════════════════════════════════════════════════════════════════════════ */
@@ -160,9 +165,9 @@ const countyMeta = {};
  */
 const nationalTotals = {};
 
-/** Tracks whether county files have been loaded yet. */
 let countyDataLoaded = false;
-let countyDataLoading = null; // Promise, set while loading is in progress
+let countyDataLoading = null; // Promise, set while loading metadata
+const countyDataLoadedForYear = {}; // Tracks which years have flow data loaded
 
 /* ════════════════════════════════════════════════════════════════════════════
    SECTION 3 — UTILITY FUNCTIONS
@@ -427,54 +432,134 @@ function processCountyRows(rows, year, direction) {
 ═══════════════════════════════════════════════════════════════════════════ */
 
 /**
- * Load a single enriched CSV file and process its rows.
- * Returns a Promise that resolves with the row count.
- */
-function loadFile({ level, year, direction, path }) {
-    return d3.csv(path).then(rows => {
-        if (level === 'state') {
-            processStateRows(rows, year, direction);
-        } else {
-            processCountyRows(rows, year, direction);
-        }
-        console.debug(`  ✓ [${level}/${year}/${direction}] ${rows.length.toLocaleString()} rows`);
-        return rows.length;
-    });
-}
-
-/**
  * Load all state-level CSV files (eagerly, at startup).
- * Returns a Promise that resolves when all 6 state files are loaded.
+ * Now using sql.js-httpvfs to query the chunked remote database.
  */
-function loadStateData() {
-    const stateFiles = DATA_FILES.filter(f => f.level === 'state');
-    console.log('[Data] Loading state files …');
-    return Promise.all(stateFiles.map(loadFile)).then(counts => {
-        const total = counts.reduce((a, b) => a + b, 0);
-        console.log(`[Data] State data ready — ${total.toLocaleString()} total rows`);
-    });
+async function loadStateData() {
+    console.log('[Data] Initializing sql.js-httpvfs database …');
+    const worker = await createDbWorker(
+        [{
+            from: "inline",
+            config: {
+                serverMode: "chunked",
+                requestChunkSize: 4096,
+                databaseLengthBytes: 464830464,
+                serverChunkSize: 41943040,
+                urlPrefix: new URL("data/db_chunks/database.sqlite.", window.location.href).toString(),
+                suffixLength: 3
+            }
+        }],
+        workerUrl.toString(),
+        wasmUrl.toString()
+    );
+    sqlDb = worker.db;
+
+    console.log('[Data] Loading all state data from VFS …');
+    const rows = await sqlDb.query("SELECT * FROM state_flows");
+    
+    // Group by year and direction so processStateRows can parse them natively
+    const grouped = {};
+    for (const row of rows) {
+        const y = row.year;
+        const d = row.direction;
+        if (!grouped[y]) grouped[y] = {};
+        if (!grouped[y][d]) grouped[y][d] = [];
+        grouped[y][d].push(row);
+    }
+    
+    for (const y in grouped) {
+        for (const d in grouped[y]) {
+            processStateRows(grouped[y][d], y, d);
+        }
+    }
+    
+    console.log(`[Data] State data ready — ${rows.length.toLocaleString()} total rows`);
 }
 
 /**
- * Load all county-level CSV files (lazily, on first use of county view).
- * Subsequent calls return the same Promise so loading happens only once.
- * Returns a Promise.
+ * Load county-level metadata (lazily, on first use of county view).
+ * Instead of downloading 440MB of county flow data, we just query the DISTINCT
+ * counties for one year to populate the combobox metadata.
  */
 function loadCountyData() {
     if (countyDataLoaded) return Promise.resolve();
     if (countyDataLoading) return countyDataLoading;
 
-    const countyFiles = DATA_FILES.filter(f => f.level === 'county');
-    console.log('[Data] Loading county files (this may take a moment) …');
-
-    countyDataLoading = Promise.all(countyFiles.map(loadFile)).then(counts => {
-        const total = counts.reduce((a, b) => a + b, 0);
+    console.log('[Data] Loading county metadata from VFS …');
+    countyDataLoading = sqlDb.query("SELECT DISTINCT y1_statefips, y1_countyfips, y1_state, y1_state_name, y1_county_name FROM county_flows WHERE year='2122' AND direction='outflow'").then(rows => {
+        for (const row of rows) {
+            const key = `${row.y1_statefips}_${row.y1_countyfips}`;
+            if (isRealCounty(row.y1_statefips, row.y1_countyfips)) {
+                countyMeta[key] = {
+                    countyName: row.y1_county_name,
+                    statePostal: row.y1_state,
+                    stateName: row.y1_state_name
+                };
+            }
+        }
         countyDataLoaded = true;
-        console.log(`[Data] County data ready — ${total.toLocaleString()} total rows`);
-        console.log(`[Data] County metadata entries: ${Object.keys(countyMeta).length.toLocaleString()}`);
+        console.log(`[Data] County metadata ready — ${rows.length.toLocaleString()} counties`);
     });
-
     return countyDataLoading;
+}
+
+/**
+ * Lazy load all flow data for a specific year and process it into the county stores.
+ * This fetches ~30MB from the SQLite chunks.
+ */
+async function ensureCountyYearData(yearTag) {
+    if (appState.level !== 'county') return;
+    if (countyDataLoadedForYear[yearTag]) return;
+    
+    setLoadingState(true, `Loading county data for ${YEAR_LABELS[yearTag]}…`);
+    try {
+        const rows = await sqlDb.query(`SELECT * FROM county_flows WHERE year='${yearTag}'`);
+        const inflows = rows.filter(r => r.direction === 'inflow');
+        const outflows = rows.filter(r => r.direction === 'outflow');
+        processCountyRows(inflows, yearTag, 'inflow');
+        processCountyRows(outflows, yearTag, 'outflow');
+        countyDataLoadedForYear[yearTag] = true;
+    } catch (err) {
+        console.error('[Data] Failed to load county year:', err);
+    } finally {
+        setLoadingState(false);
+    }
+}
+
+const countyDataLoadedForKey = {};
+
+/**
+ * Lazy load all cross-year flow data for a specific county.
+ * This fetches ~15MB from the SQLite chunks.
+ */
+async function ensureCountyRegionData(key) {
+    if (appState.level !== 'county') return;
+    if (!key || countyDataLoadedForKey[key]) return;
+
+    const [sf, cf] = key.split('_');
+    setLoadingState(true, `Loading data for county...`);
+    try {
+        const rows = await sqlDb.query(`SELECT * FROM county_flows WHERE (y1_statefips='${sf}' AND y1_countyfips='${cf}') OR (y2_statefips='${sf}' AND y2_countyfips='${cf}')`);
+        
+        const grouped = {};
+        for (const row of rows) {
+            const y = row.year;
+            const d = row.direction;
+            if (!grouped[y]) grouped[y] = {};
+            if (!grouped[y][d]) grouped[y][d] = [];
+            grouped[y][d].push(row);
+        }
+        for (const y in grouped) {
+            for (const d in grouped[y]) {
+                processCountyRows(grouped[y][d], y, d);
+            }
+        }
+        countyDataLoadedForKey[key] = true;
+    } catch (err) {
+        console.error('[Data] Failed to load region cross-year:', err);
+    } finally {
+        setLoadingState(false);
+    }
 }
 
 /**
@@ -2948,12 +3033,12 @@ function initPairComboboxes() {
 function wireControls() {
     // ── Granularity radio buttons ─────────────────────────────────────────────
     document.querySelectorAll('input[name="granularity"]').forEach(radio => {
-        radio.addEventListener('change', () => {
+        radio.addEventListener('change', async () => {
             appState.level = radio.value;
             appState.primaryRegion = null;
             appState.secondaryRegion = null;
             updateMapStatusText();
-            // County data is loaded eagerly at startup — no lazy load needed here.
+            await ensureCountyYearData(currentYear());
             render();
         });
     });
@@ -2975,7 +3060,8 @@ function wireControls() {
             slider.setAttribute('aria-valuetext', YEAR_LABELS[tag]);
 
             if (yearSliderRafId) cancelAnimationFrame(yearSliderRafId);
-            yearSliderRafId = requestAnimationFrame(() => {
+            yearSliderRafId = requestAnimationFrame(async () => {
+                await ensureCountyYearData(tag);
                 render();
                 yearSliderRafId = null;
             });
@@ -2989,11 +3075,12 @@ function wireControls() {
         const statSel = document.getElementById(statSelId);
         if (!catSel || !dirSel || !statSel) return;
 
-        function updateState() {
+        async function updateState() {
             stateObj.metric = buildMetricKey(catSel.value, dirSel.value, statSel.value);
             if (stateObj.metricCategory !== undefined) {
                 stateObj.metricCategory = catSel.value;
             }
+            await ensureCountyYearData(currentYear());
             renderFn();
         }
 
@@ -3089,20 +3176,27 @@ function wireControls() {
     // ── Individual chart: ADD button ─────────────────────────────────────────
     const indAddBtn = document.getElementById('ind-add-btn');
     if (indAddBtn) {
-        indAddBtn.addEventListener('click', () => {
+        indAddBtn.addEventListener('click', async () => {
             const activeCount = indChartState.regions.filter(r => r !== null).length;
             if (indChartState.stagedKey && activeCount < 12) {
+                const addedKey = indChartState.stagedKey;
+                
                 // Ensure it's not already in the array
-                if (!indChartState.regions.some(r => r !== null && r.key === indChartState.stagedKey)) {
+                if (!indChartState.regions.some(r => r !== null && r.key === addedKey)) {
                     // Find first empty slot
                     const emptyIdx = indChartState.regions.findIndex(r => r === null);
                     if (emptyIdx !== -1) {
                         indChartState.regions[emptyIdx] = {
-                            key: indChartState.stagedKey,
+                            key: addedKey,
                             level: indChartState.stagedLevel,
                             label: indChartState.stagedLabel
                         };
                     }
+                }
+
+                // Lazy load data across all years for line chart
+                if (indChartState.stagedLevel === 'county') {
+                    await ensureCountyRegionData(addedKey);
                 }
 
                 // Clear the input and staged values
@@ -3221,26 +3315,35 @@ function wireControls() {
     // ── Pairwise chart: ADD button ─────────────────────────────────────────
     const pairAddBtn = document.getElementById('pair-add-btn');
     if (pairAddBtn) {
-        pairAddBtn.addEventListener('click', () => {
+        pairAddBtn.addEventListener('click', async () => {
             const activeCount = pairChartState.pairs.filter(p => p !== null).length;
             if (pairChartState.stagedAKey && pairChartState.stagedBKey && activeCount < 12) {
+                
+                const addedAKey = pairChartState.stagedAKey;
+                const addedBKey = pairChartState.stagedBKey;
+                const addedALevel = pairChartState.stagedALevel;
+                const addedBLevel = pairChartState.stagedBLevel;
 
                 // Ensure duplicate isn't added
                 const isDuplicate = pairChartState.pairs.some(p =>
                     p !== null &&
-                    p.regionA.key === pairChartState.stagedAKey &&
-                    p.regionB.key === pairChartState.stagedBKey
+                    p.regionA.key === addedAKey &&
+                    p.regionB.key === addedBKey
                 );
 
                 if (!isDuplicate) {
                     const emptyIdx = pairChartState.pairs.findIndex(p => p === null);
                     if (emptyIdx !== -1) {
                         pairChartState.pairs[emptyIdx] = {
-                            regionA: { key: pairChartState.stagedAKey, level: pairChartState.stagedALevel, label: pairChartState.stagedALabel },
-                            regionB: { key: pairChartState.stagedBKey, level: pairChartState.stagedBLevel, label: pairChartState.stagedBLabel }
+                            regionA: { key: addedAKey, level: addedALevel, label: pairChartState.stagedALabel },
+                            regionB: { key: addedBKey, level: addedBLevel, label: pairChartState.stagedBLabel }
                         };
                     }
                 }
+                
+                // Lazy load data across all years for pair chart
+                if (addedALevel === 'county') await ensureCountyRegionData(addedAKey);
+                if (addedBLevel === 'county') await ensureCountyRegionData(addedBKey);
 
                 // Clear staged inputs
                 pairChartState.stagedAKey = null;

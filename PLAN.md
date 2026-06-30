@@ -525,10 +525,11 @@ them across all available years.
 - [x] Create `scripts/build_sqlite_db.py` to read all `enriched/` CSVs and insert them into a single `data/database.sqlite` file.
 - [x] Create optimized SQL tables with proper indexes (e.g., `state_flows`, `county_flows`) for fast querying.
 
-### Milestone 10.3 — Migrate Frontend to `sql.js`
-- [ ] Include `sql.js` (WebAssembly SQLite) in the frontend `index.html`.
-- [ ] Modify `script.js` to fetch `database.sqlite` once on startup, replacing CSV fetches.
-- [ ] Replace in-memory array filtering with parameterized SQL queries executed in the browser.
+### Milestone 10.3 — Migrate Frontend to `sql.js-httpvfs` (HTTP Range Requests)
+- [x] Chunk `database.sqlite` into 1MB parts for static hosting on GitHub Pages.
+- [x] Set up ES modules and Web Workers for `sql.js-httpvfs`.
+- [x] Modify `script.js` to query the chunked remote database instead of fetching CSVs.
+- [x] Replace in-memory array filtering with parameterized SQL queries executed via the VFS.
 
 ---
 
