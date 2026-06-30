@@ -2,7 +2,7 @@
 
 An interactive choropleth visualization of U.S. domestic migration patterns using
 [IRS Statistics of Income (SOI)](https://www.irs.gov/statistics/soi-tax-stats-migration-data)
-tax data from 2020 to 2023. Explore population, household, and income flows at the
+tax data from 2008 to 2023. Explore population, household, and income flows at the
 **state** and **county** level through a D3.js-powered map and time-series chart.
 
 ---
@@ -54,10 +54,10 @@ IRSMigrationDataProject/
     │   └── county_fips.csv             # Generated — do not edit manually
     │
     ├── original/
-    │   ├── state_inflow/               # stateinflow2021.csv, 2122.csv, 2223.csv
-    │   ├── state_outflow/              # stateoutflow2021.csv, 2122.csv, 2223.csv
-    │   ├── county_inflow/              # countyinflow2021.csv, 2122.csv, 2223.csv
-    │   └── county_outflow/             # countyoutflow2021.csv, 2122.csv, 2223.csv
+    │   ├── state_inflow/               # stateinflow0809.csv ... 2223.csv (15 files)
+    │   ├── state_outflow/              # stateoutflow0809.csv ... 2223.csv (15 files)
+    │   ├── county_inflow/              # countyinflow0809.csv ... 2223.csv (15 files)
+    │   └── county_outflow/             # countyoutflow0809.csv ... 2223.csv (15 files)
     │
     └── enriched/
         ├── state_inflow/               # stateinflow*_enriched.csv  — generated
@@ -82,18 +82,10 @@ Download from [IRS SOI Migration Data](https://www.irs.gov/statistics/soi-tax-st
 
 | File | Destination |
 |---|---|
-| `stateinflow2021.csv` | `data/original/state_inflow/` |
-| `stateinflow2122.csv` | `data/original/state_inflow/` |
-| `stateinflow2223.csv` | `data/original/state_inflow/` |
-| `stateoutflow2021.csv` | `data/original/state_outflow/` |
-| `stateoutflow2122.csv` | `data/original/state_outflow/` |
-| `stateoutflow2223.csv` | `data/original/state_outflow/` |
-| `countyinflow2021.csv` | `data/original/county_inflow/` |
-| `countyinflow2122.csv` | `data/original/county_inflow/` |
-| `countyinflow2223.csv` | `data/original/county_inflow/` |
-| `countyoutflow2021.csv` | `data/original/county_outflow/` |
-| `countyoutflow2122.csv` | `data/original/county_outflow/` |
-| `countyoutflow2223.csv` | `data/original/county_outflow/` |
+| `stateinflow0809.csv` ... `stateinflow2223.csv` | `data/original/state_inflow/` |
+| `stateoutflow0809.csv` ... `stateoutflow2223.csv` | `data/original/state_outflow/` |
+| `countyinflow0809.csv` ... `countyinflow2223.csv` | `data/original/county_inflow/` |
+| `countyoutflow0809.csv` ... `countyoutflow2223.csv` | `data/original/county_outflow/` |
 
 #### U.S. Census geocode files → `data/fips/`
 
@@ -247,13 +239,14 @@ resolve correctly without any per-file handling.
 
 ## Metrics Reference
 
-The visualization supports all 22 metrics from SPECS.md:
+The visualization supports 32 distinct metrics across different categories:
 
 | Group | Metrics |
 |---|---|
-| **Population** | Inflow · Outflow · Net · Inflow share · Outflow share · Net share |
-| **Households** | Inflow · Outflow · Net · Inflow share · Outflow share · Net share |
-| **AGI** | Inflow · Outflow · Net · Inflow share · Outflow share · Net share |
+| **Population** | Inflow · Outflow · Net · Inflow rate · Outflow rate · Net rate · Inbound Rate · Outbound Rate |
+| **Households** | Inflow · Outflow · Net · Inflow rate · Outflow rate · Net rate · Inbound Rate · Outbound Rate |
+| **AGI** | Inflow · Outflow · Net · Inflow rate · Outflow rate · Net rate · Inbound Rate · Outbound Rate |
 | **Average AGI** | Avg per individual moving in · Avg per household moving in · Avg per individual moving out · Avg per household moving out |
+| **AGI Ratio** | Ratio of Avg In-Migrant Ind. to Out-Migrant Ind. · Ratio of Avg In-Migrant HH to Out-Migrant HH · Ratio of Avg Out-Migrant Ind. to In-Migrant Ind. · Ratio of Avg Out-Migrant HH to In-Migrant HH |
 
 "Share" metrics express a region's flow as a fraction of its **total** flow (IRS aggregate code `96`).
