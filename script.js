@@ -2961,6 +2961,7 @@ function wireControls() {
     // ── Year slider ───────────────────────────────────────────────────────────
     const slider = document.getElementById('year-slider');
     const yearLabel = document.getElementById('year-display');
+    let yearSliderRafId = null;
 
     if (slider) {
         slider.addEventListener('input', () => {
@@ -2972,7 +2973,12 @@ function wireControls() {
             slider.style.setProperty('--slider-pct', `${pct}%`);
             slider.setAttribute('aria-valuenow', appState.yearIndex);
             slider.setAttribute('aria-valuetext', YEAR_LABELS[tag]);
-            render();
+
+            if (yearSliderRafId) cancelAnimationFrame(yearSliderRafId);
+            yearSliderRafId = requestAnimationFrame(() => {
+                render();
+                yearSliderRafId = null;
+            });
         });
     }
 
@@ -3008,6 +3014,7 @@ function wireControls() {
     // ── Zoom slider ───────────────────────────────────────────────────────────
     const zoomSlider = document.getElementById('zoom-slider');
     const zoomLabel = document.getElementById('zoom-display');
+    let zoomSliderRafId = null;
 
     if (zoomSlider) {
         zoomSlider.addEventListener('input', () => {
@@ -3022,13 +3029,18 @@ function wireControls() {
             zoomSlider.setAttribute('aria-valuenow', appState.zoomLevel);
             zoomSlider.setAttribute('aria-valuetext', `${appState.zoomLevel}×`);
 
-            renderMap(); // Only need to re-render map, not chart
+            if (zoomSliderRafId) cancelAnimationFrame(zoomSliderRafId);
+            zoomSliderRafId = requestAnimationFrame(() => {
+                renderMap(); // Only need to re-render map, not chart
+                zoomSliderRafId = null;
+            });
         });
     }
 
     // ── Pan X slider ──────────────────────────────────────────────────────────
     const panXSlider = document.getElementById('pan-x-slider');
     const panXLabel = document.getElementById('pan-x-display');
+    let panXRafId = null;
 
     if (panXSlider) {
         panXSlider.addEventListener('input', () => {
@@ -3040,13 +3052,18 @@ function wireControls() {
             const pct = ((appState.panX - min) / (max - min)) * 100;
             panXSlider.style.setProperty('--pan-x-pct', `${pct}`);
 
-            renderMap(); // Only need to re-render map
+            if (panXRafId) cancelAnimationFrame(panXRafId);
+            panXRafId = requestAnimationFrame(() => {
+                renderMap(); // Only need to re-render map
+                panXRafId = null;
+            });
         });
     }
 
     // ── Pan Y slider ──────────────────────────────────────────────────────────
     const panYSlider = document.getElementById('pan-y-slider');
     const panYLabel = document.getElementById('pan-y-display');
+    let panYRafId = null;
 
     if (panYSlider) {
         panYSlider.addEventListener('input', () => {
@@ -3058,7 +3075,11 @@ function wireControls() {
             const pct = ((appState.panY - min) / (max - min)) * 100;
             panYSlider.style.setProperty('--pan-y-pct', `${pct}`);
 
-            renderMap(); // Only need to re-render map
+            if (panYRafId) cancelAnimationFrame(panYRafId);
+            panYRafId = requestAnimationFrame(() => {
+                renderMap(); // Only need to re-render map
+                panYRafId = null;
+            });
         });
     }
 
